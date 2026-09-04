@@ -1,0 +1,102 @@
+.header {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+}
+
+.type {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.enabledIcon {
+  color: var(--success);
+}
+
+.disabledIcon {
+  color: var(--text-muted);
+}
+
+.body {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.saveRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.saveButtonSmall {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.spacedEmptyState {
+  margin-bottom: 16px;
+}
+
+.libraryStack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionSwitch {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 16px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.sectionTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.sectionTab:hover {
+  color: var(--text-primary);
+}
+
+.sectionTabActive,
+.sectionTabActive:hover {
+  background-color: var(--accent);
+  color: var(--text-on-fill);
+}
+
+.tabCount {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.tabDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.footerEnd {
+  display: flex;
+  justify-content: flex-end;
+}

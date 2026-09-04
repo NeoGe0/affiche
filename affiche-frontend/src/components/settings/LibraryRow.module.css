@@ -1,0 +1,98 @@
+.row {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.rowDirty {
+  border-color: var(--accent);
+}
+
+.toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.icon {
+  color: var(--text-muted);
+}
+
+.name {
+  flex: 1;
+  text-align: left;
+  font-weight: 500;
+}
+
+.dirtyBadge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.body {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.intervalRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.intervalLabel {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.smallInput {
+  padding: 6px 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.intervalNumber {
+  width: 70px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.fieldLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.actionSelect {
+  padding: 7px 8px;
+  max-width: 280px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.fieldHint {
+  margin-top: 2px;
+}

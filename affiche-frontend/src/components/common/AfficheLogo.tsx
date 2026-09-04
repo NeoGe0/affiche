@@ -1,0 +1,20 @@
+export function AfficheLogo({ size = 22 }: { size?: number }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      width={size}
+      height={size}
+      fill="currentColor"
+      role="img"
+      aria-label="Affiche"
+    >
+      <path
+        d="M23,25 L5,15 L17,35 L5,55 L23,45 Z
+           M27,14 H44 A12,12 0 0 1 56,26 V44 A12,12 0 0 1 44,56 H27 A5,5 0 0 1 22,51 V19 A5,5 0 0 1 27,14 Z
+           M28,14 L42,14 L26,3 Z
+           M43.8,31 A3.2,3.2 0 1 0 50.2,31 A3.2,3.2 0 1 0 43.8,31 Z
+           M56,35 L56,44 L46,39.5 Z"
+      />
+    </svg>
+  );
+}

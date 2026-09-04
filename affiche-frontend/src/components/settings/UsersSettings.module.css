@@ -1,0 +1,165 @@
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+.identityIcon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.identityName {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.identityHint {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.badge {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.badgeAdmin {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.block {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.blockHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.blockIcon {
+  color: var(--text-secondary);
+}
+
+.blockTitle {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.blockHint {
+  margin: 0 0 14px 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  max-width: 320px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.input {
+  width: 100%;
+  padding: 8px 10px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.listCard {
+  margin-top: 16px;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.accounts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.accountName {
+  font-size: 0.9rem;
+}
+
+.rowActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rowAction {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.rowAction:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.remove:hover {
+  color: var(--error);
+  background-color: var(--error-tint);
+}

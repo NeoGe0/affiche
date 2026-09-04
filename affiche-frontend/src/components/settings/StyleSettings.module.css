@@ -1,0 +1,248 @@
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  margin: 0 0 12px -10px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.backLink:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.subTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 32px 0 4px;
+}
+
+.subDescription {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.fontGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.fontCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.15s;
+}
+
+.fontCard.default {
+  border-color: var(--accent);
+}
+
+.fontSample {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fontName {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fontActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.defaultBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.setDefaultButton {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+
+.setDefaultButton:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.deleteButton {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.deleteButton:hover {
+  color: var(--error);
+  background-color: var(--bg-hover);
+}
+
+.editor {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.previewColumn {
+  flex-shrink: 0;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.previewWrapper {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.previewWrapper canvas {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+.previewSubject {
+  display: flex;
+  gap: 6px;
+}
+
+.subjectButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.subjectButton:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.subjectButton > span,
+.subjectButton {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subjectButton svg {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.subjectClear {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.subjectClear:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.subjectNote {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.savedMsg {
+  font-size: 0.85rem;
+  color: var(--success);
+}
+
+.errorMsg {
+  font-size: 0.85rem;
+  color: var(--error);
+}
+
+@media (max-width: 700px) {
+  .editor {
+    flex-direction: column;
+  }
+  .previewColumn {
+    width: 100%;
+    max-width: 260px;
+    align-self: center;
+  }
+}

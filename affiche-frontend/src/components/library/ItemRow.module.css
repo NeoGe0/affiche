@@ -1,0 +1,102 @@
+.row {
+  padding: 8px 0 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 24px 10px;
+}
+
+.arrows {
+  display: flex;
+  gap: 6px;
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--text-secondary);
+  background: none;
+  transition: color 0.15s, background-color 0.15s, opacity 0.15s;
+}
+
+.arrow:hover:not(:disabled) {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.heading,
+.headingButton {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0;
+  background: none;
+  color: var(--text-primary);
+}
+
+.headingButton:hover .title {
+  color: var(--accent);
+}
+
+.title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+
+.subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.chevron {
+  align-self: center;
+  color: var(--text-muted);
+}
+
+.track {
+  display: flex;
+  gap: 20px;
+  padding: 4px 24px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: 24px;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.cell {
+  flex: 0 0 160px;
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.placeholder {
+  flex: 0 0 160px;
+  aspect-ratio: 2/3;
+  border-radius: 12px;
+  background-color: var(--bg-card);
+}
+
+.empty {
+  padding: 0 24px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}

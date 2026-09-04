@@ -1,0 +1,12 @@
+services:
+  affiche:
+    image: ghcr.io/neoge0/affiche:latest
+    container_name: affiche
+    ports:
+      - "8000:8000"
+    volumes:
+      - affiche-config:/data/config
+    restart: unless-stopped
+
+volumes:
+  affiche-config:

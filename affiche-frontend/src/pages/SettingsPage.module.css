@@ -1,0 +1,16 @@
+.page {
+  min-height: 100vh;
+  padding: 24px 48px;
+}
+
+.content {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.loading {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+}

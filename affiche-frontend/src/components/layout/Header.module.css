@@ -1,0 +1,283 @@
+.header {
+  height: var(--header-height);
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.titleSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.titleText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crumbParent {
+  color: var(--text-secondary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crumbSep {
+  color: var(--text-secondary);
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+.crumbBadge {
+  color: var(--text-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.status span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.centerSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+}
+
+.viewToggle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.viewButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.viewButton:hover {
+  color: var(--text-primary);
+}
+
+.viewButtonActive {
+  background-color: var(--accent);
+  color: var(--text-on-fill);
+}
+
+.viewButtonActive:hover {
+  color: var(--text-on-fill);
+}
+
+.selectToggle {
+  gap: 6px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--bg-tertiary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 8px 12px;
+  gap: 8px;
+  flex: 0 1 200px;
+  min-width: 148px;
+  max-width: 300px;
+}
+
+.searchIcon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.searchInput::placeholder {
+  color: var(--text-secondary);
+}
+
+.clearSearch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.clearSearch:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+  transition: all 0.15s;
+}
+
+.actionButton span {
+  white-space: nowrap;
+}
+
+.actionButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actionButton.primary {
+  background-color: var(--accent);
+  color: var(--text-on-fill);
+}
+
+.actionButton.primary:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.actionButton.danger {
+  background-color: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+}
+
+.actionButton.danger:hover:not(:disabled) {
+  background-color: var(--error);
+  color: var(--text-on-fill);
+}
+
+.actionButton.stop {
+  background-color: var(--warning);
+  color: var(--text-on-fill);
+}
+
+.actionButton.stop:hover {
+  background-color: var(--warning-hover);
+}
+
+.actionButton.iconOnly {
+  padding: 8px;
+}
+
+.runAction {
+  min-width: 176px;
+  justify-content: center;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1400px) {
+  .selectToggle {
+    padding: 7px 9px;
+  }
+
+  .selectToggle span {
+    display: none;
+  }
+}
+
+@media (max-width: 1240px) {
+  .runAction {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 1120px) {
+  .actionButton {
+    padding: 8px;
+  }
+
+  .actionButton span {
+    display: none;
+  }
+}

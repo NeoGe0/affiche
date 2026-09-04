@@ -1,0 +1,34 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.backButton:hover {
+  background-color: var(--bg-hover);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.seasonSuffix {
+  color: var(--text-secondary);
+  font-weight: 400;
+}

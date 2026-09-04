@@ -1,0 +1,37 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.icon {
+  color: var(--text-secondary);
+}
+
+.title {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.description {
+  margin: 0 0 10px 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.toggle {
+  margin-bottom: 4px;
+}
+
+.hint {
+  margin: 0 0 12px 26px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.hint:last-child {
+  margin-bottom: 0;
+}

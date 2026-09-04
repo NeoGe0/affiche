@@ -1,0 +1,168 @@
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbarRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.sourceGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sourceLabel {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.segmented {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.segment {
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.segment:hover:not(.segmentActive) {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.segmentActive {
+  background-color: var(--accent);
+  color: var(--text-on-fill);
+}
+
+.sourceHint {
+  margin: 0 0 8px;
+  align-self: flex-end;
+  max-width: 320px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inputGroup.titleInput {
+  flex: 1;
+}
+
+.yearInput input {
+  width: 100px;
+}
+
+.seasonInput input {
+  width: 90px;
+}
+
+.inputGroup label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.inputGroup input,
+.inputGroup select {
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.inputGroup select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: 34px;
+
+  background-image: var(--select-chevron);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+
+}
+
+.inputGroup input:focus,
+.inputGroup select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.inputGroup input::placeholder {
+  color: var(--text-muted);
+}
+
+.searchButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+  transition: all 0.15s;
+  height: fit-content;
+}
+
+.searchButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.searchButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadLabel {
+  cursor: pointer;
+}
+
+.uploadLabel.uploadLabelBusy {
+  cursor: default;
+}
+
+@media (max-width: 600px) {
+  .inputGroup {
+    width: 100%;
+  }
+
+  .inputGroup input {
+    width: 100% !important;
+  }
+
+  .searchButton {
+    width: 100%;
+    justify-content: center;
+  }
+}

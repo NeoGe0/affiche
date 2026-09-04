@@ -1,0 +1,155 @@
+.container {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.description {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--bg-tertiary);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: background-color 0.15s;
+}
+
+.item:hover {
+  background-color: var(--bg-hover);
+}
+
+.item.dragging {
+  opacity: 0.5;
+}
+
+.item.dragOver {
+  border-color: var(--accent);
+  background-color: var(--bg-hover);
+}
+
+.dragHandle {
+  color: var(--text-muted);
+  cursor: grab;
+  display: flex;
+  align-items: center;
+}
+
+.item:active .dragHandle {
+  cursor: grabbing;
+}
+
+.priority {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: var(--accent);
+  color: var(--text-on-fill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 50%;
+}
+
+.providerName {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+}
+
+.moveButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  color: var(--text-secondary);
+  background-color: transparent;
+  transition: all 0.15s;
+}
+
+.moveButton:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.moveButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.resetButton {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: transparent;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+
+.resetButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.saveButton {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-on-fill);
+  background-color: var(--accent);
+  transition: all 0.15s;
+}
+
+.saveButton:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.saveButton:disabled,
+.resetButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

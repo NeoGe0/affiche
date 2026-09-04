@@ -1,0 +1,155 @@
+.header {
+  flex-shrink: 0;
+  padding: 16px 24px;
+
+  padding-right: 56px;
+  border-bottom: 1px solid var(--border);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdownTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.dropdownChevron {
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+
+.dropdownChevronOpen {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+  overflow: hidden;
+}
+
+.dropdownOption {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: background-color 0.15s;
+}
+
+.dropdownOption:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.dropdownOptionSelected,
+.dropdownOptionSelected:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.serverIcon {
+  display: flex;
+  align-items: center;
+}
+
+.serverName {
+  flex: 1;
+  text-align: left;
+}
+
+.selectedCheck {
+  margin-left: auto;
+}
+
+.errorText {
+  color: var(--error);
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.libraryPicker {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.libraryPickerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.libraryPickerTitle {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.libraryPickerHint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.bulkActions {
+  display: flex;
+  gap: 8px;
+}
+
+.bulkButton {
+  font-size: 0.8rem;
+  color: var(--accent);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.bulkButtonMuted {
+  color: var(--text-muted);
+}
+
+.libraryOption {
+  cursor: pointer;
+}
+
+.libraryCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.libraryType {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+

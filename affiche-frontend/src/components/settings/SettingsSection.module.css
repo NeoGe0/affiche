@@ -1,0 +1,363 @@
+.section {
+  margin-bottom: 32px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.sectionDescription {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.saveButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: var(--accent);
+  color: var(--text-on-fill);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.saveButton:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emptyState {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-muted);
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+}
+
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.card.dirty {
+  border-color: var(--accent);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+.cardHeader:hover {
+  background-color: var(--bg-hover);
+}
+
+.cardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.cardTitle {
+  flex: 1;
+}
+
+.dirtyIndicator {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent);
+  background-color: color-mix(in srgb, var(--accent) 15%, transparent);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.cardCount {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background-color: var(--bg-primary);
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-right: 8px;
+}
+
+.cardBody {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  background-color: var(--bg-primary);
+}
+
+.settingsGroup {
+  margin-bottom: 20px;
+}
+
+.settingsGroup:last-child {
+  margin-bottom: 0;
+}
+
+.settingsLabel {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.settingDescription {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  user-select: none;
+}
+
+.toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  margin: 0;
+}
+
+.group {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.groupTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 4px;
+}
+
+.groupDescription {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0 0 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.row:last-child {
+  margin-bottom: 0;
+}
+
+.rowStack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rowDescription {
+  margin: 0;
+  padding-left: 28px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.label {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.select {
+  max-width: 200px;
+  padding: 8px 32px 8px 10px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: var(--select-chevron);
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.savedMsg {
+  font-size: 0.85rem;
+  color: var(--success);
+  margin-left: 8px;
+}
+
+.menuTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  color: var(--text-secondary);
+  background-color: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.menuTrigger:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.divider {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.dividerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.validateButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.15s;
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.validateButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.validateButton.validated {
+  background-color: var(--success);
+  color: var(--text-on-fill);
+}
+
+.validateButton.failed {
+  background-color: var(--error);
+  color: var(--text-on-fill);
+}
+
+.validateButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.outlineButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.outlineButtonSmall {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.outlineButtonAccent {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.outlineButtonDanger {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.outlineButtonMuted {
+  color: var(--text-secondary);
+}
+
+.outlineButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

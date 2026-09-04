@@ -1,0 +1,506 @@
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 24px;
+  transition: all 0.15s;
+}
+
+.backButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.backButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loadingBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background-color: var(--accent);
+  color: var(--text-on-fill);
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.header {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.posterContainer {
+  flex-shrink: 0;
+}
+
+.posterFrame {
+  position: relative;
+}
+
+.expandButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  color: #fff;
+  background-color: rgb(0 0 0 / 55%);
+  opacity: 0;
+  transition: opacity 0.15s, background-color 0.15s;
+}
+
+.posterFrame:hover .expandButton,
+.expandButton:focus-visible {
+  opacity: 1;
+}
+
+.expandButton:hover {
+  background-color: rgb(0 0 0 / 75%);
+}
+
+@media (hover: none) {
+  .expandButton {
+    opacity: 1;
+  }
+}
+
+.compareToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  background-color: transparent;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.compareToggle:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.compareToggle[aria-pressed='true'] {
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+.poster {
+  width: 200px;
+  aspect-ratio: 2/3;
+  background-color: var(--bg-tertiary);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: var(--shadow-lg);
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.posterImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.posterImage.loaded {
+  opacity: 1;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.year {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.metadata {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.metaHeading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.metaLabel {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  min-width: 70px;
+}
+
+.metaValue {
+  color: var(--text-primary);
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.processed {
+  color: var(--success);
+  font-weight: 500;
+}
+
+.pending {
+  color: var(--text-muted);
+}
+
+.failed {
+  color: var(--error);
+  font-weight: 500;
+}
+
+.errorBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--error);
+  background-color: var(--error-tint);
+  color: var(--error);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.errorBanner svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.errorBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.errorCause {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  text-align: left;
+  background: none;
+}
+
+.errorCause:hover {
+  color: var(--text-primary);
+}
+
+.errorCause svg {
+  flex-shrink: 0;
+}
+
+.errorFix {
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.errorFix ol {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+  transition: all 0.15s;
+}
+
+.actionButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.actionButton.primary {
+  background-color: var(--accent);
+  color: var(--text-on-fill);
+}
+
+.actionButton.primary:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.actionButton.danger {
+  background-color: transparent;
+  border: 1px solid var(--error);
+  color: var(--error);
+}
+
+.actionButton.danger:hover:not(:disabled) {
+  background-color: var(--error);
+  color: var(--text-on-fill);
+}
+
+.seasonsSection {
+  border-top: 1px solid var(--border);
+  padding-top: 32px;
+}
+
+.seasonsTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.loading,
+.empty {
+  color: var(--text-muted);
+  text-align: center;
+  padding: 40px;
+}
+
+.seasonsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 20px;
+}
+
+.seasonCard {
+  background-color: var(--bg-card);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.seasonCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.seasonCardClickable {
+  cursor: pointer;
+}
+
+.seasonPoster {
+  position: relative;
+  aspect-ratio: 2/3;
+  background-color: var(--bg-tertiary);
+  overflow: hidden;
+}
+
+.seasonPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.seasonImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.seasonImage.loaded {
+  opacity: 1;
+}
+
+.seasonStatus {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.seasonHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.seasonSelectButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--accent);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--accent);
+  transition: all 0.15s;
+}
+
+.seasonSelectButton:hover {
+  background-color: var(--accent);
+  color: var(--text-on-fill);
+}
+
+.seasonInfo {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.seasonNumber {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.seasonTitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .poster {
+    width: 160px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .metadata {
+    align-items: center;
+  }
+
+  .metaItem {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .metaLabel {
+    min-width: auto;
+  }
+
+  .actions {
+    justify-content: center;
+  }
+
+  .seasonsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+}

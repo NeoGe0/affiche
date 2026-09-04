@@ -1,0 +1,11 @@
+services:
+  affiche-api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: affiche-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/config:/data/config
+    restart: unless-stopped

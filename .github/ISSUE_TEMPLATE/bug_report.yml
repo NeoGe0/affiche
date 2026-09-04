@@ -1,0 +1,92 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. The fields below are the ones that
+        actually make a bug reproducible — please don't skip them.
+
+  - type: input
+    id: version
+    attributes:
+      label: Affiche version
+      description: Shown at the bottom of the sidebar, and under Settings → General → About.
+      placeholder: 0.1.0-beta.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: media-server
+    attributes:
+      label: Media server
+      options:
+        - Plex
+        - Jellyfin
+        - Both
+        - Not applicable
+    validations:
+      required: true
+
+  - type: input
+    id: server-version
+    attributes:
+      label: Media server version
+      placeholder: "Plex 1.41.3 / Jellyfin 10.9.11"
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How are you running Affiche?
+      options:
+        - Docker (ghcr.io image)
+        - Docker (built from source)
+        - From source, no Docker
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you got instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to …
+        2. Click …
+        3. See …
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: |
+        From `docker logs affiche`, or `<CONFIG_DIR>/log/`. Setting the log level to
+        DEBUG in Settings → General before reproducing helps a lot.
+        Tokens are redacted automatically, but do give it a read before pasting.
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: For anything visual (poster output, layout), a screenshot is worth more than a description.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues
+          required: true
+        - label: I'm on the latest version, or I've said above which one I'm on
+          required: true

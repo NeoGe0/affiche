@@ -1,0 +1,196 @@
+:root {
+
+  --sidebar-width: 240px;
+  --header-height: 56px;
+}
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --shadow-color: rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.32);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+  --bg-primary: #1c1c1c;
+  --bg-secondary: #252525;
+  --bg-tertiary: #333333;
+  --bg-hover: #3d3d3d;
+  --bg-card: #2a2a2a;
+  --text-primary: #f0f0f0;
+  --text-secondary: #9a9a9a;
+  --text-muted: #666666;
+  --accent: #5c9ded;
+  --accent-hover: #7ab3f5;
+  --success: #5cb85c;
+  --warning: #f0ad4e;
+  --warning-hover: #d9932c;
+  --error: #d9534f;
+  --error-hover: #c33c38;
+  --border: #3a3a3a;
+
+  --text-on-fill: #ffffff;
+
+  --error-tint: rgba(217, 83, 79, 0.12);
+
+  --overlay-scrim: rgba(0, 0, 0, 0.5);
+
+  --backdrop: rgba(0, 0, 0, 0.7);
+  --backdrop-elevated: rgba(0, 0, 0, 0.8);
+
+  --scrim-control: rgba(0, 0, 0, 0.6);
+  --scrim-control-hover: rgba(0, 0, 0, 0.75);
+
+  --scrim-label: rgba(38, 38, 38, 0.55);
+  --text-on-scrim: rgba(255, 255, 255, 0.74);
+
+  --select-chevron: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239a9a9a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg-primary: #f6f7f9;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #eceef1;
+  --bg-hover: #e3e6ea;
+  --bg-card: #ffffff;
+  --text-primary: #1b1d21;
+  --text-secondary: #5c6370;
+  --text-muted: #848b98;
+
+  --accent: #2f6fd0;
+  --accent-hover: #245bb0;
+  --success: #2e7d32;
+  --warning: #a05f00;
+  --warning-hover: #874f00;
+  --error: #c62828;
+  --error-hover: #a52020;
+  --border: #dcdfe4;
+
+  --text-on-fill: #ffffff;
+  --error-tint: rgba(198, 40, 40, 0.1);
+
+  --overlay-scrim: rgba(0, 0, 0, 0.5);
+  --backdrop: rgba(15, 18, 22, 0.45);
+  --backdrop-elevated: rgba(15, 18, 22, 0.6);
+  --scrim-control: rgba(0, 0, 0, 0.6);
+  --scrim-control-hover: rgba(0, 0, 0, 0.75);
+
+  --scrim-label: rgba(38, 38, 38, 0.55);
+  --text-on-scrim: rgba(255, 255, 255, 0.74);
+
+  --select-chevron: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235c6370' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+
+  --shadow-color: rgba(15, 23, 42, 0.16);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.1);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.1);
+  --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 20px 60px rgba(15, 23, 42, 0.18);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  background: none;
+}
+
+input, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-hover);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-warning {
+  color: var(--warning);
+}
+
+.text-error {
+  color: var(--error);
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

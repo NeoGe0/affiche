@@ -1,0 +1,43 @@
+.rail {
+  position: fixed;
+  right: 6px;
+  top: var(--header-height);
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2px;
+  padding: 12px 2px;
+  user-select: none;
+}
+
+.letter {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+  width: 24px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.12s, background-color 0.12s;
+}
+
+.letter:hover:not(:disabled) {
+  color: var(--accent);
+  background-color: var(--bg-hover);
+}
+
+.letter:disabled {
+  color: var(--text-muted);
+  opacity: 0.35;
+  cursor: default;
+}

@@ -1,0 +1,68 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.add {
+  position: relative;
+  align-self: flex-start;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: transparent;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.addButton:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--accent);
+  background-color: var(--bg-hover);
+}
+
+.addButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.addDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10;
+  min-width: 180px;
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+}
+
+.addItem {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  text-align: left;
+  color: var(--text-primary);
+  background-color: transparent;
+  border-radius: 4px;
+  transition: background-color 0.15s;
+}
+
+.addItem:hover {
+  background-color: var(--bg-hover);
+}
