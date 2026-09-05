@@ -6,6 +6,8 @@
 
 **Custom posters for your Plex and Jellyfin libraries: generated, styled, and applied from a web UI.**
 
+Customize the posters across your whole Plex or Jellyfin library. Self-hosted, one Docker container.
+
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0--beta.2-orange.svg)](#)
 [![Backend](https://img.shields.io/badge/backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
@@ -14,12 +16,6 @@
 </div>
 
 ---
-
-> ### 🧪 Public beta
->
-> Affiche is at `0.1.0-beta.2`. It runs every day against real Plex library, but the
-> beta label is honest: expect rough edges, and back up `/data/config` before upgrading. Bug reports
-> and feedback are what this release is for, so please [open an issue](../../issues).
 
 ## What is Affiche?
 
@@ -97,6 +93,12 @@ Style options:
 Collections:
 
 ![Collections for a library](docs/images/collections.jpg)
+
+> ### 🧪 Public beta
+>
+> Affiche is at `0.1.0-beta.2`. It runs every day against real Plex library, but the
+> beta label is honest: expect rough edges, and back up `/data/config` before upgrading. Bug reports
+> and feedback are what this release is for, so please [open an issue](../../issues).
 
 ## Quick start
 
