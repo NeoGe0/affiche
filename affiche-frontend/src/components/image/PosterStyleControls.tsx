@@ -1,5 +1,7 @@
 import { useId, type ReactNode } from 'react';
 
+import { useCapsOnlyFont } from '../../hooks/useCapsOnlyFont';
+
 import { fontBaseName } from './fontName';
 import { fontChoices } from './fontChoices';
 import type { GenerationOptions, OverlayOptions, TextOptions } from '../../types';
@@ -45,6 +47,9 @@ export function PosterStyleControls({
   fonts,
   titleSlot,
 }: PosterStyleControlsProps) {
+
+  const capsOnlyFont = useCapsOnlyFont(textOptions.font_name);
+
   const fontSizePercent = asPercent(textOptions.max_font_ratio);
   const verticalPositionPercent = asPercent(textOptions.text_offset_ratio);
   const textBlockHeightPercent = asPercent(textOptions.max_height_ratio);
@@ -252,6 +257,11 @@ export function PosterStyleControls({
             />
             <span>All caps</span>
           </label>
+          {capsOnlyFont && (
+            <span className={styles.hint}>
+              {fontBaseName(textOptions.font_name)} has no lowercase, so this changes nothing
+            </span>
+          )}
         </div>
 
         <div className={styles.row}>
