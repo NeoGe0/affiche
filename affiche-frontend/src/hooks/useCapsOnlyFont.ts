@@ -7,7 +7,7 @@ interface Measurement {
   capsOnly: boolean;
 }
 
-export function useCapsOnlyFont(fontFile: string | undefined): boolean {
+export function useCapsOnlyFont(fontFile: string | undefined, available: string[]): boolean {
   const [measured, setMeasured] = useState<Measurement | null>(null);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function useCapsOnlyFont(fontFile: string | undefined): boolean {
     return () => {
       current = false;
     };
-  }, [fontFile]);
+  }, [fontFile, available]);
 
   return measured !== null && measured.font === fontFile && measured.capsOnly;
 }

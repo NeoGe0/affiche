@@ -37,12 +37,15 @@ export function glyphsAreIdentical(ctx: CanvasRenderingContext2D, family: string
 
 export async function isCapsOnlyFont(fontFile: string): Promise<boolean> {
   const family = fontBaseName(fontFile);
+  const spec = `${SAMPLE_PX}px "${family}"`;
   try {
-    await document.fonts.load(`${SAMPLE_PX}px "${family}"`);
+    await document.fonts.load(spec);
   } catch {
 
     return false;
   }
+
+  if (!document.fonts.check(spec)) return false;
 
   const ctx = document.createElement('canvas').getContext('2d');
   if (!ctx) return false;

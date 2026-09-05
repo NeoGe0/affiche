@@ -48,7 +48,7 @@ export function PosterStyleControls({
   titleSlot,
 }: PosterStyleControlsProps) {
 
-  const capsOnlyFont = useCapsOnlyFont(textOptions.font_name);
+  const capsOnlyFont = useCapsOnlyFont(textOptions.font_name, fonts);
 
   const fontSizePercent = asPercent(textOptions.max_font_ratio);
   const verticalPositionPercent = asPercent(textOptions.text_offset_ratio);
@@ -248,14 +248,17 @@ export function PosterStyleControls({
           </div>
         </div>
 
+        {
+}
         <div className={styles.row}>
           <label className={styles.checkbox}>
             <input
               type="checkbox"
               checked={textOptions.all_caps}
+              disabled={capsOnlyFont}
               onChange={(e) => onTextChange({ all_caps: e.target.checked })}
             />
-            <span>All caps</span>
+            <span className={capsOnlyFont ? styles.disabledText : undefined}>All caps</span>
           </label>
           {capsOnlyFont && (
             <span className={styles.hint}>

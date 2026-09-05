@@ -1,9 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 
 import type { OverlayOptions, TextOptions } from '../../types';
 import { PosterStyleControls } from './PosterStyleControls';
+
+const capsOnly = vi.hoisted(() => ({ value: false }));
+vi.mock('../../hooks/useCapsOnlyFont', () => ({
+  useCapsOnlyFont: () => capsOnly.value,
+}));
 
 const TEXT: TextOptions = {
   enabled: true,
@@ -147,5 +152,27 @@ describe('PosterStyleControls line layout', () => {
 
     expect(screen.getByLabelText('Auto line breaks')).not.toBeChecked();
     expect(screen.getByLabelText('Line spacing')).toHaveValue('25');
+  });
+});
+
+describe('PosterStyleControls on a caps-only font', () => {
+  afterEach(() => {
+    capsOnly.value = false;
+  });
+
+  it('leaves All caps usable on a font that has lowercase', () => {
+    renderControls();
+
+    expect(screen.getByLabelText('All caps')).toBeEnabled();
+    expect(screen.queryByText(/has no lowercase/)).not.toBeInTheDocument();
+  });
+
+  it('disables All caps and says why when the font has no lowercase', () => {
+    capsOnly.value = true;
+
+    renderControls({ font_name: 'BebasNeue-Regular.ttf' });
+
+    expect(screen.getByLabelText('All caps')).toBeDisabled();
+    expect(screen.getByText(/BebasNeue-Regular has no lowercase/)).toBeInTheDocument();
   });
 });

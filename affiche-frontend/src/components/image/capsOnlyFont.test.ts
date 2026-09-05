@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 
-import { glyphsAreIdentical } from './capsOnlyFont';
+import { glyphsAreIdentical, isCapsOnlyFont } from './capsOnlyFont';
 
 function contextReturning(bitmaps: Record<string, number[]>) {
   let drawn = '';
@@ -52,5 +52,12 @@ describe('glyphsAreIdentical', () => {
     expect(ctx.canvas.height).toBeGreaterThan(0);
 
     expect(ctx.font).toContain('BebasNeue-Regular');
+  });
+});
+
+describe('isCapsOnlyFont', () => {
+  it('answers false where there is no font API to measure with', async () => {
+
+    await expect(isCapsOnlyFont('BebasNeue-Regular.ttf')).resolves.toBe(false);
   });
 });
