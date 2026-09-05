@@ -10,6 +10,7 @@ class OverlayOptionsResponse(BaseModel):
     matte_height_ratio: float
     fade_height_ratio: float
     gradient_color: str
+    gradient_direction: Literal["bottom", "top", "left", "right"] = "bottom"
     vignette_strength: float
     vignette_color: str
     inner_glow_strength: float

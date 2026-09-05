@@ -36,6 +36,7 @@ class OverlayOptions:
     matte_height_ratio: float = 0.0
     fade_height_ratio: float = 0.0
     gradient_color: str = "#000000"
+    gradient_direction: Literal["bottom", "top", "left", "right"] = "bottom"
 
     vignette_strength: float = 0.0
     vignette_color: str = "#000000"
@@ -57,6 +58,12 @@ class OverlayOptions:
 
         if self.overlay_type not in ("poster", "background"):
             raise ValueError(f"overlay_type must be 'poster' or 'background', got {self.overlay_type}")
+
+        if self.gradient_direction not in ("bottom", "top", "left", "right"):
+            raise ValueError(
+                f"gradient_direction must be bottom, top, left or right, "
+                f"got {self.gradient_direction}"
+            )
 
         self.border_color = validate_hex_color(self.border_color)
         self.gradient_color = validate_hex_color(self.gradient_color)

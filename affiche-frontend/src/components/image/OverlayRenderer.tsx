@@ -49,22 +49,49 @@ function applyGradientMatte(ctx: CanvasRenderingContext2D, o: OverlayOptions) {
 
   const { width, height } = ctx.canvas
 
-  const matteH = Math.floor(height * o.matte_height_ratio)
-  const fadeH = Math.floor(height * o.fade_height_ratio)
+  const vertical = o.gradient_direction === "bottom" || o.gradient_direction === "top"
+  const extent = vertical ? height : width
+  const matte = Math.floor(extent * o.matte_height_ratio)
+  const fade = Math.floor(extent * o.fade_height_ratio)
 
-  const startY = height - matteH - fadeH
-  const g = ctx.createLinearGradient(0, startY, 0, height - matteH)
-  g.addColorStop(0, hexToRgba(o.gradient_color, 0))
-  g.addColorStop(1, hexToRgba(o.gradient_color, 1))
+  const band = {
+    bottom: {
+      solid: [0, height - matte, width, matte],
+      fade: [0, height - matte - fade, width, fade],
+      from: [0, height - matte - fade] as const,
+      to: [0, height - matte] as const,
+    },
+    top: {
+      solid: [0, 0, width, matte],
+      fade: [0, matte, width, fade],
+      from: [0, matte + fade] as const,
+      to: [0, matte] as const,
+    },
+    left: {
+      solid: [0, 0, matte, height],
+      fade: [matte, 0, fade, height],
+      from: [matte + fade, 0] as const,
+      to: [matte, 0] as const,
+    },
+    right: {
+      solid: [width - matte, 0, matte, height],
+      fade: [width - matte - fade, 0, fade, height],
+      from: [width - matte - fade, 0] as const,
+      to: [width - matte, 0] as const,
+    },
+  }[o.gradient_direction]
 
-  if (fadeH > 0) {
+  if (fade > 0) {
+    const g = ctx.createLinearGradient(band.from[0], band.from[1], band.to[0], band.to[1])
+    g.addColorStop(0, hexToRgba(o.gradient_color, 0))
+    g.addColorStop(1, hexToRgba(o.gradient_color, 1))
     ctx.fillStyle = g
-    ctx.fillRect(0, startY, width, fadeH)
+    ctx.fillRect(band.fade[0], band.fade[1], band.fade[2], band.fade[3])
   }
 
-  if (matteH > 0) {
+  if (matte > 0) {
     ctx.fillStyle = o.gradient_color
-    ctx.fillRect(0, height - matteH, width, matteH)
+    ctx.fillRect(band.solid[0], band.solid[1], band.solid[2], band.solid[3])
   }
 }
 

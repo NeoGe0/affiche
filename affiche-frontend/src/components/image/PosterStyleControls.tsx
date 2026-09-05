@@ -22,6 +22,13 @@ interface PosterStyleControlsProps {
 const asPercent = (ratio: number) => Math.round(ratio * 100);
 const fromPercent = (value: string) => parseInt(value) / 100;
 
+const GRADIENT_DIRECTIONS: { value: OverlayOptions['gradient_direction']; label: string }[] = [
+  { value: 'bottom', label: 'Bottom' },
+  { value: 'top', label: 'Top' },
+  { value: 'left', label: 'Left' },
+  { value: 'right', label: 'Right' },
+];
+
 const GRAVITY_LABELS: { value: TextOptions['gravity']; label: string }[] = [
   { value: 'south', label: 'Bottom' },
   { value: 'center', label: 'Center' },
@@ -39,7 +46,8 @@ export function PosterStyleControls({
   titleSlot,
 }: PosterStyleControlsProps) {
   const fontSizePercent = asPercent(textOptions.max_font_ratio);
-  const textHeightPercent = asPercent(textOptions.text_offset_ratio);
+  const verticalPositionPercent = asPercent(textOptions.text_offset_ratio);
+  const textBlockHeightPercent = asPercent(textOptions.max_height_ratio);
   const lineSpacingPercent = asPercent(textOptions.line_spacing_ratio);
   const textWidthPercent = asPercent(textOptions.max_width_ratio);
 
@@ -112,6 +120,22 @@ export function PosterStyleControls({
             />
             <span className={styles.colorValue}>{overlayOptions.gradient_color}</span>
           </div>
+        </div>
+
+        <div className={styles.row}>
+          <label className={styles.label} htmlFor={`${uid}-gradient-direction`}>Direction</label>
+          <select
+            id={`${uid}-gradient-direction`}
+            className={styles.select}
+            value={overlayOptions.gradient_direction}
+            onChange={(e) => onOverlayChange({
+              gradient_direction: e.target.value as OverlayOptions['gradient_direction'],
+            })}
+          >
+            {GRADIENT_DIRECTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
         </div>
 
         {
@@ -236,7 +260,14 @@ export function PosterStyleControls({
             id={`${uid}-position`}
             className={styles.select}
             value={textOptions.gravity}
-            onChange={(e) => onTextChange({ gravity: e.target.value as TextOptions['gravity'] })}
+            onChange={(e) => {
+              const gravity = e.target.value as TextOptions['gravity'];
+              onTextChange(
+                gravity === 'center' && textOptions.gravity !== 'center'
+                  ? { gravity, text_offset_ratio: 0.5 }
+                  : { gravity }
+              );
+            }}
           >
             {GRAVITY_LABELS.map(({ value, label }) => (
               <option key={value} value={value}>{label}</option>
@@ -247,22 +278,24 @@ export function PosterStyleControls({
         <div className={styles.row}>
           <label
             className={styles.label}
-            htmlFor={`${uid}-text-height`}
-            title="Distance of the title from the poster edge — higher moves it further in"
+            htmlFor={`${uid}-vertical-position`}
+            title={textOptions.gravity === 'center'
+              ? 'Where the title sits, measured from the bottom — 50% is the middle of the poster'
+              : 'Distance of the title from the poster edge — higher moves it further in'}
           >
-            Text height
+            Vertical position
           </label>
           <div className={styles.sliderWrapper}>
             <input
-              id={`${uid}-text-height`}
+              id={`${uid}-vertical-position`}
               type="range"
               min="0"
               max="100"
               className={styles.slider}
-              value={textHeightPercent}
+              value={verticalPositionPercent}
               onChange={(e) => onTextChange({ text_offset_ratio: fromPercent(e.target.value) })}
             />
-            <span className={styles.sliderValue}>{textHeightPercent}%</span>
+            <span className={styles.sliderValue}>{verticalPositionPercent}%</span>
           </div>
         </div>
 
@@ -307,6 +340,31 @@ export function PosterStyleControls({
               onChange={(e) => onTextChange({ max_width_ratio: fromPercent(e.target.value) })}
             />
             <span className={styles.sliderValue}>{textWidthPercent}%</span>
+          </div>
+        </div>
+
+        {
+
+}
+        <div className={styles.row}>
+          <label
+            className={styles.label}
+            htmlFor={`${uid}-text-block-height`}
+            title="How much of the poster's height the whole title may fill — raise it to let line spacing spread instead of shrinking the text"
+          >
+            Text block height
+          </label>
+          <div className={styles.sliderWrapper}>
+            <input
+              id={`${uid}-text-block-height`}
+              type="range"
+              min="5"
+              max="100"
+              className={styles.slider}
+              value={textBlockHeightPercent}
+              onChange={(e) => onTextChange({ max_height_ratio: fromPercent(e.target.value) })}
+            />
+            <span className={styles.sliderValue}>{textBlockHeightPercent}%</span>
           </div>
         </div>
 

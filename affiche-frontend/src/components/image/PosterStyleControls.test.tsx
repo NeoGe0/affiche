@@ -74,6 +74,16 @@ describe('PosterStyleControls gradient', () => {
   });
 });
 
+describe('PosterStyleControls gradient direction', () => {
+  it('sends the edge the matte grows from', () => {
+    const onOverlayChange = renderOverlayControls({ gradient_direction: 'bottom' });
+
+    fireEvent.change(screen.getByLabelText('Direction'), { target: { value: 'left' } });
+
+    expect(onOverlayChange).toHaveBeenCalledWith({ gradient_direction: 'left' });
+  });
+});
+
 describe('PosterStyleControls line layout', () => {
   it('sends line spacing as a ratio of the font size', () => {
     const onTextChange = renderControls();
@@ -89,6 +99,31 @@ describe('PosterStyleControls line layout', () => {
     fireEvent.change(screen.getByLabelText('Line spacing'), { target: { value: '-15' } });
 
     expect(onTextChange).toHaveBeenCalledWith({ line_spacing_ratio: -0.15 });
+  });
+
+  it('sends the text block height, which is what line spacing competes against', () => {
+    const onTextChange = renderControls();
+
+    fireEvent.change(screen.getByLabelText('Text block height'), { target: { value: '45' } });
+
+    expect(onTextChange).toHaveBeenCalledWith({ max_height_ratio: 0.45 });
+  });
+
+  it('re-bases the offset when the title moves to the centre', () => {
+
+    const onTextChange = renderControls({ gravity: 'south', text_offset_ratio: 0.143 });
+
+    fireEvent.change(screen.getByLabelText('Position'), { target: { value: 'center' } });
+
+    expect(onTextChange).toHaveBeenCalledWith({ gravity: 'center', text_offset_ratio: 0.5 });
+  });
+
+  it('leaves a chosen centre offset alone when the position is already centre', () => {
+    const onTextChange = renderControls({ gravity: 'center', text_offset_ratio: 0.7 });
+
+    fireEvent.change(screen.getByLabelText('Vertical position'), { target: { value: '30' } });
+
+    expect(onTextChange).toHaveBeenCalledWith({ text_offset_ratio: 0.3 });
   });
 
   it('sends text width as a ratio of the poster width', () => {
