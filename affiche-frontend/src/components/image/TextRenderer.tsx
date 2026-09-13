@@ -161,8 +161,7 @@ function calculatePosition(
     y = padding + textOffset
   } else {
 
-    const safeHeight = canvasHeight - 2 * padding
-    y = padding + Math.floor((safeHeight - textHeight) / 2)
+    y = canvasHeight - textOffset - Math.floor(textHeight / 2)
   }
 
   y = Math.max(padding, y)

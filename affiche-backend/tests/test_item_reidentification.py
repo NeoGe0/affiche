@@ -1,10 +1,13 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from affiche.app.mediaserver.connector.media_server_connector import MediaServerPersistenceConnector
-from affiche.app.mediaserver.library.model import Library, LibraryItem, LibraryItemSearch, LibrarySearch
+from affiche.app.mediaserver.library.model import Library, LibraryItem, LibraryItemSearch, LibrarySearch, LibrarySeason
+from affiche.app.mediaserver.library.seasons.library_season_repository import LibrarySeasonRepository
+from affiche.app.mediaserver.library.seasons.library_season_service import LibrarySeasonService
 from affiche.app.mediaserver.library.service.library_service import LibraryService
 from affiche.app.mediaserver.library.sync.reidentification import (
     RemoteIdentity,
@@ -99,8 +102,21 @@ class TestMatching:
 
         assert match_readded_seasons(existing, {1: "900"}) == {}
 
+    def test_seasons_whose_new_id_already_has_a_row_are_a_split_not_a_move(self):
+        existing = [_Season(10, "200", 1), _Season(20, "900", 1), _Season(11, "201", 2)]
+
+        assert match_readded_seasons(existing, {1: "900", 2: "901"}) == {11: "901"}
+
+    def test_two_stale_rows_for_one_season_number_match_neither(self):
+        existing = [_Season(10, "200", 1), _Season(11, "300", 1)]
+
+        assert match_readded_seasons(existing, {1: "900"}) == {}
+
 @pytest.fixture
 def library(session: Session):
+    return _create_library(session)
+
+def _create_library(session: Session) -> Library:
     server = MediaServerPersistenceConnector(session).create(MediaServer(
         name="Plex", type=MediaServerType.PLEX, url="http://x", token="t",
     ))
@@ -180,6 +196,42 @@ class TestAdoption:
 
         assert restored == 1
         assert _only_item(service, library.id).deleted_at is None
+
+class TestSeasonAdoption:
+
+    def _show_with_split_seasons(self, session, library):
+        library_service = LibraryService(session)
+        library_service.create_or_update_items_batch([LibraryItem(
+            library_id=library.id, external_id="500", title="Severance", type="show",
+            tvdb_id="371980", last_seen_at=T0,
+        )])
+        session.flush()
+        show = _only_item(library_service, library.id)
+        seasons = LibrarySeasonService(session)
+        seasons.create_or_update([
+            LibrarySeason(show_id=show.id, library_id=library.id, external_id=external_id,
+                          season_number=number, title=f"Season {number}")
+            for external_id, number in (("200", 1), ("900", 1), ("201", 2), ("901", 2))
+        ])
+        return show, seasons
+
+    def test_a_split_show_is_left_as_it_is(self, session: Session, library):
+        show, seasons = self._show_with_split_seasons(session, library)
+
+        assert seasons.adopt_readded_seasons(library.id, show.id, {1: "900", 2: "901"}) == []
+        stored = seasons.get_item_seasons(library.id, show.id)
+        assert sorted(s.external_id for s in stored) == ["200", "201", "900", "901"]
+
+    def test_a_failed_rekey_leaves_the_session_usable(self, clean_session: Session):
+        session = clean_session
+        library = _create_library(session)
+        show, seasons = self._show_with_split_seasons(session, library)
+        stale = next(s for s in seasons.get_item_seasons(library.id, show.id) if s.external_id == "200")
+
+        with pytest.raises(IntegrityError):
+            LibrarySeasonRepository(session).rekey_seasons({stale.id: "900"})
+
+        seasons.get_item_seasons(library.id, show.id)
 
 class TestMerging:
 

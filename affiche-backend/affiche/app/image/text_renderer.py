@@ -234,8 +234,7 @@ class TextRenderer:
         elif options.gravity == "north":
             y = padding + text_offset
         else:
-            safe_height = img_height - (2 * padding)
-            y = padding + (safe_height - text_height) // 2
+            y = (img_height - text_offset) - text_height // 2
 
         x = max(padding, min(x, img_width - padding - text_width))
 

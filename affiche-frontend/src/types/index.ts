@@ -391,6 +391,7 @@ export interface OverlayOptions {
   matte_height_ratio: number;
   fade_height_ratio: number;
   gradient_color: string;
+  gradient_direction: "bottom" | "top" | "left" | "right";
   vignette_strength: number;
   vignette_color: string;
   inner_glow_strength: number;

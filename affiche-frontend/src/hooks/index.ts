@@ -2,6 +2,7 @@ export { useEventStream } from './useEventStream';
 export type { ItemProcessedEvent, SeasonProcessedEvent, SSEEvent } from './useEventStream';
 export { usePosterConfig, invalidatePosterConfig } from './usePosterConfig';
 export { useFonts } from './useFonts';
+export { useCapsOnlyFont } from './useCapsOnlyFont';
 export { useProviderStatus } from './useProviderStatus';
 export { usePosterImage } from './usePosterImage';
 export { useLibraryItems, PAGE_SIZE } from './useLibraryItems';

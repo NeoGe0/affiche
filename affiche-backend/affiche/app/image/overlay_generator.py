@@ -89,23 +89,31 @@ class OverlayGenerator:
         mask = Image.new("L", (width, height), 0)
         draw = ImageDraw.Draw(mask)
 
-        matte_h_px = int(height * options.matte_height_ratio)
-        fade_h_px = int(height * options.fade_height_ratio)
+        vertical = options.gradient_direction in ("bottom", "top")
+        extent = height if vertical else width
 
-        if matte_h_px > 0:
-            draw.rectangle(
-                [0, height - matte_h_px, width, height],
-                fill=255
-            )
+        matte_px = int(extent * options.matte_height_ratio)
+        fade_px = int(extent * options.fade_height_ratio)
 
-        if fade_h_px > 0:
-            start_y = height - matte_h_px - fade_h_px
-            for y in range(fade_h_px):
-                alpha = int(255 * (y / fade_h_px))
-                draw.line(
-                    [(0, start_y + y), (width, start_y + y)],
-                    fill=alpha
-                )
+        profile = [255] * min(matte_px, extent)
+        for step in range(fade_px):
+            if len(profile) >= extent:
+                break
+            profile.append(int(255 * (fade_px - 1 - step) / fade_px))
+
+        for offset, alpha in enumerate(profile):
+            if alpha <= 0:
+                continue
+            if options.gradient_direction == "bottom":
+                y = height - 1 - offset
+                draw.line([(0, y), (width, y)], fill=alpha)
+            elif options.gradient_direction == "top":
+                draw.line([(0, offset), (width, offset)], fill=alpha)
+            elif options.gradient_direction == "right":
+                x = width - 1 - offset
+                draw.line([(x, 0), (x, height)], fill=alpha)
+            else:
+                draw.line([(offset, 0), (offset, height)], fill=alpha)
 
         gradient_layer.putalpha(mask)
         return Image.alpha_composite(canvas, gradient_layer)

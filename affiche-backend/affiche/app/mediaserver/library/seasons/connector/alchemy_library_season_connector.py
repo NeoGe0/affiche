@@ -25,14 +25,18 @@ class AlchemyLibrarySeasonConnector:
 
     def rekey_seasons(self, adoptions: Mapping[int, str]) -> int:
         rekeyed = 0
-        for season_id, external_id in adoptions.items():
-            entity = self._session.get(LibrarySeasonEntity, season_id)
-            if entity is None:
-                continue
-            entity.external_id = external_id
-            entity.poster_hash = None
-            rekeyed += 1
-        self._session.commit()
+        try:
+            for season_id, external_id in adoptions.items():
+                entity = self._session.get(LibrarySeasonEntity, season_id)
+                if entity is None:
+                    continue
+                entity.external_id = external_id
+                entity.poster_hash = None
+                rekeyed += 1
+            self._session.commit()
+        except Exception:
+            self._session.rollback()
+            raise
         return rekeyed
 
     def create_or_update_seasons_batch(self, seasons: List[LibrarySeason]) -> None:

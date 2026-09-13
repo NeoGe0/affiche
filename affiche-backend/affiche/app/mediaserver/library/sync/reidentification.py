@@ -63,13 +63,16 @@ def match_readded_items(existing: Sequence,
 
 def match_readded_seasons(existing: Sequence,
                           incoming: Mapping[int, str]) -> Dict[int, str]:
-    known = set(incoming.values())
+    held = {season.external_id for season in existing}
+    candidates: Dict[int, list] = {}
+    for season in existing:
+        target = incoming.get(season.season_number)
+        if target is not None and target not in held and season.external_id not in incoming.values():
+            candidates.setdefault(season.season_number, []).append(season)
     return {
-        season.id: incoming[season.season_number]
-        for season in existing
-        if season.season_number in incoming
-        and season.external_id != incoming[season.season_number]
-        and season.external_id not in known
+        rows[0].id: incoming[number]
+        for number, rows in candidates.items()
+        if len(rows) == 1
     }
 
 def match_split_items(existing: Sequence,

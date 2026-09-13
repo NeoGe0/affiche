@@ -213,6 +213,7 @@ class TestTextRendererPosition:
     def test_position_center_gravity(self):
         options = TextOptions(
             gravity="center",
+            text_offset_ratio=0.5,
             border_padding_ratio=0,
         )
 
@@ -223,6 +224,17 @@ class TestTextRendererPosition:
         )
 
         assert y == 1450
+
+    def test_center_offset_measures_from_the_bottom(self):
+        high = TextOptions(gravity="center", text_offset_ratio=0.75, border_padding_ratio=0)
+        low = TextOptions(gravity="center", text_offset_ratio=0.25, border_padding_ratio=0)
+
+        _, y_high = self.renderer._calculate_text_position((2000, 3000), (500, 100), high)
+        _, y_low = self.renderer._calculate_text_position((2000, 3000), (500, 100), low)
+
+        assert y_high == 3000 - 2250 - 50
+        assert y_low == 3000 - 750 - 50
+        assert y_low > y_high
 
     def test_position_horizontal_centering(self):
         options = TextOptions(

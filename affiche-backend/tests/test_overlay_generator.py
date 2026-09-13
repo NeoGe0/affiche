@@ -103,6 +103,49 @@ class TestOverlayGeneratorEffects:
         top_pixel = overlay.getpixel((1000, 100))
         assert top_pixel[3] == 0
 
+    def test_gradient_direction_defaults_to_bottom(self):
+        generator = OverlayGenerator()
+        options = OverlayOptions(matte_height_ratio=0.1, fade_height_ratio=0.2)
+
+        assert options.gradient_direction == "bottom"
+
+        overlay = generator.generate_overlay(options)
+
+        assert overlay.getpixel((1000, 2900))[3] == 255
+        assert overlay.getpixel((1000, 100))[3] == 0
+
+    @pytest.mark.parametrize("direction,solid,clear", [
+        ("bottom", (1000, 2950), (1000, 50)),
+        ("top", (1000, 50), (1000, 2950)),
+        ("left", (50, 1500), (1950, 1500)),
+        ("right", (1950, 1500), (50, 1500)),
+    ])
+    def test_gradient_grows_from_the_chosen_edge(self, direction, solid, clear):
+        generator = OverlayGenerator()
+        options = OverlayOptions(
+            matte_height_ratio=0.1,
+            fade_height_ratio=0.2,
+            gradient_direction=direction,
+        )
+
+        overlay = generator.generate_overlay(options)
+
+        assert overlay.getpixel(solid)[3] == 255
+        assert overlay.getpixel(clear)[3] == 0
+
+    def test_horizontal_gradient_measures_against_the_width(self):
+        generator = OverlayGenerator()
+        options = OverlayOptions(matte_height_ratio=0.1, gradient_direction="left")
+
+        overlay = generator.generate_overlay(options)
+
+        assert overlay.getpixel((199, 1500))[3] == 255
+        assert overlay.getpixel((201, 1500))[3] == 0
+
+    def test_rejects_an_unknown_direction(self):
+        with pytest.raises(ValueError, match="gradient_direction"):
+            OverlayOptions(gradient_direction="sideways")
+
     def test_inner_glow_applied(self):
         generator = OverlayGenerator()
         options = OverlayOptions(
