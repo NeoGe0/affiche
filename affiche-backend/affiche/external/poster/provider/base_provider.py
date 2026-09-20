@@ -10,6 +10,22 @@ class BaseUrlMode(str, Enum):
     FIXED = "fixed"
     USER = "user"
 
+class PosterImage(str):
+
+    language: Optional[str]
+    textless: Optional[bool]
+    width: Optional[int]
+    height: Optional[int]
+
+    def __new__(cls, url: str, *, language: Optional[str] = None, textless: Optional[bool] = None,
+                width: Optional[int] = None, height: Optional[int] = None):
+        image = super().__new__(cls, url)
+        image.language = language.lower() if language else None
+        image.textless = textless
+        image.width = width or None
+        image.height = height or None
+        return image
+
 class ExternalProvider(ABC):
 
     requires_api_key: bool = True

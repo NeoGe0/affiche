@@ -108,3 +108,22 @@ def test_the_listing_can_be_filtered_to_items_with_no_provenance(authenticated_a
                           f"/items?provider=none")
 
         assert [item["title"] for item in resp.json()["items"]] == ["B"]
+
+def test_item_ids_route_returns_every_match_unpaged(authenticated_app):
+    with TestClient(authenticated_app) as client:
+        server_id, library_id = _seed(["A", "B", "C"], deleted_titles=["Gone"])
+
+        resp = client.get(f"/affiche/media-servers/{server_id}/libraries/{library_id}/items/ids",
+                          params={"page_size": 1, "search": ""})
+
+        assert resp.status_code == 200
+        assert len(resp.json()) == 3
+
+def test_counts_route_reports_ready_and_uploaded(authenticated_app):
+    with TestClient(authenticated_app) as client:
+        server_id, library_id = _seed(["A"])
+
+        body = client.get(f"/affiche/media-servers/{server_id}/libraries/{library_id}/items/counts").json()
+
+        assert body["ready"] == 0
+        assert body["uploaded"] == 0

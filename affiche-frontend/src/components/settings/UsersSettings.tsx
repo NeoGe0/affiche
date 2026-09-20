@@ -88,7 +88,7 @@ export function UsersSettings() {
         <ConfirmModal
           title="Remove account"
           message={`Remove "${deleteTarget.username}"? They will be signed out and will no longer be able to sign in. Nothing they generated is deleted.`}
-          confirmLabel={isDeleting ? 'Removing...' : 'Remove'}
+          confirmLabel={isDeleting ? 'Removing…' : 'Remove'}
           variant="danger"
           isBusy={isDeleting}
           onConfirm={handleDelete}
@@ -164,7 +164,7 @@ function AccountCard({ username, role, onChangePassword }: AccountCardProps) {
             className={`${sectionStyles.outlineButton} ${sectionStyles.outlineButtonAccent}`}
             disabled={!canSubmit}
           >
-            {isSaving ? 'Saving...' : 'Change password'}
+            {isSaving ? 'Saving…' : 'Change password'}
           </button>
         </div>
       </form>

@@ -208,9 +208,17 @@ def get_library_item_counts(media_server_id: int,
     providers = service.count_items_by_provider(query.to_domain(library_id, provider=None))
     return LibraryItemCounts(
         total=stats.total, unprocessed=stats.unprocessed,
-        errors=stats.errors, locked=stats.locked,
+        errors=stats.errors, locked=stats.locked, ready=stats.ready, uploaded=stats.uploaded,
         providers={(provider or NO_PROVIDER): count for provider, count in providers.items()},
     )
+
+@router.get("/{library_id}/items/ids", response_model=List[int])
+def get_library_item_ids(media_server_id: int,
+                         library_id: int,
+                         query: Annotated[LibraryItemQuery, Query()],
+                         service: LibraryService = Depends(get_library_service)) -> List[int]:
+    service.get_library(media_server_id, library_id)
+    return service.find_item_ids(query.to_domain(library_id, page_size=None))
 
 @router.get("/{library_id}/items/alpha-index", response_model=List[AlphaIndexEntry])
 def get_library_alpha_index(media_server_id: int,

@@ -176,3 +176,33 @@ describe('PosterStyleControls on a caps-only font', () => {
     expect(screen.getByText(/BebasNeue-Regular has no lowercase/)).toBeInTheDocument();
   });
 });
+
+describe('PosterStyleControls effects', () => {
+  it('patches vignette, glow and grain as the 0–1 ratios the renderers read', () => {
+    const onOverlayChange = renderOverlayControls({
+      vignette_strength: 0, vignette_color: '#000000',
+      inner_glow_strength: 0, inner_glow_color: '#ffffff',
+      grain_amount: 0, grain_size: 1,
+    });
+
+    fireEvent.change(screen.getByLabelText('Vignette'), { target: { value: '40' } });
+    fireEvent.change(screen.getByLabelText('Inner glow'), { target: { value: '25' } });
+    fireEvent.change(screen.getByLabelText('Grain'), { target: { value: '10' } });
+
+    expect(onOverlayChange).toHaveBeenCalledWith({ vignette_strength: 0.4 });
+    expect(onOverlayChange).toHaveBeenCalledWith({ inner_glow_strength: 0.25 });
+    expect(onOverlayChange).toHaveBeenCalledWith({ grain_amount: 0.1 });
+  });
+
+  it('holds a colour or size back until its effect is on, since it would change nothing', () => {
+    renderOverlayControls({
+      vignette_strength: 0, vignette_color: '#000000',
+      inner_glow_strength: 0.3, inner_glow_color: '#ffffff',
+      grain_amount: 0, grain_size: 1,
+    });
+
+    expect(screen.getByLabelText('Vignette color')).toBeDisabled();
+    expect(screen.getByLabelText('Glow color')).toBeEnabled();
+    expect(screen.getByLabelText('Grain size')).toBeDisabled();
+  });
+});

@@ -15,11 +15,11 @@
   align-items: center;
   gap: 7px;
   padding: 7px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 500;
   white-space: nowrap;
   transition: background-color 0.15s, border-color 0.15s;
@@ -42,10 +42,10 @@
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  border-radius: 9px;
-  background-color: var(--accent);
+  border-radius: var(--radius-lg);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -54,13 +54,13 @@
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  width: 264px;
+  width: min(264px, calc(100vw - 32px));
   padding: 6px;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--border);
   background-color: var(--bg-secondary);
   box-shadow: var(--shadow-lg);
-  z-index: 20;
+  z-index: var(--z-popover);
 }
 
 .section {
@@ -79,7 +79,7 @@
   display: block;
   width: 100%;
   padding: 4px 10px 6px;
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -96,8 +96,8 @@
   align-items: center;
   gap: 10px;
   padding: 7px 10px;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
   color: var(--text-primary);
   cursor: pointer;
   transition: background-color 0.15s;
@@ -127,7 +127,7 @@
 .rowCount {
   flex-shrink: 0;
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
 }
 
@@ -139,17 +139,17 @@
 
   min-width: 0;
   padding: 5px 8px 5px 10px;
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--accent);
   background-color: transparent;
   color: var(--accent);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   transition: background-color 0.15s, color 0.15s;
 }
 
 .chip:hover {
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
 }
 

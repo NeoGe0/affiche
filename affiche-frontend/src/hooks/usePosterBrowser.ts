@@ -26,6 +26,7 @@ export function usePosterBrowser({ item, mediaServerId, onApplied }: UsePosterBr
   const [season, setSeason] = useState<ItemSeason | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadDefault, setUploadDefault] = useState(false);
+  const [initialPoster, setInitialPoster] = useState<string | undefined>(undefined);
 
   const loadUploadDefault = useCallback(async (libraryId: number) => {
     if (mediaServerId == null) {
@@ -40,9 +41,10 @@ export function usePosterBrowser({ item, mediaServerId, onApplied }: UsePosterBr
     }
   }, [mediaServerId]);
 
-  const open = useCallback(async (forSeason: ItemSeason | null) => {
+  const open = useCallback(async (forSeason: ItemSeason | null, poster?: string) => {
     if (item) await loadUploadDefault(item.library_id);
     setSeason(forSeason);
+    setInitialPoster(poster);
     setIsOpen(true);
   }, [item, loadUploadDefault]);
 
@@ -83,5 +85,5 @@ export function usePosterBrowser({ item, mediaServerId, onApplied }: UsePosterBr
     }
   }, [item, mediaServerId, season, onApplied, toast]);
 
-  return { isOpen, season, isSaving, uploadDefault, open, close, save };
+  return { isOpen, season, isSaving, uploadDefault, initialPoster, open, close, save };
 }

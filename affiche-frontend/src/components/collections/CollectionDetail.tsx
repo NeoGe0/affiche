@@ -112,7 +112,7 @@ export function CollectionDetail({
             onClick={() => onSelectPoster(collection)}
             disabled={isBusy}
           >
-            <Images size={16} /> Select poster
+            <Images size={16} /> Choose artwork
           </button>
           <button
             className={styles.action}

@@ -6,13 +6,19 @@ import type { TaskKind, TaskProgressState } from '../types';
 export function taskKindFromName(name?: string): TaskKind {
   if (name?.startsWith('library_sync')) return 'sync';
   if (name?.startsWith('poster_sync')) return 'generate';
+  if (name?.startsWith('poster_upload')) return 'upload';
   if (name?.startsWith('poster_reset')) return 'reset';
   return 'other';
 }
 
+export interface TaskOutcome {
+  status: 'completed' | 'failed' | 'cancelled';
+  kind: TaskKind;
+}
+
 interface UseTaskTrackingOptions {
 
-  onTaskFinished: () => void;
+  onTaskFinished: (outcome: TaskOutcome) => void;
 }
 
 export function useTaskTracking({ onTaskFinished }: UseTaskTrackingOptions) {
@@ -27,7 +33,7 @@ export function useTaskTracking({ onTaskFinished }: UseTaskTrackingOptions) {
   const startTaskTracking = useCallback((taskId: string, message?: string, kind: TaskKind = 'other') => {
     currentTaskIdRef.current = taskId;
     setIsActionLoading(true);
-    setTaskMessage(message || 'Starting task...');
+    setTaskMessage(message || 'Starting task…');
     setTaskKind(kind);
     setTaskProgress(null);
   }, []);
@@ -63,7 +69,7 @@ export function useTaskTracking({ onTaskFinished }: UseTaskTrackingOptions) {
     (taskId: string, status: string, taskName: string, message?: string, error?: string) => {
       if (currentTaskIdRef.current !== taskId) return;
 
-      setTaskMessage(message || `Task ${status}...`);
+      setTaskMessage(message || `Task ${status}…`);
       setTaskKind((prev) => prev ?? taskKindFromName(taskName));
 
       if (status !== 'completed' && status !== 'failed' && status !== 'cancelled') return;
@@ -79,7 +85,7 @@ export function useTaskTracking({ onTaskFinished }: UseTaskTrackingOptions) {
         toast.error(error || 'Unknown error', { title: 'Task failed' });
       }
 
-      onTaskFinished();
+      onTaskFinished({ status: status as TaskOutcome['status'], kind: taskKindFromName(taskName) });
     },
     [onTaskFinished, toast]
   );

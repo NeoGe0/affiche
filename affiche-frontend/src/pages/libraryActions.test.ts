@@ -77,7 +77,7 @@ describe('LIBRARY_ACTIONS metadata', () => {
     expect(LIBRARY_ACTIONS.generate.taskKind).toBe('generate');
     expect(LIBRARY_ACTIONS.reset.taskKind).toBe('reset');
 
-    expect(LIBRARY_ACTIONS.upload.taskKind).toBeUndefined();
+    expect(LIBRARY_ACTIONS.upload.taskKind).toBe('upload');
   });
 
   it('gives every action a toast title and a fallback sentence', () => {

@@ -34,7 +34,7 @@ export function PosterPreviewPane({
           />
           <button className={styles.editButton} onClick={onEditStyle}>
             <Settings size={16} />
-            Edit Style
+            Edit style
           </button>
         </>
       ) : (

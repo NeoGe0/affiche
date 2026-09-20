@@ -1,6 +1,6 @@
 .card {
   background-color: var(--bg-card);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
@@ -47,7 +47,7 @@
   left: 8px;
   display: flex;
   padding: 4px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   background-color: var(--bg-tertiary);
   box-shadow: var(--shadow-sm);
@@ -58,7 +58,7 @@
 }
 
 .title {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--text-primary);
   white-space: nowrap;
@@ -68,6 +68,6 @@
 }
 
 .count {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }

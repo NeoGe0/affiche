@@ -11,12 +11,12 @@
 
 .title {
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .description {
   margin: 0 0 10px 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
   line-height: 1.5;
 }
@@ -27,7 +27,7 @@
 
 .hint {
   margin: 0 0 12px 26px;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   line-height: 1.5;
 }

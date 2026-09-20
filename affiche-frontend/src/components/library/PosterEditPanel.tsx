@@ -1,5 +1,4 @@
-import { ArrowLeft, RotateCcw, Loader2 } from 'lucide-react';
-import { Modal } from '../common';
+import { RotateCcw, Loader2 } from 'lucide-react';
 import { PosterPreview, PosterStyleControls } from '../image';
 import { useFonts } from '../../hooks';
 import { POSTER_LANGUAGES } from '../../constants/languages';
@@ -7,7 +6,8 @@ import type { OverlayOptions, TextOptions } from '../../types';
 import styles from './PosterEditPanel.module.css';
 
 interface PosterEditPanelProps {
-  imageUrl: string;
+
+  imageUrl: string | null;
   title: string;
   onTitleChange: (title: string) => void;
   titleLanguage: string;
@@ -22,6 +22,7 @@ interface PosterEditPanelProps {
   onTextChange: (options: Partial<TextOptions>) => void;
   onQualityChange: (quality: number) => void;
   onReset: () => void;
+
   onClose: () => void;
 }
 
@@ -46,25 +47,37 @@ export function PosterEditPanel({
   const { fonts } = useFonts();
 
   return (
-
-    <Modal size="large" label="Edit poster style" elevated onClose={onClose}>
+    <section className={styles.editor} aria-labelledby="poster-style-heading">
       <div className={styles.header}>
-        <button className={styles.backButton} onClick={onClose}>
-          <ArrowLeft size={20} />
-          <span>Back to Selection</span>
+        <h3 className={styles.headerTitle} id="poster-style-heading">Edit style</h3>
+        <button className={styles.resetButton} onClick={onReset}>
+          <RotateCcw size={14} />
+          Reset to defaults
         </button>
-        <h3 className={styles.headerTitle}>Edit Poster Style</h3>
+        <button className={styles.doneButton} onClick={onClose}>
+          Done
+        </button>
+      </div>
+
+      <div className={styles.previewRow}>
+        <div className={styles.previewWrapper}>
+          {imageUrl ? (
+            <PosterPreview
+              imageUrl={imageUrl}
+              title={title}
+              overlayOptions={overlayOptions}
+              textOptions={textOptions}
+            />
+          ) : (
+            <div className={styles.previewPlaceholder}>No poster selected</div>
+          )}
+        </div>
+        <p className={styles.previewNote}>
+          Pick any poster in the grid: it takes this style straight away.
+        </p>
       </div>
 
       <div className={styles.content}>
-        <div className={styles.previewWrapper}>
-          <PosterPreview
-            imageUrl={imageUrl}
-            title={title}
-            overlayOptions={overlayOptions}
-            textOptions={textOptions}
-          />
-        </div>
 
         <PosterStyleControls
           overlayOptions={overlayOptions}
@@ -133,15 +146,6 @@ export function PosterEditPanel({
         />
       </div>
 
-      <div className={styles.footer}>
-        <button className={styles.resetButton} onClick={onReset}>
-          <RotateCcw size={16} />
-          Reset to Defaults
-        </button>
-        <button className={styles.doneButton} onClick={onClose}>
-          Done
-        </button>
-      </div>
-    </Modal>
+    </section>
   );
 }

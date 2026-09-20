@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { errorMessage, libraryApi } from '../api';
 import { useToast } from '../context/ToastContext';
-import { emptySelection, pruneSelection, toggleAll, toggleId } from '../components/library/selection';
+import { emptySelection, pruneSelection, selectRange, toggleAll, toggleId } from '../components/library/selection';
 import type { LibraryItem } from '../types';
 
 interface UseItemSelectionOptions {
@@ -14,6 +14,8 @@ interface UseItemSelectionOptions {
   onTaskStarted: (taskId: string) => void;
 
   refreshListing: (silent?: boolean) => void;
+
+  listingKey: string;
 }
 
 export function useItemSelection({
@@ -21,17 +23,28 @@ export function useItemSelection({
   mediaServerId,
   onTaskStarted,
   refreshListing,
+  listingKey,
 }: UseItemSelectionOptions) {
   const toast = useToast();
   const [selected, setSelected] = useState<ReadonlySet<number>>(emptySelection);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
+  const [allMatching, setAllMatching] = useState<{ key: string; ids: ReadonlySet<number> } | null>(null);
+  const anchor = useRef<number | null>(null);
 
   useEffect(() => {
     setSelected((prev) => pruneSelection(prev, items));
   }, [items]);
 
-  const ids = [...selected];
+  const matching = allMatching?.key === listingKey ? allMatching.ids : null;
+  const current = matching ?? selected;
+  const ids = [...current];
+
+  const edit = (change: (prev: ReadonlySet<number>) => ReadonlySet<number>) => {
+    const base = matching ?? selected;
+    setAllMatching(null);
+    setSelected(change(base));
+  };
 
   const run = async (action: (itemIds: number[]) => Promise<void>) => {
     if (!mediaServerId || ids.length === 0) return;
@@ -40,6 +53,7 @@ export function useItemSelection({
       await action(ids);
 
       setSelected(emptySelection());
+      setAllMatching(null);
       setIsSelectMode(false);
     } finally {
       setIsBusy(false);
@@ -77,24 +91,35 @@ export function useItemSelection({
     });
 
   return {
-    selected,
-    count: selected.size,
+    selected: current,
+    count: current.size,
+    isAllMatching: matching !== null,
     isBusy,
     isSelectMode,
-    isSelected: (id: number) => selected.has(id),
-    toggle: (id: number) => {
-      setSelected((prev) => toggleId(prev, id));
+    isSelected: (id: number) => current.has(id),
+
+    toggle: (id: number, extend = false) => {
+      edit((prev) => (extend ? selectRange(prev, items, anchor.current, id) : toggleId(prev, id)));
+      anchor.current = id;
       setIsSelectMode(true);
     },
-    toggleAll: () => setSelected((prev) => toggleAll(prev, items)),
+    toggleAll: () => edit((prev) => toggleAll(prev, items)),
+    selectAllMatching: (matchingIds: number[]) => {
+      setAllMatching({ key: listingKey, ids: new Set(matchingIds) });
+      setIsSelectMode(true);
+    },
     toggleSelectMode: () =>
       setIsSelectMode((prev) => {
 
-        if (prev) setSelected(emptySelection());
+        if (prev) {
+          setSelected(emptySelection());
+          setAllMatching(null);
+        }
         return !prev;
       }),
     clear: () => {
       setSelected(emptySelection());
+      setAllMatching(null);
       setIsSelectMode(false);
     },
     generate: () =>

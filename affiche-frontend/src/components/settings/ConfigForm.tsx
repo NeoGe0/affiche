@@ -147,7 +147,7 @@ export function ConfigForm({
       <div className={styles.field}>
         <div className={styles.labelRow}>
           <label className={styles.label} htmlFor={`${serviceName}-token`}>
-            API Token
+            API token
           </label>
           {getKeyUrl && (
             <a
@@ -212,11 +212,11 @@ export function ConfigForm({
             onClick={handleValidate}
             disabled={!canValidate || validateStatus === 'validating'}
           >
-            {validateStatus === 'validating' && <Loader size={16} className={styles.spinning} />}
+            {validateStatus === 'validating' && <Loader size={16} className="spin" />}
             {validateStatus === 'success' && <CheckCircle size={16} />}
             {validateStatus === 'error' && <XCircle size={16} />}
             {validateStatus === 'idle' && <CheckCircle size={16} />}
-            {validateStatus === 'validating' ? 'Validating...' :
+            {validateStatus === 'validating' ? 'Validating…' :
              validateStatus === 'success' ? 'Valid!' :
              validateStatus === 'error' ? 'Invalid' : 'Validate'}
           </button>
@@ -229,7 +229,7 @@ export function ConfigForm({
             title={!canSave ? 'Validate credentials first' : undefined}
           >
             <Save size={16} />
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving ? 'Saving…' : 'Save'}
           </button>
         )}
       </div>

@@ -9,12 +9,12 @@
 .group {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 16px;
 }
 
 .groupTitle {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -35,14 +35,14 @@
 }
 
 .hint {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
   text-align: right;
   line-height: 1.3;
 }
 
 .label {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
 }
 
@@ -50,7 +50,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
   cursor: pointer;
 }
@@ -77,9 +77,9 @@
   padding: 8px 32px 8px 10px;
   background-color: var(--bg-tertiary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
@@ -120,7 +120,7 @@
 }
 
 .sliderValue {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
   min-width: 44px;
   text-align: right;
@@ -136,7 +136,7 @@
   width: 36px;
   height: 32px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 2px;
   cursor: pointer;
   background: transparent;
@@ -148,7 +148,7 @@
 }
 
 .colorValue {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
   font-family: monospace;
   text-transform: uppercase;
@@ -158,4 +158,64 @@
   .sliderWrapper {
     max-width: none;
   }
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+.field .row {
+  margin-bottom: 4px;
+}
+
+.help {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.fineTune {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.fineTuneSummary,
+.groupSummary {
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-secondary);
+  list-style: none;
+}
+
+.fineTuneSummary::-webkit-details-marker,
+.groupSummary::-webkit-details-marker {
+  display: none;
+}
+
+.fineTuneSummary::before,
+.groupSummary::before {
+  content: '▸ ';
+  color: var(--text-muted);
+}
+
+.fineTune[open] > .fineTuneSummary::before,
+.foldedGroup[open] > .groupSummary::before {
+  content: '▾ ';
+}
+
+.fineTune[open] > .fineTuneSummary {
+  margin-bottom: 12px;
+}
+
+.groupSummary {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: var(--text-sm);
+}
+
+.foldedGroup[open] > .groupSummary {
+  margin-bottom: 12px;
 }

@@ -32,6 +32,7 @@ SORTABLE_COLUMNS = {
     'year': LibraryItemEntity.year,
     'release_date': LibraryItemEntity.release_date,
     'added_at': LibraryItemEntity.added_at,
+    'poster_generated_at': LibraryItemEntity.poster_generated_at,
     'resolution': LibraryItemEntity.media_height,
     'codec': LibraryItemEntity.video_codec,
     'size': LibraryItemEntity.media_size_bytes,
@@ -45,6 +46,10 @@ def _pending_clause():
 
 def _error_clause():
     return LibraryItemEntity.error_message.is_not(None)
+
+def _ready_clause():
+    return and_(LibraryItemEntity.processed.is_(True), LibraryItemEntity.error_message.is_(None),
+                LibraryItemEntity.poster_uploaded_at.is_(None))
 
 def _attempted_clause():
     return or_(LibraryItemEntity.processed.is_(True), _error_clause())
@@ -67,6 +72,7 @@ def _bucket_sums():
         'errors': func.sum(case((_error_clause(), 1), else_=0)),
         'locked': func.sum(case((LibraryItemEntity.locked.is_(True), 1), else_=0)),
         'uploaded': func.sum(case((LibraryItemEntity.poster_uploaded_at.is_not(None), 1), else_=0)),
+        'ready': func.sum(case((_ready_clause(), 1), else_=0)),
     }
 
 def _stats_from_row(row) -> LibraryItemStats:
@@ -215,6 +221,10 @@ class AlchemyLibraryConnector:
     def find_items(self, search: LibraryItemSearch) -> List[LibraryItem]:
         query = self._paged(self._ordered(self._search_query(search), search), search)
         return [LibraryItem.model_validate(item) for item in query.all()]
+
+    def find_item_ids(self, search: LibraryItemSearch) -> List[int]:
+        query = self._ordered(self._search_query(search), search).with_entities(LibraryItemEntity.id)
+        return [row[0] for row in query.all()]
 
     def count_items(self, search: LibraryItemSearch) -> int:
         return self._search_query(search).count()

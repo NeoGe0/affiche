@@ -178,7 +178,7 @@ describe('MediaServersSettings saving', () => {
     const user = await openMoviesSettings();
 
     await user.click(screen.getByRole('checkbox', { name: 'Enabled' }));
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     await waitFor(() => expect(updateLibrarySettings).toHaveBeenCalledTimes(1));
     const [serverId, libraryId, body] = updateLibrarySettings.mock.calls[0];
@@ -206,7 +206,7 @@ describe('MediaServersSettings saving', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Enabled' }));
     expect(screen.getByText('Unsaved')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     await waitFor(() => expect(screen.queryByText('Unsaved')).not.toBeInTheDocument());
   });
@@ -216,11 +216,11 @@ describe('MediaServersSettings saving', () => {
     const user = await openMoviesSettings();
 
     await user.click(screen.getByRole('checkbox', { name: 'Enabled' }));
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Library is locked');
     expect(screen.getByText('Unsaved')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Save Changes/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /Save changes/ })).toBeEnabled();
   });
 
   it('saves every dirty library of the card in one go', async () => {
@@ -230,7 +230,7 @@ describe('MediaServersSettings saving', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Enabled' }));
     await user.click(screen.getByRole('button', { name: /Shows/ }));
     await user.click(screen.getByRole('checkbox', { name: 'Track episodes' }));
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     await waitFor(() => expect(updateLibrarySettings).toHaveBeenCalledTimes(2));
     expect(updateLibrarySettings.mock.calls.map((c) => c[1]).sort()).toEqual([10, 11]);
@@ -243,7 +243,7 @@ describe('MediaServersSettings deletion', () => {
     const user = await openServerSettings();
 
     await user.click(screen.getByRole('button', { name: 'More actions' }));
-    await user.click(screen.getByRole('menuitem', { name: 'Delete Server' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Delete server' }));
 
     return user;
   };
@@ -255,7 +255,7 @@ describe('MediaServersSettings deletion', () => {
     await user.click(screen.getByRole('button', { name: 'Delete' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Server is in use');
-    expect(screen.getByText('Delete Server')).toBeInTheDocument();
+    expect(screen.getByText('Delete server')).toBeInTheDocument();
   });
 
   it('closes the confirmation and refreshes once the delete lands', async () => {
@@ -278,7 +278,7 @@ describe('MediaServersSettings artwork languages', () => {
     const user = await openServerSettings();
 
     await user.click(screen.getByRole('button', { name: 'Move English up' }));
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     await waitFor(() => expect(setLanguageOrder).toHaveBeenCalledWith(1, ['en', '', 'fr']));
 
@@ -291,10 +291,10 @@ describe('MediaServersSettings artwork languages', () => {
     const user = await openServerSettings();
 
     await user.click(screen.getByRole('button', { name: 'Move English up' }));
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Server unreachable');
-    expect(screen.getByRole('button', { name: /Save Changes/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Save changes/ })).toBeInTheDocument();
   });
 });
 
@@ -312,7 +312,7 @@ describe('MediaServersSettings poster fallbacks', () => {
 
     const user = await openServerCard();
     await user.click(screen.getByRole('checkbox', { name: /Style the media server's own poster/ }));
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     await waitFor(() =>
       expect(setPosterFallback).toHaveBeenCalledWith(1, {
@@ -327,7 +327,7 @@ describe('MediaServersSettings poster fallbacks', () => {
     await user.click(
       screen.getByRole('checkbox', { name: /Use posters that already have a title as-is/ })
     );
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     await waitFor(() =>
       expect(setPosterFallback).toHaveBeenCalledWith(1, {
@@ -342,10 +342,10 @@ describe('MediaServersSettings poster fallbacks', () => {
 
     const user = await openServerCard();
     await user.click(screen.getByRole('checkbox', { name: /Style the media server's own poster/ }));
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Server unreachable');
-    expect(screen.getByRole('button', { name: /Save Changes/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Save changes/ })).toBeInTheDocument();
   });
 });
 
@@ -387,7 +387,7 @@ describe('MediaServersSettings auto-sync interval', () => {
     expect(screen.getByRole('spinbutton', { name: 'Check every' })).toHaveValue(6);
 
     await user.selectOptions(screen.getByRole('combobox', { name: 'Interval unit' }), 'days');
-    await user.click(screen.getByRole('button', { name: /Save Changes/ }));
+    await user.click(screen.getByRole('button', { name: /Save changes/ }));
 
     await waitFor(() => expect(updateLibrarySettings).toHaveBeenCalled());
     const body = updateLibrarySettings.mock.calls[0][2];

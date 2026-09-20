@@ -8,7 +8,7 @@ import type {
   DashboardLibrary, DashboardTask, ItemStats, MediaServerType, ProviderShare,
 } from '../types';
 import {
-  byCoverageAscending, coveragePercent, providerBarPercent, taskLabel, taskTimestamp,
+  byCoverageAscending, coveragePercent, providerBarPercent, taskLabel, taskStatusLabel, taskTimestamp,
 } from './dashboardStats';
 import styles from './DashboardPage.module.css';
 
@@ -135,9 +135,9 @@ export function DashboardPage({ onOpenLibrary }: DashboardPageProps) {
 function StatTiles({ totals }: { totals: ItemStats }) {
   const tiles = [
     { label: 'Items', value: totals.total, icon: <Image size={16} />, tone: '' },
-    { label: 'Posters generated', value: totals.processed, icon: <CheckCircle size={16} />, tone: styles.success },
-    { label: 'Awaiting generation', value: totals.unprocessed, icon: <Image size={16} />, tone: '' },
-    { label: 'Uploaded', value: totals.uploaded, icon: <Upload size={16} />, tone: '' },
+    { label: 'With a poster', value: totals.processed, icon: <CheckCircle size={16} />, tone: styles.success },
+    { label: 'No poster yet', value: totals.unprocessed, icon: <Image size={16} />, tone: '' },
+    { label: 'On server', value: totals.uploaded, icon: <Upload size={16} />, tone: '' },
     { label: 'Failed', value: totals.errors, icon: <AlertTriangle size={16} />, tone: styles.danger },
     { label: 'Locked', value: totals.locked, icon: <Lock size={16} />, tone: '' },
   ];
@@ -211,14 +211,14 @@ function RecentActivity({ tasks }: { tasks: DashboardTask[] }) {
   return (
     <section className={styles.section}>
       <h2 className={styles.sectionTitle}>Recent activity</h2>
-      <p className={styles.sectionHint}>Since the server last started.</p>
+      <p className={styles.sectionHint}>The latest runs, kept across restarts.</p>
       {tasks.length === 0 ? (
         <p className={styles.empty}>Nothing has run yet.</p>
       ) : (
         <ul className={styles.tasks}>
           {tasks.map((task) => (
             <li key={task.task_id} className={styles.task}>
-              <span className={`${styles.taskStatus} ${styles[task.status] ?? ''}`}>{task.status}</span>
+              <span className={`${styles.taskStatus} ${styles[task.status] ?? ''}`}>{taskStatusLabel(task.status)}</span>
               <span className={styles.taskName}>{taskLabel(task)}</span>
               <span className={styles.taskTime}>{formatDateTime(taskTimestamp(task))}</span>
             </li>

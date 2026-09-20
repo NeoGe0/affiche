@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { errorMessage } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { AfficheLogo } from '../components/common';
+import { AfficheLogo, PasswordRules, passwordRules } from '../components/common';
 import styles from './AuthPage.module.css';
 
 export function SetupPage() {
@@ -11,6 +11,7 @@ export function SetupPage() {
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const rules = passwordRules(password, confirm);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -79,7 +80,8 @@ export function SetupPage() {
               required
             />
           </div>
-          <button className={styles.submit} type="submit" disabled={submitting}>
+          <PasswordRules rules={rules} />
+          <button className={styles.submit} type="submit" disabled={submitting || !rules.every((rule) => rule.met)}>
             {submitting ? 'Creating…' : 'Create account'}
           </button>
         </form>

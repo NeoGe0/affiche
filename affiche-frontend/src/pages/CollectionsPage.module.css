@@ -13,13 +13,13 @@
 }
 
 .breadcrumb {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
 }
 
 .title {
   margin-top: 2px;
-  font-size: 1.5rem;
+  font-size: var(--text-3xl);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -36,16 +36,20 @@
   gap: 8px;
   padding: 7px 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-muted);
   background-color: var(--bg-secondary);
+}
+
+.searchBox:focus-within {
+  border-color: var(--accent);
 }
 
 .searchBox input {
   width: 180px;
   border: none;
   outline: none;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
   background: transparent;
 }
@@ -56,19 +60,19 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   font-weight: 500;
   transition: background-color 0.15s, color 0.15s;
 }
 
 .primary {
   color: var(--text-on-fill);
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
 }
 
 .primary:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
 }
 
 .secondary {
@@ -105,14 +109,14 @@
 }
 
 .empty h2 {
-  font-size: 1.1rem;
+  font-size: var(--text-xl);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .empty p {
   max-width: 44ch;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-secondary);
 }
 
@@ -122,6 +126,6 @@
 
 .taskStatus {
   margin: 4px 0 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
 }

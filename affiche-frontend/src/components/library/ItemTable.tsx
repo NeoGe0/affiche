@@ -4,6 +4,7 @@ import { useInfiniteScroll, usePosterImage } from '../../hooks';
 import type { LibraryItem, SortState } from '../../types';
 import { failureTooltip, formatDate, formatDateTime, formatFileSize, posterSource } from './format';
 import styles from './ItemTable.module.css';
+import { POSTER_STATE_LABEL, posterState } from './posterState';
 
 interface ItemTableProps {
   items: LibraryItem[];
@@ -18,7 +19,9 @@ interface ItemTableProps {
   sort: SortState;
   onSortChange: (sort: SortState) => void;
 
-  onToggleSelect?: (item: LibraryItem) => void;
+  onToggleSelect?: (item: LibraryItem, extend: boolean) => void;
+
+  emptyMessage?: { title: string; hint: string };
   onToggleSelectAll?: () => void;
   isSelected?: (item: LibraryItem) => boolean;
 
@@ -72,17 +75,20 @@ function PosterThumb({ item }: { item: LibraryItem }) {
 }
 
 function StatusCell({ item }: { item: LibraryItem }) {
-  if (item.error_message) {
+  const state = posterState(item);
+  if (state === 'failed') {
+    const failure = failureTooltip(item);
     return (
-      <span className={`${styles.statusPill} ${styles.failed}`} title={failureTooltip(item)}>
-        <AlertTriangle size={14} /> Failed
+      <span className={`${styles.statusPill} ${styles.failed}`} title={failure}>
+        <AlertTriangle size={14} /> {POSTER_STATE_LABEL.failed}
+        {failure && <span className="visually-hidden">: {failure}</span>}
       </span>
     );
   }
-  if (item.processed) {
-    return <span className={`${styles.statusPill} ${styles.processed}`}><CheckCircle size={14} /> Processed</span>;
+  if (state === 'pending') {
+    return <span className={`${styles.statusPill} ${styles.pending}`}><Circle size={14} /> {POSTER_STATE_LABEL.pending}</span>;
   }
-  return <span className={`${styles.statusPill} ${styles.pending}`}><Circle size={14} /> Pending</span>;
+  return <span className={`${styles.statusPill} ${styles.processed}`}><CheckCircle size={14} /> {POSTER_STATE_LABEL[state]}</span>;
 }
 
 export function ItemTable({
@@ -97,6 +103,7 @@ export function ItemTable({
   sort,
   onSortChange,
   onToggleSelect,
+  emptyMessage,
   onToggleSelectAll,
   isSelected,
   selectMode = false,
@@ -106,7 +113,9 @@ export function ItemTable({
   const isTrash = variant === 'trash';
   const loadMoreRef = useInfiniteScroll({ hasMore, isLoadingMore, onLoadMore });
 
-  const rowClick = selectMode && onToggleSelect ? onToggleSelect : onItemClick;
+  const rowClick = selectMode && onToggleSelect
+    ? (item: LibraryItem, extend: boolean) => onToggleSelect(item, extend)
+    : onItemClick && ((item: LibraryItem) => onItemClick(item));
 
   const handleSort = (sortKey?: string) => {
     if (!sortKey) return;
@@ -120,8 +129,8 @@ export function ItemTable({
   if (isLoading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.spinner} />
-        <span>Loading items...</span>
+        <div className={`${styles.spinner} spin`} />
+        <span>Loading items…</span>
       </div>
     );
   }
@@ -136,8 +145,8 @@ export function ItemTable({
           </>
         ) : (
           <>
-            <p>No items found</p>
-            <p className="text-muted">Sync your library to see items here</p>
+            <p>{emptyMessage?.title ?? 'No items yet'}</p>
+            <p className="text-muted">{emptyMessage?.hint ?? 'Sync this library to fetch its items from the media server.'}</p>
           </>
         )}
       </div>
@@ -203,14 +212,14 @@ export function ItemTable({
             <tr
               key={`${item.library_id}-${item.id}`}
               className={`${styles.row} ${isTrash ? styles.trashRow : ''} ${isSelected?.(item) ? styles.selectedRow : ''}`}
-              onClick={rowClick ? () => rowClick(item) : undefined}
+              onClick={rowClick ? (e) => rowClick(item, e.shiftKey) : undefined}
             >
               {onToggleSelect && (
                 <td className={styles.colSelect} onClick={(e) => e.stopPropagation()}>
                   <input
                     type="checkbox"
                     checked={!!isSelected?.(item)}
-                    onChange={() => onToggleSelect(item)}
+                    onChange={(e) => onToggleSelect(item, (e.nativeEvent as MouseEvent).shiftKey === true)}
                     aria-label={`Select ${item.title}`}
                   />
                 </td>
@@ -222,7 +231,7 @@ export function ItemTable({
                   <button
                     type="button"
                     className={styles.titleButton}
-                    onClick={(e) => { e.stopPropagation(); rowClick(item); }}
+                    onClick={(e) => { e.stopPropagation(); rowClick(item, e.shiftKey); }}
                   >
                     {item.title}
                   </button>
@@ -278,8 +287,8 @@ export function ItemTable({
       <div ref={loadMoreRef} className={styles.loadMoreTrigger}>
         {isLoadingMore && (
           <div className={styles.loadingMore}>
-            <div className={styles.spinner} />
-            <span>Loading more...</span>
+            <div className={`${styles.spinner} spin`} />
+            <span>Loading more…</span>
           </div>
         )}
       </div>

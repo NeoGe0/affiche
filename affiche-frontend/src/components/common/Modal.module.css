@@ -5,13 +5,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: var(--z-modal);
   padding: 24px;
 }
 
 .modal {
   background-color: var(--bg-secondary);
-  border-radius: 12px;
+  border-radius: var(--radius-2xl);
   max-width: 400px;
   width: 100%;
   max-height: calc(100vh - 48px);
@@ -76,7 +76,7 @@
   margin: 0;
   margin-right: auto;
   align-self: center;
-  font-size: 0.85rem;
+  font-size: var(--text-md);
 }
 
 .footerNoteError {
@@ -93,7 +93,7 @@
 }
 
 .backdrop.backdropElevated {
-  z-index: 300;
+  z-index: var(--z-modal-elevated);
   background-color: var(--backdrop-elevated);
 }
 
@@ -114,7 +114,7 @@
   right: 12px;
   color: var(--text-muted);
   padding: 6px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: all 0.15s;
 }
 
@@ -144,7 +144,7 @@
 }
 
 .title {
-  font-size: 1.05rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
@@ -152,6 +152,13 @@
 
 .description {
   margin: 4px 0 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal,
+  .modal.drawer {
+    animation: none;
+  }
 }

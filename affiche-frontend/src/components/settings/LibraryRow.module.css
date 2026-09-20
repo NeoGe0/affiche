@@ -1,7 +1,7 @@
 .row {
   background-color: var(--bg-tertiary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .rowDirty {
@@ -31,13 +31,13 @@
 }
 
 .dirtyBadge {
-  font-size: 0.7rem;
+  font-size: var(--text-2xs);
   font-weight: 500;
   color: var(--accent);
 }
 
 .count {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
@@ -54,7 +54,7 @@
 }
 
 .intervalLabel {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-secondary);
 }
 
@@ -63,8 +63,8 @@
   background: var(--bg-primary);
   color: var(--text-primary);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
 }
 
 .intervalNumber {
@@ -79,7 +79,7 @@
 }
 
 .fieldLabel {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 500;
 }
 
@@ -89,8 +89,8 @@
   background: var(--bg-primary);
   color: var(--text-primary);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
 }
 
 .fieldHint {

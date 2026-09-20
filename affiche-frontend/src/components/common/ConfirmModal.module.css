@@ -21,7 +21,7 @@
 }
 
 .title {
-  font-size: 1.25rem;
+  font-size: var(--text-2xl);
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 8px;
@@ -29,7 +29,7 @@
 
 .message {
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   line-height: 1.5;
 }
 
@@ -39,7 +39,7 @@
   justify-content: center;
   gap: 8px;
   margin-top: 16px;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-secondary);
   cursor: pointer;
 }
@@ -51,8 +51,8 @@
 .button {
   flex: 1;
   padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   font-weight: 500;
   transition: all 0.15s;
 }
@@ -67,19 +67,19 @@
 }
 
 .button.confirm {
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
 }
 
 .button.confirm:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
 }
 
 .button.danger {
-  background-color: var(--error);
+  background-color: var(--error-fill);
   color: var(--text-on-fill);
 }
 
 .button.danger:hover {
-  background-color: var(--error-hover);
+  background-color: var(--error-fill-hover);
 }

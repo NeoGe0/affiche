@@ -37,6 +37,8 @@ interface HeaderProps {
 
   filterCounts?: LibraryItemCounts;
 
+  pendingCount?: number;
+
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
 
@@ -66,6 +68,7 @@ export function Header({
   provider,
   onProviderChange,
   filterCounts,
+  pendingCount,
   viewMode = 'grid',
   onViewModeChange,
   selectMode = false,
@@ -94,6 +97,9 @@ export function Header({
       disabled: isLoading, danger: true },
   ];
 
+  const hasListingControls = !!(onSearchChange || onViewModeChange || onToggleSelectMode
+    || (!isTrash && onFilterChange && onProviderChange));
+
   return (
     <header className={styles.header}>
       <div className={styles.titleSection}>
@@ -112,13 +118,14 @@ export function Header({
         {
 }
         {isLoading && !showProgressBar && statusMessage && (
-          <div className={styles.status}>
-            <Loader size={14} className={styles.spinning} />
+          <div className={styles.status} role="status">
+            <Loader size={14} className="spin" />
             <span>{statusMessage}</span>
           </div>
         )}
       </div>
 
+      {hasListingControls && (
       <div className={styles.centerSection}>
         {!isTrash && onFilterChange && onProviderChange && (
           <FilterMenu
@@ -136,7 +143,8 @@ export function Header({
             <input
               type="text"
               className={styles.searchInput}
-              placeholder="Search items..."
+              placeholder="Search items…"
+              aria-label={`Search ${title}`}
               value={searchValue}
               onChange={(e) => onSearchChange(e.target.value)}
             />
@@ -145,6 +153,7 @@ export function Header({
                 className={styles.clearSearch}
                 onClick={() => onSearchChange('')}
                 title="Clear search"
+                aria-label="Clear search"
               >
                 <X size={14} />
               </button>
@@ -185,6 +194,7 @@ export function Header({
           </button>
         )}
       </div>
+      )}
 
       <div className={styles.actions}>
         {isTrash ? (
@@ -209,9 +219,9 @@ export function Header({
               title={runningLabel ?? 'Generate decorated posters'}
             >
               {runningLabel
-                ? <Loader size={16} className={styles.spinning} />
+                ? <Loader size={16} className="spin" />
                 : <Image size={16} />}
-              <span>{runningLabel ?? 'Generate Posters'}</span>
+              <span>{runningLabel ?? (pendingCount ? `Generate ${pendingCount.toLocaleString()} posters` : 'Generate posters')}</span>
             </button>
 
             {isLoading && onStopTask ? (
@@ -232,6 +242,12 @@ export function Header({
           </>
         )}
       </div>
+
+      {
+}
+      <span className={styles.srOnly} aria-live="polite">
+        {showProgressBar ? `${runningTaskVerb(taskKind)} ${title}` : ''}
+      </span>
 
       {
 }

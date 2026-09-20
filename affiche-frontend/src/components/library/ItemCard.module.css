@@ -1,9 +1,32 @@
 .card {
+  position: relative;
   background-color: var(--bg-card);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card.openable {
+  cursor: pointer;
+}
+
+.open {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.open:focus-visible {
+  outline: none;
+}
+
+.card:has(.open:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .card:hover {
@@ -44,12 +67,6 @@
   opacity: 1;
 }
 
-.status {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-}
-
 .card.selected {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
@@ -62,7 +79,7 @@
   z-index: 1;
   display: flex;
   padding: 5px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background-color: var(--scrim-control);
   opacity: 0;
   transition: opacity 0.15s;
@@ -90,7 +107,9 @@
 }
 
 .card.trash:hover .poster,
-.card.trash:hover .info {
+.card.trash:hover .info,
+.card.trash:focus-within .poster,
+.card.trash:focus-within .info {
   opacity: 1;
   filter: none;
 }
@@ -103,8 +122,8 @@
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-on-fill);
   background-color: var(--scrim-control);
@@ -112,52 +131,14 @@
   transition: opacity 0.15s, background-color 0.15s;
 }
 
-.card.trash:hover .restoreButton {
+.card.trash:hover .restoreButton,
+.card.trash:focus-within .restoreButton,
+.restoreButton:focus-visible {
   opacity: 1;
 }
 
 .restoreButton:hover {
-  background-color: var(--accent);
-}
-
-.processed {
-  color: var(--success);
-}
-
-.pending {
-  color: var(--text-muted);
-}
-
-.failed {
-  color: var(--error);
-}
-
-.badges {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-
-  max-width: calc(100% - 48px);
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 4px;
-}
-
-.badge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-on-fill);
-  box-shadow: var(--shadow-sm);
-}
-
-.failedBadge {
-  background-color: var(--error);
+  background-color: var(--accent-fill);
 }
 
 .lockButton {
@@ -168,7 +149,7 @@
   display: flex;
   padding: 6px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-on-fill);
   background-color: var(--scrim-control);
   cursor: pointer;
@@ -183,7 +164,7 @@
 }
 
 .lockButton:hover {
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
 }
 
 .lockButton:disabled {
@@ -192,7 +173,7 @@
 }
 
 .lockButtonOn {
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
 }
 
 .info {
@@ -200,7 +181,7 @@
 }
 
 .title {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--text-primary);
   white-space: nowrap;
@@ -209,7 +190,46 @@
   margin-bottom: 4px;
 }
 
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  min-width: 0;
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stateDot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+}
+
+.uploaded .stateDot { background-color: var(--success); }
+.ready .stateDot { background-color: var(--accent); }
+.pending .stateDot { background-color: transparent; box-shadow: inset 0 0 0 1.5px var(--text-muted); }
+.failed .stateDot { background-color: var(--error); }
+
+.state.failed {
+  color: var(--error);
+}
+
 .year {
-  font-size: 0.8rem;
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { DashboardTask, ItemStats } from '../types';
 import {
-  byCoverageAscending, coveragePercent, providerBarPercent, taskLabel, taskTimestamp,
+  byCoverageAscending, coveragePercent, providerBarPercent, taskLabel, taskStatusLabel, taskTimestamp,
 } from './dashboardStats';
 
 const stats = (overrides: Partial<ItemStats> = {}): ItemStats => ({
@@ -100,5 +100,16 @@ describe('taskTimestamp', () => {
 
   it('is null when neither is known', () => {
     expect(taskTimestamp(task())).toBeNull();
+  });
+});
+
+describe('taskStatusLabel', () => {
+  it('puts the backend statuses into words', () => {
+    expect(taskStatusLabel('completed')).toBe('Done');
+    expect(taskStatusLabel('cancelled')).toBe('Stopped');
+  });
+
+  it('shows a status it does not know as sent', () => {
+    expect(taskStatusLabel('paused')).toBe('paused');
   });
 });

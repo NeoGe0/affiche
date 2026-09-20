@@ -5,7 +5,7 @@ from typing import Optional, List
 import requests
 from tvdb_v4_official import TVDB
 
-from affiche.external.poster.provider.base_provider import BaseUrlMode, ExternalProvider
+from affiche.external.poster.provider.base_provider import BaseUrlMode, ExternalProvider, PosterImage
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ LANG_2_TO_3 = {
     "en": "eng", "fr": "fra", "de": "deu", "es": "spa", "it": "ita",
     "pt": "por", "nl": "nld", "ja": "jpn", "ko": "kor", "zh": "zho",
 }
+LANG_3_TO_2 = {three: two for two, three in LANG_2_TO_3.items()}
 
 class TVDBClient(ExternalProvider):
 
@@ -154,7 +155,7 @@ class TVDBClient(ExternalProvider):
             artworks.sort(key=lambda x: (x.get("language") is not None, -x.get("score", 0)))
 
             poster_urls = [
-                {"url": artwork["image"], "score": artwork.get("score", 0)}
+                {"url": self._image(artwork), "score": artwork.get("score", 0)}
                 for artwork in artworks
                 if artwork.get("image")
             ]
@@ -176,7 +177,7 @@ class TVDBClient(ExternalProvider):
                 return []
 
             poster_urls = [
-                {"url": artwork["image"], "score": artwork.get("score", 0)}
+                {"url": self._image(artwork), "score": artwork.get("score", 0)}
                 for artwork in artworks.get('artworks', [])
                 if artwork.get("image")
             ]
@@ -209,7 +210,7 @@ class TVDBClient(ExternalProvider):
                 return []
 
             poster_urls = [
-                {"url": artwork["image"], "score": artwork.get("score", 0)}
+                {"url": self._image(artwork), "score": artwork.get("score", 0)}
                 for artwork in artworks
                 if artwork.get("image")
             ]
@@ -219,6 +220,15 @@ class TVDBClient(ExternalProvider):
         except Exception as e:
             logger.error(f"Error fetching TVDB season posters for {tvdb_id} S{season_number}: {e}")
             return []
+
+    @staticmethod
+    def _image(artwork: dict) -> PosterImage:
+        code = artwork.get("language")
+        return PosterImage(artwork["image"],
+                           language=LANG_3_TO_2.get(code, code) if code else None,
+                           textless=code is None,
+                           width=artwork.get("width"),
+                           height=artwork.get("height"))
 
     def _get_provider_media_type(self, media_type: str) -> str:
         return "movie" if media_type == "movie" else "series"

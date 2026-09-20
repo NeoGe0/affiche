@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Upload, Trash2, Check, Loader, Save, ArrowLeft, Clapperboard, X } from 'lucide-react';
 import { errorMessage, settingsApi, fontsApi } from '../../api';
 import { useToast } from '../../context/ToastContext';
-import { useFonts, invalidatePosterConfig, usePreviewSubject } from '../../hooks';
+import { useFonts, invalidatePosterConfig, usePreviewSubject, useUnsavedChangesGuard } from '../../hooks';
 import { PosterPreview, PosterStyleControls, fontBaseName } from '../image';
 import { ConfirmModal } from '../common';
 import { PreviewSubjectModal } from './PreviewSubjectModal';
@@ -183,15 +183,37 @@ export function StyleSettings() {
     }
   };
 
+  const hasUnsavedEdits = !!saved && (
+    JSON.stringify(saved.overlay_options) !== JSON.stringify(overlay) ||
+    JSON.stringify(saved.text_options) !== JSON.stringify(text) ||
+    JSON.stringify(saved.generation_options) !== JSON.stringify(gen)
+  );
+
+  const unsavedGuard = useUnsavedChangesGuard(hasUnsavedEdits, (from, to) =>
+    from.pathname === to.pathname
+    && new URLSearchParams(from.search).get('tab') === new URLSearchParams(to.search).get('tab'));
+  const unsavedDialog = unsavedGuard.isAsking && (
+    <ConfirmModal
+      title="Leave without saving?"
+      message="Your changes to the style defaults are not saved. Leaving now discards them."
+      confirmLabel="Discard changes"
+      cancelLabel="Keep editing"
+      variant="danger"
+      onConfirm={unsavedGuard.leave}
+      onCancel={unsavedGuard.stay}
+    />
+  );
+
   if (section === 'profiles') {
     return (
       <section className={sectionStyles.section}>
         <button className={styles.backLink} onClick={() => goToSection('main')}>
           <ArrowLeft size={16} />
-          Style Options
+          Style options
         </button>
 
         <StyleProfilesPanel />
+        {unsavedDialog}
       </section>
     );
   }
@@ -199,10 +221,11 @@ export function StyleSettings() {
   if (!overlay || !text || !gen) {
     return (
       <section className={sectionStyles.section}>
-        <h2 className={sectionStyles.sectionTitle}>Style Options</h2>
+        <h2 className={sectionStyles.sectionTitle}>Style options</h2>
         <div className={sectionStyles.emptyState}>
           {loadFailed ? 'Could not load the style options.' : 'Loading style options…'}
         </div>
+        {unsavedDialog}
       </section>
     );
   }
@@ -212,7 +235,7 @@ export function StyleSettings() {
       <section className={sectionStyles.section}>
         <button className={styles.backLink} onClick={() => goToSection('main')}>
           <ArrowLeft size={16} />
-          Style Options
+          Style options
         </button>
 
         <div className={sectionStyles.sectionHeader}>
@@ -223,7 +246,7 @@ export function StyleSettings() {
             </p>
           </div>
           <button className={sectionStyles.saveButton} onClick={handleUploadClick} disabled={isUploading}>
-            {isUploading ? <Loader size={16} className={styles.spinning} /> : <Upload size={16} />}
+            {isUploading ? <Loader size={16} className="spin" /> : <Upload size={16} />}
             {isUploading ? 'Uploading…' : 'Upload font'}
           </button>
           <input
@@ -287,6 +310,7 @@ export function StyleSettings() {
             onCancel={() => setDeleteTarget(null)}
           />
         )}
+        {unsavedDialog}
       </section>
     );
   }
@@ -299,7 +323,7 @@ export function StyleSettings() {
 
   return (
     <section className={sectionStyles.section}>
-      <h2 className={sectionStyles.sectionTitle}>Style Options</h2>
+      <h2 className={sectionStyles.sectionTitle}>Style options</h2>
       {
 }
       <p className={sectionStyles.sectionDescription}>
@@ -307,7 +331,7 @@ export function StyleSettings() {
         a style of its own.
       </p>
 
-      <h3 className={styles.subTitle}>Generation Defaults</h3>
+      <h3 className={styles.subTitle}>Generation defaults</h3>
       <p className={styles.subDescription}>
         These defaults are applied to every poster during generation.
       </p>
@@ -359,8 +383,8 @@ export function StyleSettings() {
 
           <div className={styles.footer}>
             <button className={sectionStyles.saveButton} onClick={handleSave} disabled={isSaving || !isDirty}>
-              {isSaving ? <Loader size={16} className={styles.spinning} /> : <Save size={16} />}
-              {isSaving ? 'Saving…' : 'Save Defaults'}
+              {isSaving ? <Loader size={16} className="spin" /> : <Save size={16} />}
+              {isSaving ? 'Saving…' : 'Save defaults'}
             </button>
             <button className={styles.setDefaultButton} onClick={handleReset} disabled={!isDirty || isSaving}>
               Reset
@@ -376,6 +400,7 @@ export function StyleSettings() {
           onSelect={preview.choose}
         />
       )}
+      {unsavedDialog}
     </section>
   );
 }

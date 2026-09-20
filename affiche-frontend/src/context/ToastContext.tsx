@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -12,17 +13,27 @@ import styles from './ToastContext.module.css';
 
 export type ToastType = 'error' | 'success' | 'info';
 
+interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 interface Toast {
   id: number;
   type: ToastType;
   title?: string;
   message: string;
+  action?: ToastAction;
+
+  duration: number;
 }
 
 interface ShowToastOptions {
   title?: string;
 
   duration?: number;
+
+  action?: ToastAction;
 }
 
 interface ToastContextValue {
@@ -56,12 +67,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const show = useCallback((type: ToastType, message: string, options?: ShowToastOptions) => {
     const id = nextId.current++;
-    setToasts((prev) => [...prev, { id, type, message, title: options?.title }]);
     const duration = options?.duration ?? DEFAULT_DURATION[type];
-    if (duration > 0) {
-      window.setTimeout(() => remove(id), duration);
-    }
-  }, [remove]);
+    setToasts((prev) => [...prev, { id, type, message, title: options?.title, action: options?.action, duration }]);
+  }, []);
 
   const error = useCallback((m: string, o?: ShowToastOptions) => show('error', m, o), [show]);
   const success = useCallback((m: string, o?: ShowToastOptions) => show('success', m, o), [show]);
@@ -76,27 +84,54 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <div className={styles.container} role="region" aria-label="Notifications">
-        {toasts.map((toast) => {
-          const Icon = ICONS[toast.type];
-          return (
-            <div key={toast.id} className={`${styles.toast} ${styles[toast.type]}`} role="alert">
-              <Icon size={18} className={styles.icon} />
-              <div className={styles.body}>
-                {toast.title && <div className={styles.title}>{toast.title}</div>}
-                <div className={styles.message}>{toast.message}</div>
-              </div>
-              <button
-                className={styles.close}
-                onClick={() => remove(toast.id)}
-                aria-label="Dismiss"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          );
-        })}
+        {toasts.map((toast) => (
+          <ToastItem key={toast.id} toast={toast} onRemove={remove} />
+        ))}
       </div>
     </ToastContext.Provider>
+  );
+}
+
+function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: number) => void }) {
+  const [paused, setPaused] = useState(false);
+  const Icon = ICONS[toast.type];
+  const onDismiss = () => onRemove(toast.id);
+
+  useEffect(() => {
+    if (paused || toast.duration <= 0) return;
+    const timer = window.setTimeout(() => onRemove(toast.id), toast.duration);
+    return () => window.clearTimeout(timer);
+  }, [paused, toast.duration, toast.id, onRemove]);
+
+  return (
+    <div
+      className={`${styles.toast} ${styles[toast.type]}`}
+      role={toast.type === 'error' ? 'alert' : 'status'}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      <Icon size={18} className={styles.icon} />
+      <div className={styles.body}>
+        {toast.title && <div className={styles.title}>{toast.title}</div>}
+        <div className={styles.message}>{toast.message}</div>
+        {toast.action && (
+          <button
+            className={styles.action}
+            onClick={() => {
+              toast.action?.onClick();
+              onDismiss();
+            }}
+          >
+            {toast.action.label}
+          </button>
+        )}
+      </div>
+      <button className={styles.close} onClick={onDismiss} aria-label="Dismiss">
+        <X size={14} />
+      </button>
+    </div>
   );
 }
 

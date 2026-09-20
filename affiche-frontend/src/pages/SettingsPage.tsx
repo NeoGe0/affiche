@@ -79,7 +79,7 @@ export function SettingsPage({ onDataChanged }: SettingsPageProps) {
   if (isLoading) {
     return (
       <div className={styles.page}>
-        <div className={styles.loading}>Loading settings...</div>
+        <div className={styles.loading}>Loading settings…</div>
       </div>
     );
   }

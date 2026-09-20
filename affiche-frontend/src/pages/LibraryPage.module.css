@@ -13,14 +13,14 @@
 
 .emptyContent h2 {
   color: var(--text-primary);
-  font-size: 1.5rem;
+  font-size: var(--text-3xl);
   font-weight: 600;
   margin-bottom: 12px;
 }
 
 .emptyContent p {
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   line-height: 1.5;
   margin-bottom: 8px;
 }
@@ -28,18 +28,18 @@
 .emptyButton {
   margin-top: 20px;
   padding: 10px 20px;
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.15s;
 }
 
 .emptyButton:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
 }
 
 .episodePane {
@@ -53,10 +53,10 @@
   margin: 0 24px 16px;
   padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   background-color: var(--bg-secondary);
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   line-height: 1.5;
 }
 

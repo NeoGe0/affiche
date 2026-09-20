@@ -61,9 +61,9 @@ export function StyleProfilesPanel() {
     <div>
       <div className={styles.header}>
         <div>
-          <h2 className={sectionStyles.sectionTitle}>Style Profiles</h2>
+          <h2 className={sectionStyles.sectionTitle}>Style profiles</h2>
           <p className={sectionStyles.sectionDescription}>
-            Named styles shared across libraries. A library picks one in its Poster Style editor,
+            Named styles shared across libraries. A library picks one in its Poster style editor,
             and every library using a profile follows it.
           </p>
         </div>

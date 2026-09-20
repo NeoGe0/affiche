@@ -11,13 +11,13 @@ export const SERVER_CONFIG: Record<MediaServerType, {
   PLEX: {
     ...MEDIA_SERVER_BRAND.PLEX,
     url: 'http://localhost:32400',
-    tokenLabel: 'API Token',
+    tokenLabel: 'API token',
     tokenPlaceholder: 'Enter Plex token',
   },
   JELLYFIN: {
     ...MEDIA_SERVER_BRAND.JELLYFIN,
     url: 'http://localhost:8096',
-    tokenLabel: 'API Key',
+    tokenLabel: 'API key',
     tokenPlaceholder: 'Enter Jellyfin API key',
   },
 };

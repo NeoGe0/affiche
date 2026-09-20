@@ -167,7 +167,7 @@ export function NotificationTargetModal({
               onClick={handleTest}
               disabled={!canTest || testStatus === 'testing' || isSaving}
             >
-              {testStatus === 'testing' && <Loader size={16} className={styles.spinning} />}
+              {testStatus === 'testing' && <Loader size={16} className="spin" />}
               {testStatus === 'delivered' && <CheckCircle size={16} />}
               {testStatus === 'failed' && <XCircle size={16} />}
               {testStatus === 'idle' && <Send size={16} />}

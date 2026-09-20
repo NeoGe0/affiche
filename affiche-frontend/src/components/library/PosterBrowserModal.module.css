@@ -7,7 +7,7 @@
 }
 
 .title {
-  font-size: 1.25rem;
+  font-size: var(--text-2xl);
   font-weight: 600;
   color: var(--text-primary);
 
@@ -33,8 +33,9 @@
   text-align: center;
   padding: 12px 24px;
   color: var(--error);
-  background-color: var(--error-tint);
-  border-radius: 8px;
+  border: 1px solid var(--notice-error-edge);
+  background-color: var(--notice-error-tint);
+  border-radius: var(--radius-lg);
   flex-shrink: 0;
 }
 
@@ -47,22 +48,11 @@
   border-top: 1px solid var(--border);
 }
 
-.uploadToggle {
-  margin-right: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+.footerNote {
+  margin: 0 auto 0 0;
+  max-width: 60ch;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
-  cursor: pointer;
-  user-select: none;
-}
-
-.uploadToggle input {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--accent);
 }
 
 .footerButton {
@@ -70,8 +60,8 @@
   align-items: center;
   gap: 6px;
   padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   font-weight: 500;
   transition: all 0.15s;
 }
@@ -87,12 +77,22 @@
 }
 
 .footerButton.save {
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
 }
 
 .footerButton.save:hover:not(:disabled) {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
+}
+
+.footerButton.secondary {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+}
+
+.footerButton.secondary:hover:not(:disabled) {
+  background-color: var(--bg-hover);
 }
 
 .footerButton:disabled {
@@ -103,5 +103,13 @@
 @media (max-width: 900px) {
   .mainArea {
     flex-direction: column;
+  }
+
+  .footer {
+    flex-wrap: wrap;
+  }
+
+  .footerNote {
+    flex-basis: 100%;
   }
 }

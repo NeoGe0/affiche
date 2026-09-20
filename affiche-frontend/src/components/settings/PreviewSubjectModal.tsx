@@ -93,6 +93,7 @@ export function PreviewSubjectModal({ onClose, onSelect }: PreviewSubjectModalPr
       <div className={styles.filters}>
         <div className={styles.controls}>
           <select
+            aria-label="Library"
             className={styles.librarySelect}
             value={activeId ?? ''}
             disabled={options.length === 0}
@@ -112,6 +113,7 @@ export function PreviewSubjectModal({ onClose, onSelect }: PreviewSubjectModalPr
               type="search"
               className={styles.searchInput}
               placeholder="Filter by title…"
+              aria-label="Filter by title"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
             />
@@ -123,12 +125,12 @@ export function PreviewSubjectModal({ onClose, onSelect }: PreviewSubjectModalPr
 
         {isLoadingLibraries || isLoading ? (
           <div className={styles.state}>
-            <Loader size={18} className={styles.spinning} />
+            <Loader size={18} className="spin" />
             <span>Loading…</span>
           </div>
         ) : options.length === 0 ? (
           <div className={styles.state}>
-            Add a media server under Settings → Media Servers to pick a title.
+            Add a media server under Settings → Media servers to pick a title.
           </div>
         ) : items.length === 0 ? (
           <div className={styles.state}>

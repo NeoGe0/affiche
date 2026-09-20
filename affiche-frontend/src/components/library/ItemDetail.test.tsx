@@ -2,7 +2,8 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 
 import { ItemDetail } from './ItemDetail';
-import { libraryApi } from '../../api';
+import { resetItemArtworkCache } from '../../hooks/useItemArtwork';
+import { libraryApi, postersApi } from '../../api';
 import type { ItemSeason, LibraryItem, LibraryItemWithSeasons } from '../../types';
 
 vi.mock('../../api', async (importOriginal) => {
@@ -10,6 +11,7 @@ vi.mock('../../api', async (importOriginal) => {
   return {
     ...actual,
     libraryApi: { ...actual.libraryApi, getItemWithSeasons: vi.fn() },
+    postersApi: { ...actual.postersApi, getPosters: vi.fn() },
   };
 });
 
@@ -37,17 +39,24 @@ const withSeasons = (...numbers: number[]) =>
 
 const noop = () => {};
 
-function renderDetail(props: { item?: LibraryItem; imageRefreshKey?: number } = {}) {
+function renderDetail(
+  props: {
+    item?: LibraryItem; imageRefreshKey?: number; onSelectPoster?: (url?: string) => void;
+    uploadsAutomatically?: boolean;
+  } = {}
+) {
   const ui = (p: typeof props) => (
     <ItemDetail
       item={p.item ?? show}
       mediaServerId={1}
+      mediaServerName="Plex"
       imageRefreshKey={p.imageRefreshKey ?? 0}
       onBack={noop}
       onSync={noop}
       onGeneratePoster={noop}
+      uploadsAutomatically={p.uploadsAutomatically}
       onReset={noop}
-      onSelectPoster={noop}
+      onSelectPoster={p.onSelectPoster ?? noop}
       onUpload={noop}
       onToggleLock={noop}
     />
@@ -62,6 +71,8 @@ const findSeason = (n: number) => screen.findAllByText(`Season ${n}`);
 const seasonShown = (n: number) => screen.queryAllByText(`Season ${n}`).length > 0;
 
 beforeEach(() => {
+  resetItemArtworkCache();
+  vi.mocked(postersApi.getPosters).mockResolvedValue([]);
   getItemWithSeasons.mockReset();
   toast.error.mockReset();
 });
@@ -144,54 +155,28 @@ describe('ItemDetail seasons', () => {
   });
 });
 
-describe('ItemDetail before/after compare', () => {
+describe('ItemDetail before/after fade', () => {
   const withSource = (overrides: Partial<LibraryItem> = {}): LibraryItem =>
     ({ ...show, has_poster: true, poster_version: 'v2',
        source_poster_version: 'v1', ...overrides });
 
-  const toggle = () => screen.queryByRole('button', { name: /compare with original/i });
+  const fader = () => screen.queryByRole('slider', { name: /fade between the original/i });
 
-  it('offers no compare when the server artwork was never kept', async () => {
+  it('offers no fade when the server artwork was never kept', () => {
 
     renderDetail({ item: { ...show, source_poster_version: null } });
 
-    expect(toggle()).not.toBeInTheDocument();
+    expect(fader()).not.toBeInTheDocument();
   });
 
-  it('offers the compare once a source poster is kept', () => {
-    renderDetail({ item: withSource() });
-
-    expect(toggle()).toBeInTheDocument();
-    expect(screen.queryByText('Before')).not.toBeInTheDocument();
-  });
-
-  it('swaps the poster for the wipe slider when toggled on', () => {
-    renderDetail({ item: withSource() });
-    expect(screen.queryByRole('slider')).not.toBeInTheDocument();
-
-    fireEvent.click(toggle()!);
-
-    expect(screen.getByRole('slider')).toBeInTheDocument();
-  });
-
-  it('requests the source variant for the revealed side', () => {
+  it('fades between the source and the generated poster once a source is kept', () => {
 
     renderDetail({ item: withSource() });
-    fireEvent.click(toggle()!);
 
+    expect(fader()).toBeInTheDocument();
     const sources = screen.getAllByRole('img').map((img) => img.getAttribute('src') ?? '');
-
     expect(sources.some((src) => src.includes('variant=source') && src.includes('v=v1'))).toBe(true);
     expect(sources.some((src) => !src.includes('variant=') && src.includes('v=v2'))).toBe(true);
-  });
-
-  it('opens the full-size compare from the poster corner', () => {
-    renderDetail({ item: withSource() });
-
-    fireEvent.click(screen.getByRole('button', { name: /compare severance full size/i }));
-
-    const dialog = screen.getByRole('dialog');
-    expect(within(dialog).getByRole('slider')).toBeInTheDocument();
   });
 
   it('offers a full-size compare per season, never at thumbnail size', async () => {
@@ -245,5 +230,95 @@ describe('ItemDetail failure banner', () => {
 
     expect(screen.getByText(/no poster found/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /IMDb or TVDB/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('ItemDetail actions', () => {
+  const movie = (overrides: Partial<LibraryItem> = {}): LibraryItem =>
+    ({ ...show, type: 'movie', processed: false, ...overrides });
+
+  it('fills in upload for a generated poster and says what it replaces', () => {
+    renderDetail({ item: movie({ processed: true }) });
+
+    expect(screen.getByRole('button', { name: /upload to plex/i })).toBeInTheDocument();
+    expect(screen.getByText(/replaces the poster plex shows for this movie/i)).toBeInTheDocument();
+    expect(screen.getByText(/reset puts it back/i)).toBeInTheDocument();
+  });
+
+  it('says where a generated poster goes, now that generating one item does not ask first', () => {
+    renderDetail({ item: movie(), uploadsAutomatically: true });
+    expect(screen.getByText(/goes straight to Plex/)).toBeInTheDocument();
+  });
+
+  it('says a generated poster stays in Affiche for a library that does not upload', () => {
+    renderDetail({ item: movie(), uploadsAutomatically: false });
+    expect(screen.getByText(/stays in Affiche until you upload it/)).toBeInTheDocument();
+  });
+
+  it('offers no upload once the poster is on the server', () => {
+    renderDetail({ item: movie({ processed: true, poster_uploaded_at: '2026-09-01T10:00:00Z' }) });
+
+    expect(screen.queryByRole('button', { name: /upload to/i })).not.toBeInTheDocument();
+    expect(screen.getByText('On server')).toBeInTheDocument();
+  });
+
+  it('opens the picker on the provider poster picked from the strip', async () => {
+    vi.mocked(postersApi.getPosters).mockResolvedValue([
+      { url: 'https://img.example/alien.jpg', provider: 'tmdb', rank: 0, rank_score: 1 },
+    ]);
+    const onSelectPoster = vi.fn();
+    renderDetail({ item: movie({ tmdb_id: '348' }), onSelectPoster });
+
+    fireEvent.click(await screen.findByRole('button', { name: /use poster 1 from/i }));
+    expect(onSelectPoster).toHaveBeenCalledWith('https://img.example/alien.jpg');
+
+    fireEvent.click(screen.getByRole('button', { name: /search, paste a url or pick a file/i }));
+    expect(onSelectPoster).toHaveBeenLastCalledWith();
+  });
+});
+
+describe('ItemDetail stepping through the listing', () => {
+  function renderStepper() {
+    const onPrevious = vi.fn();
+    const onNext = vi.fn();
+    render(
+      <ItemDetail
+        item={{ ...show, type: 'movie' }}
+        mediaServerId={1}
+        onBack={noop}
+        previousItem={{ title: 'Alien' }}
+        nextItem={{ title: 'Heat' }}
+        onPrevious={onPrevious}
+        onNext={onNext}
+        onSync={noop}
+        onGeneratePoster={noop}
+        onReset={noop}
+        onSelectPoster={noop}
+        onUpload={noop}
+        onToggleLock={noop}
+      />
+    );
+    return { onPrevious, onNext };
+  }
+
+  it('steps with the buttons and with the arrow keys', () => {
+    const { onPrevious, onNext } = renderStepper();
+
+    fireEvent.click(screen.getByRole('button', { name: /Heat/ }));
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });
+
+    expect(onNext).toHaveBeenCalledTimes(1);
+    expect(onPrevious).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the arrow keys to a slider or field that has focus', () => {
+    const { onPrevious } = renderStepper();
+    const field = document.createElement('input');
+    document.body.appendChild(field);
+
+    fireEvent.keyDown(field, { key: 'ArrowLeft' });
+
+    expect(onPrevious).not.toHaveBeenCalled();
+    field.remove();
   });
 });

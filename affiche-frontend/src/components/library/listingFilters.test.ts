@@ -14,13 +14,13 @@ describe('activeFilterChips', () => {
 
   it('names the status bucket with the same wording the panel uses', () => {
     expect(activeFilterChips('errors', undefined)).toEqual([
-      { facet: 'status', label: 'With errors' },
+      { facet: 'status', label: 'Failed' },
     ]);
   });
 
   it('names both dimensions when both are narrowed, status first', () => {
     expect(activeFilterChips('unprocessed', 'tmdb')).toEqual([
-      { facet: 'status', label: 'Unprocessed' },
+      { facet: 'status', label: 'No poster yet' },
       { facet: 'source', label: 'TMDB' },
     ]);
   });

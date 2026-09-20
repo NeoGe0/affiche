@@ -107,7 +107,7 @@ describe('ItemCard poster', () => {
 
 describe('ItemCard select mode', () => {
 
-  const card = () => screen.getByRole('button');
+  const card = () => screen.getByRole('button', { name: /^(Open )?Arrival$/ });
 
   it('opens the item on click when select mode is off', () => {
     const onClick = vi.fn();
@@ -166,6 +166,13 @@ describe('ItemCard badges', () => {
     renderCard(makeItem({ error_message: 'No poster found' }));
 
     expect(screen.getByText('Failed')).toBeInTheDocument();
+  });
+
+  it('gives the failure to keyboard and screen-reader users, not only to a hover tooltip', () => {
+    renderCard(makeItem({ error_message: 'No poster found' }));
+
+    expect(screen.getByRole('button', { name: 'Open Arrival' }))
+      .toHaveAccessibleDescription('No poster found');
   });
 
   it('shows the failure alongside the lock control', () => {

@@ -168,20 +168,20 @@ export function AddMediaServerPanel({ onClose, onCreated }: AddMediaServerPanelP
             onClick={handleSave}
             disabled={isSaving || !canSave}
           >
-            {isSaving ? <Loader size={16} className={styles.spinning} /> : <Save size={16} />}
-            {isSaving ? 'Saving...' : 'Add Server'}
+            {isSaving ? <Loader size={16} className="spin" /> : <Save size={16} />}
+            {isSaving ? 'Saving…' : 'Add server'}
           </button>
         </>
       }
     >
       <div className={panelStyles.header}>
-        <h3 className={styles.title}>Add Media Server</h3>
+        <h3 className={styles.title}>Add media server</h3>
         <p className={styles.description}>Connect to your Plex or Jellyfin server</p>
       </div>
 
       <div className={panelStyles.content}>
         <div className={styles.field}>
-          <label className={styles.label}>Server Type</label>
+          <label className={styles.label}>Server type</label>
           <div ref={dropdownRef} className={panelStyles.dropdown}>
             <button
               type="button"
@@ -276,13 +276,13 @@ export function AddMediaServerPanel({ onClose, onCreated }: AddMediaServerPanelP
             onClick={handleTestConnection}
             disabled={!token || !url || testStatus === 'testing'}
           >
-            {testStatus === 'testing' && <Loader size={16} className={styles.spinning} />}
+            {testStatus === 'testing' && <Loader size={16} className="spin" />}
             {testStatus === 'success' && <CheckCircle size={16} />}
             {testStatus === 'error' && <XCircle size={16} />}
             {testStatus === 'idle' && <Server size={16} />}
-            {testStatus === 'testing' ? 'Testing...' :
+            {testStatus === 'testing' ? 'Testing…' :
              testStatus === 'success' ? 'Connected!' :
-             testStatus === 'error' ? 'Failed' : 'Test Connection'}
+             testStatus === 'error' ? 'Failed' : 'Test connection'}
           </button>
         </div>
 
@@ -299,14 +299,14 @@ export function AddMediaServerPanel({ onClose, onCreated }: AddMediaServerPanelP
               </div>
               <div className={panelStyles.bulkActions}>
                 <button type="button" className={panelStyles.bulkButton} onClick={handleSelectAll}>
-                  Select All
+                  Select all
                 </button>
                 <button
                   type="button"
                   className={`${panelStyles.bulkButton} ${panelStyles.bulkButtonMuted}`}
                   onClick={handleSelectNone}
                 >
-                  Select None
+                  Select none
                 </button>
               </div>
             </div>

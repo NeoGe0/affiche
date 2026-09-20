@@ -61,6 +61,7 @@ class LibraryItemResponse(BaseModel):
     updated_at: Optional[datetime] = None
     last_seen_at: Optional[datetime] = None
     poster_uploaded_at: Optional[datetime] = None
+    poster_generated_at: Optional[datetime] = None
     imdb_id: Optional[str] = None
     tmdb_id: Optional[int] = None
     tvdb_id: Optional[int] = None
@@ -199,6 +200,8 @@ class LibraryItemCounts(BaseModel):
     unprocessed: int
     errors: int
     locked: int
+    ready: int
+    uploaded: int
     providers: Dict[str, int] = {}
 
 class LibraryStyleStaleness(BaseModel):

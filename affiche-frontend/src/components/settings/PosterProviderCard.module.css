@@ -18,10 +18,10 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.72rem;
+  font-size: var(--text-2xs);
   font-weight: 500;
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--border);
   color: var(--text-muted);
   white-space: nowrap;
@@ -38,7 +38,7 @@
 }
 
 .description {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
   margin: 0;
   padding: 16px 24px 0;

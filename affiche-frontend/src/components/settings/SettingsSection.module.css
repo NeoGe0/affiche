@@ -11,14 +11,14 @@
 }
 
 .sectionTitle {
-  font-size: 1.25rem;
+  font-size: var(--text-2xl);
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 8px;
 }
 
 .sectionDescription {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-muted);
   margin: 0;
 }
@@ -28,18 +28,18 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
-  font-size: 0.875rem;
+  font-size: var(--text-md);
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: all 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .saveButton:hover:not(:disabled) {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
 }
 
 .saveButton:disabled {
@@ -52,7 +52,7 @@
   text-align: center;
   color: var(--text-muted);
   background-color: var(--bg-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px dashed var(--border);
 }
 
@@ -65,7 +65,7 @@
 .card {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   transition: border-color 0.15s;
 }
@@ -81,7 +81,7 @@
   width: 100%;
   padding: 16px;
   color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: 500;
   text-align: left;
   transition: background-color 0.15s;
@@ -103,20 +103,20 @@
 }
 
 .dirtyIndicator {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 500;
   color: var(--accent);
   background-color: color-mix(in srgb, var(--accent) 15%, transparent);
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .cardCount {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
   background-color: var(--bg-primary);
   padding: 2px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   margin-right: 8px;
 }
 
@@ -135,14 +135,14 @@
 }
 
 .settingsLabel {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .settingDescription {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
   margin-top: 4px;
   margin-bottom: 0;
@@ -154,7 +154,7 @@
   gap: 10px;
   cursor: pointer;
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   user-select: none;
 }
 
@@ -170,13 +170,13 @@
 .group {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 16px;
   margin-bottom: 16px;
 }
 
 .groupTitle {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -185,7 +185,7 @@
 }
 
 .groupDescription {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
   margin: 0 0 14px;
 }
@@ -211,12 +211,12 @@
 .rowDescription {
   margin: 0;
   padding-left: 28px;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
 .label {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
 }
 
@@ -225,7 +225,7 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
 }
 
@@ -241,9 +241,9 @@
   padding: 8px 32px 8px 10px;
   background-color: var(--bg-tertiary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
@@ -258,7 +258,7 @@
 }
 
 .savedMsg {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--success);
   margin-left: 8px;
 }
@@ -272,7 +272,7 @@
   color: var(--text-secondary);
   background-color: transparent;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: all 0.15s;
 }
 
@@ -298,8 +298,8 @@
   align-items: center;
   gap: 6px;
   padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   font-weight: 500;
   transition: all 0.15s;
   color: var(--text-primary);
@@ -311,12 +311,12 @@
 }
 
 .validateButton.validated {
-  background-color: var(--success);
+  background-color: var(--success-fill);
   color: var(--text-on-fill);
 }
 
 .validateButton.failed {
-  background-color: var(--error);
+  background-color: var(--error-fill);
   color: var(--text-on-fill);
 }
 
@@ -332,15 +332,15 @@
   padding: 8px 12px;
   background: none;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
 }
 
 .outlineButtonSmall {
   padding: 6px 10px;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
 }
 
 .outlineButtonAccent {

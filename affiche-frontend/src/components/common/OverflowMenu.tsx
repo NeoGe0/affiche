@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { MoreVertical } from 'lucide-react';
 
 import { usePopoverDismiss } from '../../hooks/usePopoverDismiss';
+import { useMenuKeyboard } from '../../hooks/useMenuKeyboard';
 
 import styles from './OverflowMenu.module.css';
 
@@ -30,12 +31,15 @@ export function OverflowMenu({
 }: OverflowMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = usePopoverDismiss<HTMLDivElement>(isOpen, () => setIsOpen(false));
+  const { menuRef: dropdownRef, triggerRef, onKeyDown } =
+    useMenuKeyboard<HTMLDivElement, HTMLButtonElement>(isOpen, () => setIsOpen(false));
 
   if (items.length === 0) return null;
 
   return (
     <div className={styles.menu} ref={menuRef}>
       <button
+        ref={triggerRef}
         className={`${styles.trigger} ${triggerClassName ?? styles.triggerSkin} ${isOpen ? styles.triggerActive : ''}`}
         onClick={() => setIsOpen((open) => !open)}
         title={title}
@@ -47,8 +51,10 @@ export function OverflowMenu({
 
       {isOpen && (
         <div
+          ref={dropdownRef}
           className={`${styles.dropdown} ${placement === 'top-start' ? styles.dropdownTopStart : ''}`}
           role="menu"
+          onKeyDown={onKeyDown}
         >
           {items.map((item, index) => (
             <div key={item.label}>
@@ -56,6 +62,7 @@ export function OverflowMenu({
               <button
                 className={`${styles.item} ${item.danger ? styles.itemDanger : ''}`}
                 role="menuitem"
+                tabIndex={-1}
                 disabled={item.disabled}
                 onClick={() => {
                   setIsOpen(false);

@@ -12,22 +12,22 @@
 
 .identityName {
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
 }
 
 .identityHint {
   margin-left: auto;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 
 .badge {
-  font-size: 0.68rem;
+  font-size: var(--text-2xs);
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--text-muted);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 2px 8px;
 }
 
@@ -54,12 +54,12 @@
 
 .blockTitle {
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .blockHint {
   margin: 0 0 14px 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
@@ -79,7 +79,7 @@
 }
 
 .label {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-secondary);
 }
@@ -89,9 +89,9 @@
   padding: 8px 10px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   transition: border-color 0.15s;
 }
 
@@ -132,7 +132,7 @@
 }
 
 .accountName {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .rowActions {
@@ -148,7 +148,7 @@
   padding: 5px;
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-muted);
   cursor: pointer;
   transition: color 0.15s, background-color 0.15s;

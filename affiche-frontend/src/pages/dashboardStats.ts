@@ -1,9 +1,7 @@
+import { coveragePercent } from '../components/library/coverage';
 import type { DashboardTask, ItemStats } from '../types';
 
-export function coveragePercent(stats: ItemStats): number {
-  if (stats.total === 0) return 0;
-  return Math.round((stats.processed / stats.total) * 100);
-}
+export { coveragePercent };
 
 export function byCoverageAscending<T extends { stats: ItemStats }>(rows: T[]): T[] {
   return [...rows].sort((a, b) => {
@@ -30,4 +28,16 @@ export function taskLabel(task: DashboardTask): string {
 
 export function taskTimestamp(task: DashboardTask): string | null {
   return task.completed_at ?? task.created_at ?? null;
+}
+
+const TASK_STATUS_LABELS: Record<string, string> = {
+  pending: 'Queued',
+  running: 'Running',
+  completed: 'Done',
+  failed: 'Failed',
+  cancelled: 'Stopped',
+};
+
+export function taskStatusLabel(status: string): string {
+  return TASK_STATUS_LABELS[status] ?? status;
 }

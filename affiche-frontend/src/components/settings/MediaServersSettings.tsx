@@ -75,20 +75,20 @@ export function MediaServersSettings({ onServerCreated }: MediaServersSettingsPr
     <section className={sectionStyles.section}>
       <div className={sectionStyles.sectionHeader}>
         <div>
-          <h2 className={sectionStyles.sectionTitle}>Media Servers</h2>
+          <h2 className={sectionStyles.sectionTitle}>Media servers</h2>
           <p className={sectionStyles.sectionDescription}>
             Connect your media servers and configure library settings.
           </p>
         </div>
         <button className={sectionStyles.saveButton} onClick={() => setIsAddServerOpen(true)}>
           <Plus size={16} />
-          Add Media Server
+          Add media server
         </button>
       </div>
 
       {media.servers.length > 0 ? (
         <div className={styles.group}>
-          <h3 className={styles.groupTitle}>Connected Servers</h3>
+          <h3 className={styles.groupTitle}>Connected servers</h3>
           <div className={sectionStyles.cardList}>
             {media.servers.map(({ server, libraries }) => (
               <MediaServerCard
@@ -133,7 +133,7 @@ export function MediaServersSettings({ onServerCreated }: MediaServersSettingsPr
         </div>
       ) : (
         <div className={`${sectionStyles.emptyState} ${styles.group}`}>
-          No media servers connected yet. Click "Add Media Server" to connect your Plex or Jellyfin
+          No media servers connected yet. Click "Add media server" to connect your Plex or Jellyfin
           server.
         </div>
       )}
@@ -152,7 +152,7 @@ export function MediaServersSettings({ onServerCreated }: MediaServersSettingsPr
         <ConfirmModal
           title={`Delete ${deleteTarget.type === 'server' ? 'Server' : 'Library'}`}
           message={DELETE_MESSAGE[deleteTarget.type](deleteTarget.name)}
-          confirmLabel={media.isDeleting ? 'Deleting...' : 'Delete'}
+          confirmLabel={media.isDeleting ? 'Deleting…' : 'Delete'}
           variant="danger"
           isBusy={media.isDeleting}
           onConfirm={handleConfirmDelete}

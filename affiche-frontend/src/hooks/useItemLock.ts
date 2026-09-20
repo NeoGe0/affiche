@@ -43,6 +43,13 @@ export function useItemLock({ allLibraries, setItems, onLockChanged }: UseItemLo
         )
       );
       onLockChanged?.();
+
+      toast.info(
+        updated.locked
+          ? `Poster generation will skip "${item.title}" until it is unlocked.`
+          : `Poster generation can replace the poster for "${item.title}" again.`,
+        { title: updated.locked ? 'Locked' : 'Unlocked' }
+      );
     } catch (error) {
       toast.error(errorMessage(error, 'Failed to change the lock on this item.'), {
         title: 'Lock failed',

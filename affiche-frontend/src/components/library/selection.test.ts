@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { emptySelection, pruneSelection, toggleAll, toggleId } from './selection';
+import { emptySelection, neighbours, pruneSelection, selectRange, toggleAll, toggleId } from './selection';
 
 const items = (...ids: number[]) => ids.map((id) => ({ id }));
 const set = (...ids: number[]) => new Set(ids);
@@ -66,5 +66,35 @@ describe('pruneSelection', () => {
   it('clears the selection when the listing empties', () => {
 
     expect([...pruneSelection(set(1, 2), [])]).toEqual([]);
+  });
+});
+
+describe('selectRange', () => {
+  it('adds everything between the anchor and the target, in either direction', () => {
+    expect([...selectRange(set(), items(1, 2, 3, 4, 5), 2, 4)].sort()).toEqual([2, 3, 4]);
+    expect([...selectRange(set(), items(1, 2, 3, 4, 5), 4, 2)].sort()).toEqual([2, 3, 4]);
+  });
+
+  it('keeps what was already selected outside the range', () => {
+    expect([...selectRange(set(5), items(1, 2, 3, 4, 5), 1, 2)].sort()).toEqual([1, 2, 5]);
+  });
+
+  it('falls back to a plain toggle without a listed anchor', () => {
+    expect([...selectRange(set(), items(1, 2, 3), null, 2)]).toEqual([2]);
+    expect([...selectRange(set(), items(1, 2, 3), 99, 2)]).toEqual([2]);
+  });
+});
+
+describe('neighbours', () => {
+  const listed = [{ id: 1, library_id: 1 }, { id: 2, library_id: 1 }, { id: 3, library_id: 1 }];
+
+  it('finds the items either side', () => {
+    expect(neighbours(listed, { id: 2, library_id: 1 })).toEqual({ previous: listed[0], next: listed[2] });
+  });
+
+  it('has nothing past the ends, or for an item that is not listed', () => {
+    expect(neighbours(listed, { id: 1 }).previous).toBeUndefined();
+    expect(neighbours(listed, { id: 3 }).next).toBeUndefined();
+    expect(neighbours(listed, { id: 9 })).toEqual({});
   });
 });

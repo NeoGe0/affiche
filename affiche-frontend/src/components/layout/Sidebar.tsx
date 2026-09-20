@@ -5,6 +5,7 @@ import type { Library as LibraryType, MediaServerResponse } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useAppVersion } from '../../hooks';
 import { SOURCE_URL } from '../../constants/app';
+import { searchShortcutLabel } from '../../constants/platform';
 import { AfficheLogo, LibraryTypeIcon, MediaServerIcon } from '../common';
 import styles from './Sidebar.module.css';
 
@@ -19,6 +20,8 @@ interface SidebarProps {
   selectedLibraryId?: number;
   view?: 'library' | 'trash' | 'collections';
   collapsed?: boolean;
+
+  overlayOpen?: boolean;
   onToggleCollapse?: () => void;
   onSelectLibrary: (mediaServerId: number, libraryId: number | undefined) => void;
   onSelectTrash: (mediaServerId: number, libraryId: number | undefined) => void;
@@ -32,6 +35,7 @@ export function Sidebar({
   selectedLibraryId,
   view = 'library',
   collapsed = false,
+  overlayOpen = false,
   onToggleCollapse,
   onSelectLibrary,
   onSelectTrash,
@@ -138,19 +142,19 @@ export function Sidebar({
           <button
             className={styles.railButton}
             onClick={onToggleCollapse}
-            title="Media Servers"
-            aria-label="Media Servers"
+            title="Show media servers"
+            aria-label="Show media servers"
           >
             <HardDrive size={20} />
           </button>
-          <button
-            className={styles.railButton}
-            onClick={onToggleCollapse}
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => `${styles.railButton} ${isActive ? styles.active : ''}`}
             title="Settings"
             aria-label="Settings"
           >
             <Settings size={20} />
-          </button>
+          </NavLink>
           <button
             className={`${styles.railButton} ${styles.railExpand}`}
             onClick={onToggleCollapse}
@@ -170,8 +174,10 @@ export function Sidebar({
         </div>
       )}
       <aside
-        className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''} ${collapsed && peek ? styles.peek : ''}`}
+        className={`${styles.sidebar} ${collapsed ? styles.collapsed : ''} ${collapsed && (peek || overlayOpen) ? styles.peek : ''} ${overlayOpen ? styles.overlay : ''}`}
         onMouseLeave={() => setPeek(false)}
+
+        inert={collapsed && !peek && !overlayOpen}
       >
       <div className={styles.logo}>
         <NavLink to="/" className={styles.logoBrand} title="Home">
@@ -185,10 +191,10 @@ export function Sidebar({
         <button
           className={styles.collapseButton}
           onClick={onToggleCollapse}
-          title={collapsed ? 'Expand menu' : 'Collapse menu'}
-          aria-label={collapsed ? 'Expand menu' : 'Collapse menu'}
+          title={overlayOpen ? 'Close menu' : collapsed ? 'Expand menu' : 'Collapse menu'}
+          aria-label={overlayOpen ? 'Close menu' : collapsed ? 'Expand menu' : 'Collapse menu'}
         >
-          {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
+          {collapsed && !overlayOpen ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
         </button>
       </div>
 
@@ -199,7 +205,7 @@ export function Sidebar({
             <span>Search</span>
             {
 }
-            <kbd className={styles.shortcut}>Ctrl K</kbd>
+            <kbd className={styles.shortcut}>{searchShortcutLabel()}</kbd>
           </button>
         </div>
 
@@ -217,9 +223,10 @@ export function Sidebar({
           <button
             className={styles.sectionHeader}
             onClick={() => setMediaServersExpanded(!mediaServersExpanded)}
+            aria-expanded={mediaServersExpanded}
           >
             <HardDrive size={18} />
-            <span>Media Servers</span>
+            <span>Media servers</span>
             {mediaServersExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           </button>
 
@@ -245,6 +252,7 @@ export function Sidebar({
                       <button
                         className={`${styles.serverHeader} ${isServerSelected && selectedLibraryId === undefined ? styles.active : ''}`}
                         onClick={() => toggleServer(server.id)}
+                        aria-expanded={isExpanded}
                       >
                         <MediaServerIcon type={server.type} />
                         <span className={styles.serverName}>{server.name}</span>
@@ -290,6 +298,7 @@ export function Sidebar({
                             <button
                               className={`${styles.libraryItem} ${isCollectionsView ? styles.active : ''}`}
                               onClick={() => toggleCollections(server.id)}
+                              aria-expanded={expandedCollections.has(server.id)}
                             >
                               <Layers size={14} />
                               <span>Collections</span>
@@ -322,6 +331,7 @@ export function Sidebar({
                             <button
                               className={`${styles.libraryItem} ${isServerTrashSelected && selectedLibraryId === undefined ? styles.active : ''}`}
                               onClick={() => toggleTrash(server.id)}
+                              aria-expanded={isTrashExpanded}
                             >
                               <Trash2 size={14} />
                               <span>Trash</span>
@@ -335,7 +345,7 @@ export function Sidebar({
                                     onClick={() => onSelectTrash(server.id, undefined)}
                                   >
                                     <Library size={14} />
-                                    <span>All Libraries</span>
+                                    <span>All libraries</span>
                                   </button>
                                 </li>
                                 {libs.map((lib) => (
@@ -366,6 +376,7 @@ export function Sidebar({
           <button
             className={`${styles.sectionHeader} ${isSettingsPage ? styles.active : ''}`}
             onClick={() => setSettingsExpanded(!settingsExpanded)}
+            aria-expanded={settingsExpanded}
           >
             <Settings size={18} />
             <span>Settings</span>
@@ -392,7 +403,7 @@ export function Sidebar({
                   className={`${styles.subMenuItem} ${isSettingsPage && currentTab === 'media-servers' ? styles.active : ''}`}
                 >
                   <HardDrive size={16} />
-                  <span>Media Servers</span>
+                  <span>Media servers</span>
                 </NavLink>
               </li>
               )}
@@ -434,7 +445,7 @@ export function Sidebar({
                   className={`${styles.subMenuItem} ${isSettingsPage && currentTab === 'style' && !currentSection ? styles.active : ''}`}
                 >
                   <Palette size={16} />
-                  <span>Style Options</span>
+                  <span>Style options</span>
                 </NavLink>
                 {
 
@@ -455,7 +466,7 @@ export function Sidebar({
                       className={`${styles.subSubMenuItem} ${isStyleSection('profiles') ? styles.active : ''}`}
                     >
                       <SwatchBook size={14} />
-                      <span>Style Profiles</span>
+                      <span>Style profiles</span>
                     </NavLink>
                   </li>
                 </ul>

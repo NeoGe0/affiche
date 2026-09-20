@@ -12,7 +12,7 @@ import {
   failureTooltip,
   hasQuality,
   posterSource,
-  posterStatus,
+  posterStatusDetail,
 } from './format';
 
 const DASH = '—';
@@ -121,21 +121,19 @@ describe('formatAudio', () => {
   });
 });
 
-describe('posterStatus', () => {
-
-  it('reports an upload with its timestamp', () => {
-    expect(posterStatus(item({ poster_uploaded_at: '2024-03-15T10:30:00Z', processed: true })))
-      .toMatch(/^Uploaded /);
+describe('posterStatusDetail', () => {
+  it('gives the upload time and the artwork source', () => {
+    expect(posterStatusDetail(item({
+      poster_uploaded_at: '2024-03-15T10:30:00Z', processed: true, poster_provider: 'tmdb',
+    }))).toMatch(/^Uploaded .+ · TMDB$/);
   });
 
-  it('reports a generated poster that has not been uploaded', () => {
-    expect(posterStatus(item({ processed: true }))).toBe('Generated (not uploaded)');
-
-    expect(posterStatus(item({ has_poster: true }))).toBe('Generated (not uploaded)');
+  it('gives the source alone before an upload', () => {
+    expect(posterStatusDetail(item({ processed: true, poster_provider: 'manual' }))).toBe('Chosen manually');
   });
 
-  it('reports nothing stored', () => {
-    expect(posterStatus(item())).toBe('None');
+  it('says nothing for an item with only server artwork stored', () => {
+    expect(posterStatusDetail(item({ has_poster: true }))).toBe('');
   });
 });
 

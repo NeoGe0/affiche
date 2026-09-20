@@ -66,6 +66,27 @@ export const libraryApi = {
     );
   },
 
+  getLibraryItemIds: (
+    mediaServerId: number,
+    libraryId: number,
+    options?: {
+      search?: string; status?: ItemStatusFilter; provider?: string;
+
+      sortBy?: string; sortDir?: 'asc' | 'desc';
+    }
+  ) => {
+    const params = new URLSearchParams();
+    if (options?.search) params.append('search', options.search);
+    if (options?.status) params.append('status', options.status);
+    if (options?.provider) params.append('provider', options.provider);
+    if (options?.sortBy) params.append('sort_by', options.sortBy);
+    if (options?.sortDir) params.append('sort_dir', options.sortDir);
+    const queryString = params.toString();
+    return api.get<number[]>(
+      `/media-servers/${mediaServerId}/libraries/${libraryId}/items/ids${queryString ? `?${queryString}` : ''}`
+    );
+  },
+
   getLibraryItemCounts: (
     mediaServerId: number,
     libraryId: number,

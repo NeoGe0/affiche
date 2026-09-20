@@ -100,6 +100,7 @@ export function ItemPickerModal({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search this library…"
+            aria-label="Search this library"
             autoFocus
           />
         </div>

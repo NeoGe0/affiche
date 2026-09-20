@@ -5,3 +5,4 @@ export { LoginPage } from './LoginPage';
 export { SetupPage } from './SetupPage';
 export { ChangePasswordPage } from './ChangePasswordPage';
 export { CollectionsPage } from './CollectionsPage';
+export { WelcomePage } from './WelcomePage';

@@ -70,13 +70,24 @@ describe('ChangePasswordPage', () => {
     await waitFor(() => expect(changePassword).toHaveBeenCalledWith(TEMPORARY, CHOSEN));
   });
 
-  it('refuses a mistyped confirmation without asking the backend', async () => {
+  it('refuses a mistyped confirmation without asking the backend, and says so while typing', async () => {
     const user = userEvent.setup();
     renderPage();
 
     await fill(user, { confirm: 'something-else' });
 
-    expect(await screen.findByText('Passwords do not match')).toBeInTheDocument();
+    expect(screen.getByText('Both passwords match').closest('li')).toHaveTextContent('(not met yet)');
+    expect(screen.getByRole('button', { name: 'Set password' })).toBeDisabled();
+    expect(changePassword).not.toHaveBeenCalled();
+  });
+
+  it('holds a new password shorter than the minimum back before submitting', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await fill(user, { next: 'short', confirm: 'short' });
+
+    expect(screen.getByText('At least 8 characters').closest('li')).toHaveTextContent('(not met yet)');
     expect(changePassword).not.toHaveBeenCalled();
   });
 

@@ -1,13 +1,13 @@
 .title {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .description {
   margin: 4px 0 0;
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
 }
 
@@ -19,7 +19,7 @@
   padding: 0;
   background: none;
   border: none;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
   cursor: pointer;
 }
@@ -46,7 +46,7 @@
   text-align: left;
   background-color: var(--bg-tertiary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   transition: border-color 0.15s, background-color 0.15s;
 }
@@ -70,13 +70,13 @@
 }
 
 .choiceName {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--text-primary);
 }
 
 .choiceDescription {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
   color: var(--text-muted);
 }
@@ -85,6 +85,6 @@
   margin: 0;
   padding: 24px;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
 }

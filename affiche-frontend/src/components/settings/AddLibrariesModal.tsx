@@ -68,7 +68,7 @@ export function AddLibrariesModal({
     <Modal
       size="wide"
       label="Add libraries"
-      title="Add Libraries"
+      title="Add libraries"
       description={
         <>
           Select libraries from <strong>{serverName}</strong> to add to Affiche.
@@ -87,8 +87,8 @@ export function AddLibrariesModal({
               onClick={() => onAdd(libraries.filter((l) => selected.has(l.id)), defaults ?? {})}
               disabled={isAdding || selected.size === 0}
             >
-              {isAdding ? <Loader size={14} className={styles.spinning} /> : <CheckCircle size={14} />}
-              {isAdding ? 'Adding...' : `Add ${selected.size} Libraries`}
+              {isAdding ? <Loader size={14} className="spin" /> : <CheckCircle size={14} />}
+              {isAdding ? 'Adding…' : `Add ${selected.size} Libraries`}
             </button>
           )}
         </>
@@ -97,8 +97,8 @@ export function AddLibrariesModal({
       <div className={styles.content}>
         {isLoading ? (
           <div className={styles.loading}>
-            <Loader size={20} className={styles.spinning} />
-            <span>Loading libraries...</span>
+            <Loader size={20} className="spin" />
+            <span>Loading libraries…</span>
           </div>
         ) : !hasLibraries ? (
           <div className={styles.empty}>
@@ -116,14 +116,14 @@ export function AddLibrariesModal({
                   className={styles.bulkButton}
                   onClick={() => setSelected(new Set(libraries.map((l) => l.id)))}
                 >
-                  Select All
+                  Select all
                 </button>
                 <button
                   type="button"
                   className={`${styles.bulkButton} ${styles.bulkButtonMuted}`}
                   onClick={() => setSelected(new Set())}
                 >
-                  Select None
+                  Select none
                 </button>
               </div>
             </div>

@@ -4,7 +4,7 @@
 
 .groupTitle {
   margin-bottom: 12px;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--text-secondary);
 }

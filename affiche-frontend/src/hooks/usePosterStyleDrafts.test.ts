@@ -104,4 +104,28 @@ describe('usePosterStyleDrafts', () => {
     expect(result.current.overlayOptions).toEqual({ border_enabled: true, blur_amount: 99 });
     expect(result.current.quality).toBe(85);
   });
+
+  it('puts every edit back when a reset is undone', () => {
+    const { result } = renderHook(() => usePosterStyleDrafts(config()));
+    act(() => result.current.changeOverlay({ blur_amount: 20 }));
+    act(() => result.current.changeQuality(50));
+
+    let undo: (() => void) | null = null;
+    act(() => { undo = result.current.reset(); });
+    act(() => undo!());
+
+    expect(result.current.overlayOptions).toEqual({ border_enabled: true, blur_amount: 20 });
+    expect(result.current.textOptions).toEqual({ font_name: 'Serif.ttf', all_caps: false });
+    expect(result.current.quality).toBe(50);
+  });
+
+  it('has nothing to undo when the style was never edited', () => {
+
+    const { result } = renderHook(() => usePosterStyleDrafts(config()));
+
+    let undo: (() => void) | null = () => {};
+    act(() => { undo = result.current.reset(); });
+
+    expect(undo).toBeNull();
+  });
 });

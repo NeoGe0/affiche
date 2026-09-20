@@ -21,11 +21,12 @@ export function LibraryRows({
 
   return (
     <div className={styles.rows}>
-      {rows.map(({ library, items, total }) => (
+      {rows.map(({ library, items, total, stats }) => (
         <ItemRow
           key={library.id}
           title={library.name}
           subtitle={countLabel(total)}
+          stats={stats}
           items={items}
           isLoading={isLoading}
           onItemClick={onItemClick}
