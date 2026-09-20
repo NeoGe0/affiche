@@ -96,7 +96,7 @@ Collections:
 
 > ### 🧪 Public beta
 >
-> Affiche is at `0.1.0-beta.2`. It runs every day against real Plex library, but the
+> Affiche is at `0.1.0-beta.3`. It runs every day against real Plex library, but the
 > beta label is honest: expect rough edges, and back up `/data/config` before upgrading. Bug reports
 > and feedback are what this release is for, so please [open an issue](../../issues).
 

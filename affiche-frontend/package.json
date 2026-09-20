@@ -1,7 +1,7 @@
 {
   "name": "affiche-frontend",
   "private": true,
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.3",
   "type": "module",
   "//engines": "jsdom 30 requires ^22.22.2 || ^24.15.0 || >=26, and undici 8 requires >=22.19. On an older Node the whole Vitest suite dies during environment setup ('webidl.util.markAsUncloneable is not a function') and reports '0 tests' in about a second, which reads like a pass. .npmrc sets engine-strict so install refuses instead.",
   "engines": {
