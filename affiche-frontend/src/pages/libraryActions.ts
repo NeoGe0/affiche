@@ -46,6 +46,7 @@ export const LIBRARY_ACTIONS: Record<LibraryActionName, LibraryActionSpec> = {
       library
         ? libraryApi.uploadLibraryPosters(library.media_server_id, library.id)
         : libraryApi.uploadAllPosters(mediaServerId),
+    taskKind: 'upload',
     errorTitle: 'Upload failed',
     errorFallback: 'Could not start the poster upload.',
   },

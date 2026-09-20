@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { PosterBrowserModal } from './PosterBrowserModal';
+import { ToastProvider } from '../../context/ToastContext';
 import { posterTargetFromItem } from './posterTarget';
 import { postersApi } from '../../api';
 import { usePosterConfig } from '../../hooks';
@@ -22,6 +23,10 @@ vi.mock('../../api', () => ({
 
 vi.mock('../image', () => ({
   PosterPreview: ({ title }: { title: string }) => <div data-testid="preview">{title}</div>,
+
+  PosterStyleControls: ({ onOverlayChange }: { onOverlayChange: (c: object) => void }) => (
+    <button onClick={() => onOverlayChange({ border_px: 9 })}>Thicker border</button>
+  ),
 }));
 
 const CONFIG = {
@@ -33,6 +38,7 @@ const CONFIG = {
 vi.mock('../../hooks', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../hooks')>()),
   usePosterConfig: vi.fn(),
+  useFonts: () => ({ fonts: [], isLoading: false }),
   useProviderStatus: () => ({
     isAnyProviderConfigured: true,
     configuredProviders: ['tmdb', 'tvdb'],
@@ -75,12 +81,14 @@ function renderModal(props: Partial<React.ComponentProps<typeof PosterBrowserMod
   const onSave = props.onSave ?? vi.fn();
   const onClose = props.onClose ?? vi.fn();
   const utils = render(
-    <PosterBrowserModal
-      target={posterTargetFromItem(ITEM)}
-      {...props}
-      onSave={onSave}
-      onClose={onClose}
-    />
+    <ToastProvider>
+      <PosterBrowserModal
+        target={posterTargetFromItem(ITEM)}
+        {...props}
+        onSave={onSave}
+        onClose={onClose}
+      />
+    </ToastProvider>
   );
   return { ...utils, onSave, onClose };
 }
@@ -156,7 +164,7 @@ describe('PosterBrowserModal — filling the grid', () => {
     await waitFor(() => expect(getSeasonPosters).toHaveBeenCalledTimes(1));
     expect(getSeasonPosters.mock.calls[0][0].season_number).toBe(2);
 
-    await user.click(screen.getByRole('tab', { name: 'Show art' }));
+    await user.click(screen.getByRole('button', { name: 'Show art' }));
 
     await waitFor(() => expect(getPosters).toHaveBeenCalledTimes(1));
     expect(screen.getByText(/still applies to Season 2/)).toBeInTheDocument();
@@ -168,11 +176,36 @@ describe('PosterBrowserModal — filling the grid', () => {
     renderModal();
     await candidates();
 
+    await user.click(screen.getByRole('button', { name: 'Find elsewhere' }));
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => expect(searchPosters).toHaveBeenCalled());
     expect(searchPosters.mock.calls[0][0]).toMatchObject({ name: 'Alien', year: 1979 });
     await waitFor(async () => expect(await candidates()).toHaveLength(1));
+  });
+
+  it('keeps title search and own images folded until asked for', async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await candidates();
+
+    expect(screen.queryByLabelText('Search by title')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Find elsewhere' }));
+
+    expect(screen.getByLabelText('Search by title')).toBeInTheDocument();
+    expect(screen.getByLabelText('Use your own image')).toBeInTheDocument();
+  });
+
+  it('offers the folded ways out when the grid comes back empty', async () => {
+
+    getPosters.mockResolvedValue([]);
+    const user = userEvent.setup();
+    renderModal();
+
+    await user.click(await screen.findByRole('button', { name: /Search another title/ }));
+
+    expect(screen.getByLabelText('Search by title')).toBeInTheDocument();
   });
 
   it('shows the reason a fetch failed', async () => {
@@ -189,6 +222,7 @@ describe('PosterBrowserModal — filling the grid', () => {
     const { onSave } = renderModal();
     await candidates();
 
+    await user.click(screen.getByRole('button', { name: 'Find elsewhere' }));
     await user.type(screen.getByLabelText('Use your own image'), 'https://example.com/p.jpg');
     await user.click(screen.getByRole('button', { name: 'Add' }));
 
@@ -196,6 +230,44 @@ describe('PosterBrowserModal — filling the grid', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
     expect(onSave).toHaveBeenCalledWith('custom:abc', expect.anything());
+  });
+});
+
+describe('PosterBrowserModal — saving from the grid', () => {
+  it('saves a double-clicked poster with the button the library fills', async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderModal({ defaultUpload: true });
+    const [, second] = await candidates();
+
+    await user.dblClick(second);
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave).toHaveBeenCalledWith('https://cdn/b.jpg', expect.objectContaining({ upload: true }));
+  });
+
+  it('saves on Enter only once the poster is already picked', async () => {
+
+    const user = userEvent.setup();
+    const { onSave } = renderModal();
+    const [first] = await candidates();
+
+    first.focus();
+    await user.keyboard('{Enter}');
+    expect(first).toHaveAttribute('aria-pressed', 'true');
+    expect(onSave).not.toHaveBeenCalled();
+
+    await user.keyboard('{Enter}');
+    expect(onSave).toHaveBeenCalledWith('https://cdn/a.jpg', expect.objectContaining({ upload: false }));
+  });
+
+  it('does not start a second save while one is in flight', async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderModal({ isSaving: true });
+    const [first] = await candidates();
+
+    await user.dblClick(first);
+
+    expect(onSave).not.toHaveBeenCalled();
   });
 });
 
@@ -261,18 +333,72 @@ describe('PosterBrowserModal — style drafts', () => {
     });
   });
 
-  it('defaults the upload toggle to the library setting and sends it', async () => {
+  it('uploads only when Save & upload is the button pressed', async () => {
     const user = userEvent.setup();
     const { onSave } = renderModal({ defaultUpload: true });
     const [first] = await candidates();
 
     await user.click(first);
+    await user.click(screen.getByRole('button', { name: 'Save & upload' }));
+    expect(onSave).toHaveBeenLastCalledWith('https://cdn/a.jpg', expect.objectContaining({ upload: true }));
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onSave).toHaveBeenLastCalledWith('https://cdn/a.jpg', expect.objectContaining({ upload: false }));
+  });
+
+  it('says in words which save is the default, not only by which button is filled', async () => {
+    renderModal({ defaultUpload: true });
+    await candidates();
+
+    expect(screen.getByText(/This library uploads new posters/)).toBeInTheDocument();
+  });
+
+  it('offers no upload where applying cannot reach the media server', async () => {
+    renderModal({ canUpload: false });
+    await candidates();
+
+    expect(screen.queryByRole('button', { name: 'Save & upload' })).not.toBeInTheDocument();
+  });
+
+  it('edits the style beside the grid, restyling whichever poster is picked', async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderModal();
+    const [first, second] = await candidates();
+
+    await user.click(first);
+    await user.click(screen.getByRole('button', { name: /Edit style/ }));
+
+    expect(screen.getAllByRole('dialog')).toHaveLength(1);
+    expect(await candidates()).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+
+    await user.click(screen.getByRole('button', { name: 'Thicker border' }));
+    await user.click(second);
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(onSave).toHaveBeenCalledWith(
-      'https://cdn/a.jpg',
-      expect.objectContaining({ upload: true })
-    );
+    expect(onSave).toHaveBeenCalledWith('https://cdn/b.jpg', expect.objectContaining({
+      overlayOptions: { border_px: 9 },
+    }));
+
+    await user.click(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.getByRole('button', { name: /Edit style/ })).toBeInTheDocument();
+  });
+
+  it('puts the edits back when a reset is undone', async () => {
+    const user = userEvent.setup();
+    const { onSave } = renderModal();
+    const [first] = await candidates();
+    await user.click(first);
+    await user.click(screen.getByRole('button', { name: /Edit style/ }));
+    await user.click(screen.getByRole('button', { name: 'Thicker border' }));
+
+    await user.click(screen.getByRole('button', { name: 'Reset to defaults' }));
+    await user.click(await screen.findByRole('button', { name: 'Undo' }));
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(onSave).toHaveBeenCalledWith('https://cdn/a.jpg', expect.objectContaining({
+      overlayOptions: { border_px: 9 },
+    }));
   });
 
   it('titles a season pick with its season label', async () => {

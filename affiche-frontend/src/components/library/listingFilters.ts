@@ -7,8 +7,10 @@ export const STATUS_FILTER_OPTIONS: {
   count: keyof ItemStatusCounts;
 }[] = [
   { value: 'all', label: 'All items', count: 'total' },
-  { value: 'unprocessed', label: 'Unprocessed', count: 'unprocessed' },
-  { value: 'errors', label: 'With errors', count: 'errors' },
+  { value: 'unprocessed', label: 'No poster yet', count: 'unprocessed' },
+  { value: 'ready', label: 'Ready to upload', count: 'ready' },
+  { value: 'uploaded', label: 'On server', count: 'uploaded' },
+  { value: 'errors', label: 'Failed', count: 'errors' },
   { value: 'locked', label: 'Locked', count: 'locked' },
 ];
 

@@ -71,14 +71,14 @@ export function EpisodeList({
 
       {isLoading ? (
         <div className={styles.loading}>
-          <div className={styles.spinner} />
-          <span>Loading episodes...</span>
+          <div className={`${styles.spinner} spin`} />
+          <span>Loading episodes…</span>
         </div>
       ) : episodes.length === 0 ? (
         <div className={styles.empty}>
           <p>No episodes tracked for this season</p>
           <p className="text-muted">
-            Enable “Track episodes” for this library (Settings → Media Servers) and re-sync to see
+            Enable “Track episodes” for this library (Settings → Media servers) and re-sync to see
             per-episode details here.
           </p>
         </div>

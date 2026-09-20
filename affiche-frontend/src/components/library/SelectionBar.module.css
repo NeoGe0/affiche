@@ -1,14 +1,14 @@
 .bar {
   position: sticky;
   top: var(--header-height);
-  z-index: 5;
+  z-index: var(--z-sticky);
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 16px;
   padding: 10px 16px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   background-color: var(--bg-card);
   box-shadow: var(--shadow-md);
 }
@@ -20,8 +20,8 @@
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
   color: var(--text-secondary);
   background-color: transparent;
   transition: background-color 0.15s, color 0.15s;
@@ -42,7 +42,7 @@
 }
 
 .count {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
@@ -62,4 +62,17 @@
 
 .close {
   padding: 6px;
+}
+
+.matching {
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--accent);
+  background-color: transparent;
+}
+
+.matching:hover:not(:disabled) {
+  background-color: var(--bg-hover);
 }

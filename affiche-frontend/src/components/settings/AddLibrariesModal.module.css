@@ -25,7 +25,7 @@
 }
 
 .count {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
 }
 
@@ -36,8 +36,8 @@
 
 .bulkButton {
   padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
   color: var(--accent);
   background: none;
   border: none;
@@ -61,7 +61,7 @@
   padding: 12px;
   background-color: var(--bg-tertiary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
 }
 
@@ -88,23 +88,23 @@
 }
 
 .meta {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
 .type {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   text-transform: capitalize;
 }
 
 .cancelButton {
   flex: 1;
   padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background-color: transparent;
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   transition: all 0.15s;
 }
@@ -120,31 +120,23 @@
   justify-content: center;
   gap: 6px;
   padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: none;
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   transition: all 0.15s;
 }
 
 .addButton:hover:not(:disabled) {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
 }
 
 .addButton:disabled,
 .cancelButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 .defaults {

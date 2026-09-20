@@ -1,6 +1,6 @@
 .form {
   background-color: var(--bg-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 24px;
 }
 
@@ -9,14 +9,14 @@
 }
 
 .title {
-  font-size: 1.1rem;
+  font-size: var(--text-xl);
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 4px;
 }
 
 .description {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
 }
 
@@ -26,7 +26,7 @@
 
 .label {
   display: block;
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 6px;
@@ -37,9 +37,9 @@
   padding: 10px 12px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   transition: border-color 0.15s;
 }
 
@@ -61,7 +61,7 @@
 
 .hint {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   margin-top: 4px;
 }
@@ -82,7 +82,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--accent);
   text-decoration: none;
   transition: color 0.15s;
@@ -101,11 +101,11 @@
   padding: 10px 12px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 
 .maskedValue {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
   font-family: monospace;
   letter-spacing: 0.05em;
@@ -113,11 +113,11 @@
 
 .changeTokenButton {
   flex-shrink: 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--accent);
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   transition: background-color 0.15s;
 }
 
@@ -140,7 +140,7 @@
   transform: translateY(-50%);
   padding: 6px;
   color: var(--text-muted);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .toggleToken:hover {
@@ -153,7 +153,7 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .checkboxLabel input[type="checkbox"] {
@@ -173,32 +173,19 @@
   align-items: center;
   gap: 6px;
   padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   font-weight: 500;
   transition: all 0.15s;
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
 }
 
 .saveButton:hover:not(:disabled) {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
 }
 
 .saveButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }

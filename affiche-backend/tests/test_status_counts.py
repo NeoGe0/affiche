@@ -58,6 +58,7 @@ def _seed(db, library_id: int, items: list[dict]) -> None:
         entity.processed = item.get("processed", False)
         entity.error_message = item.get("error_message")
         entity.poster_provider = item.get("poster_provider")
+        entity.poster_uploaded_at = item.get("poster_uploaded_at")
         repo.create_or_update_item(entity)
     db.commit()
 
@@ -238,3 +239,36 @@ def test_the_poster_breakdown_counts_seasons_as_posters_of_their_own(db, library
     counts = LibraryService(db).count_posters_by_provider(LibraryItemSearch(library_id=library_id))
 
     assert counts == {"tmdb": 1, "mediux": 2}
+
+def test_ready_and_uploaded_buckets_agree_with_their_filters(db, library_id):
+    from datetime import datetime
+    uploaded_at = datetime(2026, 9, 1)
+    _seed(db, library_id, [
+        {"title": "Pending"},
+        {"title": "Ready One", "processed": True},
+        {"title": "Ready Two", "processed": True},
+        {"title": "On Server", "processed": True, "poster_uploaded_at": uploaded_at},
+        {"title": "Failed Again", "processed": True, "error_message": "boom",
+         "poster_uploaded_at": uploaded_at},
+        {"title": "Failed", "error_message": "boom"},
+    ])
+
+    stats = LibraryService(db).count_status_buckets(LibraryItemSearch(library_id=library_id))
+
+    assert stats.ready == 2 == _listing_count(db, library_id, ItemStatusFilter.READY)
+    assert stats.uploaded == 2 == _listing_count(db, library_id, ItemStatusFilter.UPLOADED)
+
+def test_status_and_uploaded_cannot_both_be_passed(library_id):
+    with pytest.raises(ValueError):
+        LibraryItemSearch(library_id=library_id, status=ItemStatusFilter.READY, uploaded=True)
+
+def test_item_ids_cover_every_match_in_listing_order_regardless_of_paging(db, library_id):
+    _seed(db, library_id, [{"title": t} for t in ["Charlie", "Alpha", "Bravo"]]
+          + [{"title": "Done", "processed": True}])
+    service = LibraryService(db)
+
+    ids = service.find_item_ids(LibraryItemSearch(
+        library_id=library_id, status=ItemStatusFilter.UNPROCESSED, page=1, page_size=1))
+
+    titles = {item.id: item.title for item in service.find_items(LibraryItemSearch(library_id=library_id))}
+    assert [titles[i] for i in ids] == ["Alpha", "Bravo", "Charlie"]

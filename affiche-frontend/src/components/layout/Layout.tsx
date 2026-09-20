@@ -1,8 +1,12 @@
 import { useEffect, useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
+import { useMediaQuery } from '../../hooks';
 import { GlobalSearchModal } from '../search';
 import type { Library, MediaServerResponse, SearchHit } from '../../types';
 import styles from './Layout.module.css';
+
+const NARROW_QUERY = '(max-width: 899px)';
 
 interface MediaServerWithLibraries {
   server: MediaServerResponse;
@@ -36,6 +40,26 @@ export function Layout({
   const [collapsed, setCollapsed] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  const isNarrow = useMediaQuery(NARROW_QUERY);
+  const [overlayOpen, setOverlayOpen] = useState(false);
+  const location = useLocation();
+  const [prevLocation, setPrevLocation] = useState(location);
+  if (location !== prevLocation) {
+
+    setPrevLocation(location);
+    setOverlayOpen(false);
+  }
+  const isOverlayShown = isNarrow && overlayOpen;
+
+  useEffect(() => {
+    if (!isOverlayShown) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOverlayOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOverlayShown]);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() === 'k' && (event.ctrlKey || event.metaKey)) {
@@ -54,14 +78,18 @@ export function Layout({
         selectedMediaServerId={selectedMediaServerId}
         selectedLibraryId={selectedLibraryId}
         view={view}
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed(c => !c)}
+        collapsed={isNarrow || collapsed}
+        overlayOpen={isOverlayShown}
+        onToggleCollapse={() => (isNarrow ? setOverlayOpen((open) => !open) : setCollapsed((c) => !c))}
         onSelectLibrary={onSelectLibrary}
         onSelectTrash={onSelectTrash}
         onSelectCollections={onSelectCollections}
         onOpenSearch={() => setIsSearchOpen(true)}
       />
-      <main className={`${styles.main} ${collapsed ? styles.mainCollapsed : ''}`}>{children}</main>
+      {isOverlayShown && (
+        <div className={styles.overlayBackdrop} onClick={() => setOverlayOpen(false)} aria-hidden="true" />
+      )}
+      <main className={`${styles.main} ${isNarrow || collapsed ? styles.mainCollapsed : ''}`}>{children}</main>
       {isSearchOpen && (
         <GlobalSearchModal
           onClose={() => setIsSearchOpen(false)}

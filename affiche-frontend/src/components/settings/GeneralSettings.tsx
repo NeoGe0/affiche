@@ -75,7 +75,7 @@ export function GeneralSettings() {
       </h2>
       <p className={sectionStyles.sectionDescription}>
         App-wide preferences and diagnostics. Defaults for newly added libraries live with the
-        libraries themselves, under Media Servers.
+        libraries themselves, under Media servers.
       </p>
 
       {}

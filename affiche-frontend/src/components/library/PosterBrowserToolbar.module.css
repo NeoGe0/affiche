@@ -9,6 +9,44 @@
 
 .toolbarRow {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.count {
+  align-self: center;
+  margin-top: 22px;
+  font-size: var(--text-md);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.findToggle {
+  margin-left: auto;
+}
+
+.findToggle svg {
+  transition: transform 0.15s;
+}
+
+.findToggle .chevronOpen {
+  transform: rotate(180deg);
+}
+
+.findPanel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border);
+}
+
+.findGroup {
+  display: flex;
+  flex: 1 1 360px;
   gap: 12px;
   align-items: flex-end;
 }
@@ -20,7 +58,7 @@
 }
 
 .sourceLabel {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
 }
 
@@ -30,13 +68,13 @@
   padding: 3px;
   background-color: var(--bg-tertiary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .segment {
   padding: 7px 16px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--text-secondary);
   white-space: nowrap;
@@ -49,7 +87,7 @@
 }
 
 .segmentActive {
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
 }
 
@@ -57,7 +95,7 @@
   margin: 0 0 8px;
   align-self: flex-end;
   max-width: 320px;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   line-height: 1.4;
   color: var(--text-muted);
 }
@@ -81,18 +119,18 @@
 }
 
 .inputGroup label {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
 }
 
 .inputGroup input,
 .inputGroup select {
   padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .inputGroup select {
@@ -122,8 +160,8 @@
   align-items: center;
   gap: 6px;
   padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   font-weight: 500;
   color: var(--text-primary);
   background-color: var(--bg-tertiary);
@@ -164,5 +202,13 @@
   .searchButton {
     width: 100%;
     justify-content: center;
+  }
+
+  .findGroup {
+    flex-wrap: wrap;
+  }
+
+  .findToggle {
+    margin-left: 0;
   }
 }

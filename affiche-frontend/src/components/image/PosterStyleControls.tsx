@@ -24,6 +24,9 @@ interface PosterStyleControlsProps {
 const asPercent = (ratio: number) => Math.round(ratio * 100);
 const fromPercent = (value: string) => parseInt(value) / 100;
 
+const GRAIN_SIZE_MIN = 0.5;
+const GRAIN_SIZE_MAX = 10;
+
 const GRADIENT_DIRECTIONS: { value: OverlayOptions['gradient_direction']; label: string }[] = [
   { value: 'bottom', label: 'Bottom' },
   { value: 'top', label: 'Top' },
@@ -288,152 +291,280 @@ export function PosterStyleControls({
           </select>
         </div>
 
-        <div className={styles.row}>
-          <label
-            className={styles.label}
-            htmlFor={`${uid}-vertical-position`}
-            title={textOptions.gravity === 'center'
-              ? 'Where the title sits, measured from the bottom — 50% is the middle of the poster'
-              : 'Distance of the title from the poster edge — higher moves it further in'}
-          >
-            Vertical position
-          </label>
-          <div className={styles.sliderWrapper}>
-            <input
-              id={`${uid}-vertical-position`}
-              type="range"
-              min="0"
-              max="100"
-              className={styles.slider}
-              value={verticalPositionPercent}
-              onChange={(e) => onTextChange({ text_offset_ratio: fromPercent(e.target.value) })}
-            />
-            <span className={styles.sliderValue}>{verticalPositionPercent}%</span>
+        <div className={styles.field}>
+          <div className={styles.row}>
+            <label className={styles.label} htmlFor={`${uid}-vertical-position`}>
+              Vertical position
+            </label>
+            <div className={styles.sliderWrapper}>
+              <input
+                id={`${uid}-vertical-position`}
+                type="range"
+                min="0"
+                max="100"
+                className={styles.slider}
+                value={verticalPositionPercent}
+                aria-describedby={`${uid}-vertical-position-help`}
+                onChange={(e) => onTextChange({ text_offset_ratio: fromPercent(e.target.value) })}
+              />
+              <span className={styles.sliderValue}>{verticalPositionPercent}%</span>
+            </div>
           </div>
-        </div>
-
-        <div className={styles.row}>
-          <label
-            className={styles.label}
-            htmlFor={`${uid}-line-spacing`}
-            title="Gap between lines of a multi-line title — negative pulls them together"
-          >
-            Line spacing
-          </label>
-          <div className={styles.sliderWrapper}>
-            <input
-              id={`${uid}-line-spacing`}
-              type="range"
-              min="-20"
-              max="100"
-              className={styles.slider}
-              value={lineSpacingPercent}
-              onChange={(e) => onTextChange({ line_spacing_ratio: fromPercent(e.target.value) })}
-            />
-            <span className={styles.sliderValue}>{lineSpacingPercent}%</span>
-          </div>
-        </div>
-
-        <div className={styles.row}>
-          <label
-            className={styles.label}
-            htmlFor={`${uid}-text-width`}
-            title="How much of the poster's width a line of the title may use"
-          >
-            Text width
-          </label>
-          <div className={styles.sliderWrapper}>
-            <input
-              id={`${uid}-text-width`}
-              type="range"
-              min="10"
-              max="100"
-              className={styles.slider}
-              value={textWidthPercent}
-              onChange={(e) => onTextChange({ max_width_ratio: fromPercent(e.target.value) })}
-            />
-            <span className={styles.sliderValue}>{textWidthPercent}%</span>
-          </div>
+          <p className={styles.help} id={`${uid}-vertical-position-help`}>
+            {textOptions.gravity === 'center'
+              ? 'Measured from the bottom — 50% is the middle of the poster.'
+              : 'Distance from the poster edge — higher moves the title further in.'}
+          </p>
         </div>
 
         {
 
 }
-        <div className={styles.row}>
-          <label
-            className={styles.label}
-            htmlFor={`${uid}-text-block-height`}
-            title="How much of the poster's height the whole title may fill — raise it to let line spacing spread instead of shrinking the text"
-          >
-            Text block height
-          </label>
-          <div className={styles.sliderWrapper}>
-            <input
-              id={`${uid}-text-block-height`}
-              type="range"
-              min="5"
-              max="100"
-              className={styles.slider}
-              value={textBlockHeightPercent}
-              onChange={(e) => onTextChange({ max_height_ratio: fromPercent(e.target.value) })}
-            />
-            <span className={styles.sliderValue}>{textBlockHeightPercent}%</span>
-          </div>
-        </div>
+        <details className={styles.fineTune}>
+          <summary className={styles.fineTuneSummary}>Fine-tune the title</summary>
 
-        <div className={styles.row}>
-          <label className={styles.checkbox} title="Break a long title across lines by itself, so it can be drawn larger. Line breaks typed into the title are always kept, and turn this off for that title.">
-            <input
-              type="checkbox"
-              checked={textOptions.auto_wrap}
-              onChange={(e) => onTextChange({ auto_wrap: e.target.checked })}
-            />
-            <span>Auto line breaks</span>
-          </label>
-        </div>
-
-        <div className={styles.row}>
-          <label className={styles.checkbox} title="Start a new line where the title contains one of these separators">
-            <input
-              type="checkbox"
-              checked={textOptions.break_on_symbols}
-              onChange={(e) => onTextChange({ break_on_symbols: e.target.checked })}
-            />
-            <span>Break on “ - ”, “: ”</span>
-          </label>
-        </div>
-
-        <div className={styles.row}>
-          <label className={styles.checkbox}>
-            <input
-              type="checkbox"
-              checked={textOptions.stroke_enabled}
-              onChange={(e) => onTextChange({ stroke_enabled: e.target.checked })}
-            />
-            <span>Text outline</span>
-          </label>
-          {textOptions.stroke_enabled && (
-            <div className={styles.colorRow}>
-              {
-}
-              <input
-                type="color"
-                aria-label="Outline color"
-                className={styles.colorInput}
-                value={textOptions.stroke_color}
-                onChange={(e) => onTextChange({ stroke_color: e.target.value })}
-              />
-              <span className={styles.colorValue}>{textOptions.stroke_color}</span>
+          <div className={styles.field}>
+            <div className={styles.row}>
+              <label className={styles.label} htmlFor={`${uid}-line-spacing`}>Line spacing</label>
+              <div className={styles.sliderWrapper}>
+                <input
+                  id={`${uid}-line-spacing`}
+                  type="range"
+                  min="-20"
+                  max="100"
+                  className={styles.slider}
+                  value={lineSpacingPercent}
+                  aria-describedby={`${uid}-line-spacing-help`}
+                  onChange={(e) => onTextChange({ line_spacing_ratio: fromPercent(e.target.value) })}
+                />
+                <span className={styles.sliderValue}>{lineSpacingPercent}%</span>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
+            <p className={styles.help} id={`${uid}-line-spacing-help`}>
+              Gap between the lines of a multi-line title. Negative pulls them together.
+            </p>
+          </div>
 
-      {jpegQuality !== undefined && onQualityChange && (
-        <div className={styles.group} role="group" aria-labelledby={`${uid}-output`}>
-          <h4 className={styles.groupTitle} id={`${uid}-output`}>Output</h4>
+          <div className={styles.field}>
+            <div className={styles.row}>
+              <label className={styles.label} htmlFor={`${uid}-text-width`}>Text width</label>
+              <div className={styles.sliderWrapper}>
+                <input
+                  id={`${uid}-text-width`}
+                  type="range"
+                  min="10"
+                  max="100"
+                  className={styles.slider}
+                  value={textWidthPercent}
+                  aria-describedby={`${uid}-text-width-help`}
+                  onChange={(e) => onTextChange({ max_width_ratio: fromPercent(e.target.value) })}
+                />
+                <span className={styles.sliderValue}>{textWidthPercent}%</span>
+              </div>
+            </div>
+            <p className={styles.help} id={`${uid}-text-width-help`}>
+              How much of the poster&apos;s width one line of the title may use.
+            </p>
+          </div>
+
+          {
+
+}
+          <div className={styles.field}>
+            <div className={styles.row}>
+              <label className={styles.label} htmlFor={`${uid}-text-block-height`}>Text block height</label>
+              <div className={styles.sliderWrapper}>
+                <input
+                  id={`${uid}-text-block-height`}
+                  type="range"
+                  min="5"
+                  max="100"
+                  className={styles.slider}
+                  value={textBlockHeightPercent}
+                  aria-describedby={`${uid}-text-block-height-help`}
+                  onChange={(e) => onTextChange({ max_height_ratio: fromPercent(e.target.value) })}
+                />
+                <span className={styles.sliderValue}>{textBlockHeightPercent}%</span>
+              </div>
+            </div>
+            <p className={styles.help} id={`${uid}-text-block-height-help`}>
+              How much of the poster&apos;s height the whole title may fill. Raise it to let line
+              spacing spread the lines instead of shrinking the text.
+            </p>
+          </div>
+
+          <div className={styles.field}>
+            <div className={styles.row}>
+              <label className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={textOptions.auto_wrap}
+                  aria-describedby={`${uid}-auto-wrap-help`}
+                  onChange={(e) => onTextChange({ auto_wrap: e.target.checked })}
+                />
+                <span>Auto line breaks</span>
+              </label>
+            </div>
+            <p className={styles.help} id={`${uid}-auto-wrap-help`}>
+              Breaks a long title across lines so it can be drawn larger. Line breaks typed into a
+              title are always kept, and turn this off for that title.
+            </p>
+          </div>
+
+          <div className={styles.field}>
+            <div className={styles.row}>
+              <label className={styles.checkbox}>
+                <input
+                  type="checkbox"
+                  checked={textOptions.break_on_symbols}
+                  aria-describedby={`${uid}-break-symbols-help`}
+                  onChange={(e) => onTextChange({ break_on_symbols: e.target.checked })}
+                />
+                <span>Break on “ - ”, “: ”</span>
+              </label>
+            </div>
+            <p className={styles.help} id={`${uid}-break-symbols-help`}>
+              Starts a new line where the title contains one of these separators.
+            </p>
+          </div>
 
           <div className={styles.row}>
+            <label className={styles.checkbox}>
+              <input
+                type="checkbox"
+                checked={textOptions.stroke_enabled}
+                onChange={(e) => onTextChange({ stroke_enabled: e.target.checked })}
+              />
+              <span>Text outline</span>
+            </label>
+            {textOptions.stroke_enabled && (
+              <div className={styles.colorRow}>
+                {
+}
+                <input
+                  type="color"
+                  aria-label="Outline color"
+                  className={styles.colorInput}
+                  value={textOptions.stroke_color}
+                  onChange={(e) => onTextChange({ stroke_color: e.target.value })}
+                />
+                <span className={styles.colorValue}>{textOptions.stroke_color}</span>
+              </div>
+            )}
+          </div>
+        </details>
+      </div>
+
+      {
+
+}
+      <details className={`${styles.group} ${styles.foldedGroup}`}>
+        <summary className={styles.groupSummary} id={`${uid}-effects`}>Effects</summary>
+
+        <div role="group" aria-labelledby={`${uid}-effects`}>
+          <div className={styles.row}>
+            <label className={styles.label} htmlFor={`${uid}-vignette`}>Vignette</label>
+            <div className={styles.sliderWrapper}>
+              <input
+                id={`${uid}-vignette`}
+                type="range"
+                min="0"
+                max="100"
+                className={styles.slider}
+                value={asPercent(overlayOptions.vignette_strength)}
+                onChange={(e) => onOverlayChange({ vignette_strength: fromPercent(e.target.value) })}
+              />
+              <span className={styles.sliderValue}>{asPercent(overlayOptions.vignette_strength)}%</span>
+            </div>
+          </div>
+
+          <div className={styles.row}>
+            <label className={styles.label} htmlFor={`${uid}-vignette-color`}>Vignette color</label>
+            <div className={styles.colorRow}>
+              <input
+                id={`${uid}-vignette-color`}
+                type="color"
+                className={styles.colorInput}
+                value={overlayOptions.vignette_color}
+                disabled={overlayOptions.vignette_strength <= 0}
+                onChange={(e) => onOverlayChange({ vignette_color: e.target.value })}
+              />
+              <span className={styles.colorValue}>{overlayOptions.vignette_color}</span>
+            </div>
+          </div>
+
+          <div className={styles.row}>
+            <label className={styles.label} htmlFor={`${uid}-glow`}>Inner glow</label>
+            <div className={styles.sliderWrapper}>
+              <input
+                id={`${uid}-glow`}
+                type="range"
+                min="0"
+                max="100"
+                className={styles.slider}
+                value={asPercent(overlayOptions.inner_glow_strength)}
+                onChange={(e) => onOverlayChange({ inner_glow_strength: fromPercent(e.target.value) })}
+              />
+              <span className={styles.sliderValue}>{asPercent(overlayOptions.inner_glow_strength)}%</span>
+            </div>
+          </div>
+
+          <div className={styles.row}>
+            <label className={styles.label} htmlFor={`${uid}-glow-color`}>Glow color</label>
+            <div className={styles.colorRow}>
+              <input
+                id={`${uid}-glow-color`}
+                type="color"
+                className={styles.colorInput}
+                value={overlayOptions.inner_glow_color}
+                disabled={overlayOptions.inner_glow_strength <= 0}
+                onChange={(e) => onOverlayChange({ inner_glow_color: e.target.value })}
+              />
+              <span className={styles.colorValue}>{overlayOptions.inner_glow_color}</span>
+            </div>
+          </div>
+
+          <div className={styles.row}>
+            <label className={styles.label} htmlFor={`${uid}-grain`}>Grain</label>
+            <div className={styles.sliderWrapper}>
+              <input
+                id={`${uid}-grain`}
+                type="range"
+                min="0"
+                max="100"
+                className={styles.slider}
+                value={asPercent(overlayOptions.grain_amount)}
+                onChange={(e) => onOverlayChange({ grain_amount: fromPercent(e.target.value) })}
+              />
+              <span className={styles.sliderValue}>{asPercent(overlayOptions.grain_amount)}%</span>
+            </div>
+          </div>
+
+          <div className={styles.row}>
+            <label className={styles.label} htmlFor={`${uid}-grain-size`}>Grain size</label>
+            <div className={styles.sliderWrapper}>
+              <input
+                id={`${uid}-grain-size`}
+                type="range"
+                min={GRAIN_SIZE_MIN}
+                max={GRAIN_SIZE_MAX}
+                step="0.5"
+                className={styles.slider}
+                value={overlayOptions.grain_size}
+                disabled={overlayOptions.grain_amount <= 0}
+                onChange={(e) => onOverlayChange({ grain_size: parseFloat(e.target.value) })}
+              />
+              <span className={styles.sliderValue}>{overlayOptions.grain_size}×</span>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      {jpegQuality !== undefined && onQualityChange && (
+        <details className={`${styles.group} ${styles.foldedGroup}`}>
+          <summary className={styles.groupSummary} id={`${uid}-output`}>Output</summary>
+
+          <div className={styles.row} role="group" aria-labelledby={`${uid}-output`}>
             <label className={styles.label} htmlFor={`${uid}-quality`}>Image quality</label>
             <div className={styles.sliderWrapper}>
               <input
@@ -448,7 +579,7 @@ export function PosterStyleControls({
               <span className={styles.sliderValue}>{jpegQuality}</span>
             </div>
           </div>
-        </div>
+        </details>
       )}
     </div>
   );

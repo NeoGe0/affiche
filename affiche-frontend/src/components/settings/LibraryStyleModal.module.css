@@ -13,12 +13,10 @@
   gap: 10px;
   margin: 0;
   padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-left-width: 3px;
-  border-left-color: var(--warning);
-  border-radius: 10px;
-  background-color: var(--bg-secondary);
-  font-size: 0.85rem;
+  border: 1px solid var(--notice-warning-edge);
+  border-radius: var(--radius-xl);
+  background-color: var(--notice-warning-tint);
+  font-size: var(--text-md);
   color: var(--text-secondary);
 }
 
@@ -33,12 +31,12 @@
   flex-direction: column;
   gap: 10px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 14px 16px;
 }
 
 .modeLegend {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--text-secondary);
   padding: 0 6px;
@@ -58,7 +56,7 @@
 }
 
 .modeName {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
 }
 
@@ -70,7 +68,7 @@
 }
 
 .profileLabel {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -79,10 +77,10 @@
 .profileNameInput {
   padding: 6px 10px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
 }
 
 .profileSelect {
@@ -115,7 +113,7 @@
 .previewColumn {
   flex-shrink: 0;
   width: 240px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-md);
 }
@@ -129,4 +127,16 @@
 .controlsColumn {
   flex: 1;
   min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .editor {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .previewColumn {
+    width: min(240px, 100%);
+    align-self: center;
+  }
 }

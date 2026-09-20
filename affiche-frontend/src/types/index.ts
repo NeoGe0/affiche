@@ -36,7 +36,7 @@ export interface Library {
   enabled?: boolean;
 }
 
-export type ItemStatusFilter = 'unprocessed' | 'errors' | 'locked';
+export type ItemStatusFilter = 'unprocessed' | 'errors' | 'locked' | 'ready' | 'uploaded';
 
 export const NO_PROVIDER = 'none';
 
@@ -47,6 +47,11 @@ export interface PosterCandidate {
   rank: number;
 
   rank_score: number;
+
+  language?: string | null;
+  textless?: boolean | null;
+  width?: number | null;
+  height?: number | null;
 }
 
 export type ItemProviderFilter = string | undefined;
@@ -60,7 +65,7 @@ export interface SortState {
 
 export type ViewMode = 'grid' | 'list';
 
-export type TaskKind = 'sync' | 'generate' | 'reset' | 'other';
+export type TaskKind = 'sync' | 'generate' | 'upload' | 'reset' | 'other';
 
 export interface TaskProgressState {
   current: number;
@@ -84,6 +89,8 @@ export interface LibraryItem {
   last_seen_at?: string;
 
   poster_uploaded_at?: string;
+
+  poster_generated_at?: string | null;
   imdb_id?: string;
   tmdb_id?: string;
   tvdb_id?: string;
@@ -194,6 +201,10 @@ export interface ItemStatusCounts {
   unprocessed: number;
   errors: number;
   locked: number;
+
+  ready?: number;
+
+  uploaded?: number;
 }
 
 export interface ItemStats {
@@ -203,6 +214,8 @@ export interface ItemStats {
   errors: number;
   locked: number;
   uploaded: number;
+
+  ready?: number;
 }
 
 export interface DashboardLibrary {

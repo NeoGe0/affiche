@@ -24,7 +24,7 @@ function renderForm(props: Props = {}) {
 }
 
 const saveButton = () => screen.getByRole('button', { name: /save/i });
-const tokenField = () => screen.getByLabelText('API Token');
+const tokenField = () => screen.getByLabelText('API token');
 
 describe('ConfigForm', () => {
   it('starts in token-entry mode when nothing is configured yet', () => {
@@ -38,7 +38,7 @@ describe('ConfigForm', () => {
     renderForm({ hasStoredToken: true, storedTokenHint: 'c3et',
                  initialUrl: TEST_URL });
 
-    expect(screen.queryByLabelText('API Token')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('API token')).not.toBeInTheDocument();
 
     expect(screen.getByText(/c3et/)).toBeInTheDocument();
     expect(screen.getByLabelText('API URL')).toHaveValue(TEST_URL);
@@ -141,7 +141,7 @@ describe('ConfigForm for a provider with an open API', () => {
   it('asks for no token at all', () => {
     renderForm({ hideToken: true });
 
-    expect(screen.queryByLabelText('API Token')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('API token')).not.toBeInTheDocument();
   });
 
   it('can still validate, since reachability is the only question left', async () => {

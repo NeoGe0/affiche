@@ -4,7 +4,7 @@ from typing import Optional, List
 import requests
 
 from affiche.config.http_config import HTTP_TIMEOUT
-from affiche.external.poster.provider.base_provider import ExternalProvider
+from affiche.external.poster.provider.base_provider import ExternalProvider, PosterImage
 
 logger = logging.getLogger(__name__)
 
@@ -167,11 +167,7 @@ class TMDBClient(ExternalProvider):
             posters = data.get("posters", [])
             posters.sort(key=lambda x: x.get("vote_average", 0), reverse=True)
 
-            return [
-                f"{self.IMAGE_BASE_URL}{poster['file_path']}"
-                for poster in posters
-                if poster.get("file_path")
-            ]
+            return [self._image(poster) for poster in posters if poster.get("file_path")]
         except requests.RequestException as e:
             logger.error(f"Error fetching TMDB posters for {tmdb_id}: {e}")
             return []
@@ -192,14 +188,19 @@ class TMDBClient(ExternalProvider):
             posters = data.get("posters", [])
             posters.sort(key=lambda x: x.get("vote_average", 0), reverse=True)
 
-            return [
-                f"{self.IMAGE_BASE_URL}{poster['file_path']}"
-                for poster in posters
-                if poster.get("file_path")
-            ]
+            return [self._image(poster) for poster in posters if poster.get("file_path")]
         except requests.RequestException as e:
             logger.error(f"Error fetching TMDB season posters for {tmdb_id} S{season_number}: {e}")
             return []
+
+    def _image(self, poster: dict) -> PosterImage:
+        code = poster.get("iso_639_1")
+        no_language = code in (None, "xx")
+        return PosterImage(f"{self.IMAGE_BASE_URL}{poster['file_path']}",
+                           language=None if no_language else code,
+                           textless=no_language,
+                           width=poster.get("width"),
+                           height=poster.get("height"))
 
     def _get_provider_media_type(self, media_type: str) -> str:
         return "movie" if media_type == "movie" else "tv"

@@ -4,6 +4,7 @@ import { ChevronUp, ChevronDown, Plus, X } from 'lucide-react';
 import { ORDERABLE_LANGUAGES, languageLabel } from '../../constants/languages';
 import { ReorderableList } from './ReorderableList';
 import { moveItem } from './reorder';
+import { useMenuKeyboard } from '../../hooks/useMenuKeyboard';
 import rowStyles from './ReorderableList.module.css';
 import styles from './LanguageOrderList.module.css';
 
@@ -17,6 +18,8 @@ interface LanguageOrderListProps {
 export function LanguageOrderList({ languages, onChange, disabled = false }: LanguageOrderListProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const addRef = useRef<HTMLDivElement>(null);
+  const { menuRef, triggerRef, onKeyDown } =
+    useMenuKeyboard<HTMLDivElement, HTMLButtonElement>(isAddOpen, () => setIsAddOpen(false));
 
   const available = ORDERABLE_LANGUAGES.filter((lang) => !languages.includes(lang.value));
 
@@ -84,6 +87,7 @@ export function LanguageOrderList({ languages, onChange, disabled = false }: Lan
 
       <div className={styles.add} ref={addRef}>
         <button
+          ref={triggerRef}
           type="button"
           className={styles.addButton}
           onClick={() => setIsAddOpen((open) => !open)}
@@ -97,12 +101,13 @@ export function LanguageOrderList({ languages, onChange, disabled = false }: Lan
         </button>
 
         {isAddOpen && available.length > 0 && (
-          <div className={styles.addDropdown} role="menu">
+          <div ref={menuRef} className={styles.addDropdown} role="menu" onKeyDown={onKeyDown}>
             {available.map((lang) => (
               <button
                 key={lang.value || 'textless'}
                 type="button"
                 role="menuitem"
+                tabIndex={-1}
                 className={styles.addItem}
                 onClick={() => add(lang.value)}
               >

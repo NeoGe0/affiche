@@ -179,6 +179,7 @@ export function CollectionsPage({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search collections…"
+              aria-label="Search collections"
             />
           </div>
           {
@@ -217,7 +218,7 @@ export function CollectionsPage({
             {search
               ? 'No collection matches that search.'
               : `Collection sync is off by default. Turn on "Track collections" for ${library.name} in
-                 Settings → Media Servers, then sync the library — or create one here.`}
+                 Settings → Media servers, then sync the library — or create one here.`}
           </p>
         </div>
       ) : (
@@ -242,7 +243,7 @@ export function CollectionsPage({
     if (dialog.kind === 'match') {
       return (
         <ConfirmModal
-          title="Match Collections"
+          title="Match collections"
           message={`This will look up the collections in ${library.name} that have no catalogue match yet, so their artwork can come from TMDB or MediUX. Collections that match nothing are re-checked every time you run this. Continue?`}
           confirmLabel="Match"
           onConfirm={() => void matchCollections()}
@@ -321,8 +322,9 @@ export function CollectionsPage({
       return (
         <ConfirmModal
           title="Remove from collection"
-          message={`Remove "${dialog.item.title}" from this collection? The item itself is not deleted.`}
-          confirmLabel="Remove"
+
+          message={`Remove "${dialog.item.title}" from this collection on ${mediaServerName ?? 'the media server'}? The change is made on the server straight away. The item itself is not deleted, and can be added back.`}
+          confirmLabel="Remove on server"
           onCancel={close}
           onConfirm={async () => {
             await collections.removeItems(dialog.collectionId, [dialog.item.id]);

@@ -92,7 +92,7 @@ export function PosterApisSettings({ configs, onConfigSaved }: PosterApisSetting
         </div>
         <button className={styles.saveButton} onClick={() => setIsAddOpen(true)}>
           <Plus size={16} />
-          Add Provider
+          Add provider
         </button>
       </div>
 
@@ -118,7 +118,7 @@ export function PosterApisSettings({ configs, onConfigSaved }: PosterApisSetting
         </div>
       ) : (
         <div className={styles.emptyState}>
-          No poster providers yet. Click "Add Provider" to configure one — TMDB is a good place to
+          No poster providers yet. Click "Add provider" to configure one — TMDB is a good place to
           start.
         </div>
       )}

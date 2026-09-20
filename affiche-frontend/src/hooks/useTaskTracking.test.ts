@@ -24,7 +24,7 @@ describe('taskKindFromName', () => {
   });
 
   it('falls back to a bar-less kind for anything else', () => {
-    expect(taskKindFromName('poster_upload_2')).toBe('other');
+    expect(taskKindFromName('poster_upload_2')).toBe('upload');
     expect(taskKindFromName('something_new')).toBe('other');
     expect(taskKindFromName(undefined)).toBe('other');
   });

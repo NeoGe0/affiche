@@ -181,7 +181,7 @@ export function LibraryStyleModal({
             <span>
               <span className={styles.modeName}>Global style</span>
               <span className={sectionStyles.settingDescription}>
-                Follow Settings → Style Options, including later changes to it.
+                Follow Settings → Style options, including later changes to it.
               </span>
             </span>
           </label>

@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import requests
 
 from affiche.config.http_config import HTTP_TIMEOUT
-from affiche.external.poster.provider.base_provider import ExternalProvider
+from affiche.external.poster.provider.base_provider import ExternalProvider, PosterImage
 
 logger = logging.getLogger(__name__)
 
@@ -293,13 +293,14 @@ class MediuxClient(ExternalProvider):
             return False
         return ((asset.get("language") or {}).get("iso_639_1")) == language
 
-    def _asset_url(self, asset: dict) -> Optional[str]:
+    def _asset_url(self, asset: dict) -> Optional[PosterImage]:
         asset_id = (asset or {}).get("id")
         if not asset_id:
             return None
         url = f"{self.image_base}/{asset_id}"
         version = self._format_modified(asset.get("modified_on"))
-        return f"{url}?v={version}" if version else url
+        return PosterImage(f"{url}?v={version}" if version else url,
+                           language=(asset.get("language") or {}).get("iso_639_1"))
 
     @staticmethod
     def _format_modified(value: Optional[str]) -> Optional[str]:

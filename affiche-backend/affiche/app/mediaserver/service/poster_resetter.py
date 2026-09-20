@@ -47,6 +47,7 @@ class PosterResetter:
             item.poster_hash = None
             item.poster_provider = None
             item.style_hash = None
+            item.poster_generated_at = None
             item.error_message = None
             self._cache_source_poster(item, connector, poster_url=reset.poster_url)
             repo.create_or_update_item(item)

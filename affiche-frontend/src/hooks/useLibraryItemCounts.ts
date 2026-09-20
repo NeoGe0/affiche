@@ -43,6 +43,8 @@ function sum(all: LibraryItemCounts[]): LibraryItemCounts {
       unprocessed: acc.unprocessed + c.unprocessed,
       errors: acc.errors + c.errors,
       locked: acc.locked + c.locked,
+      ready: (acc.ready ?? 0) + (c.ready ?? 0),
+      uploaded: (acc.uploaded ?? 0) + (c.uploaded ?? 0),
       providers: acc.providers,
     }),
     { ...ZERO, providers: sumProviders(all) }

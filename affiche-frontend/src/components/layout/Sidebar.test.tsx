@@ -105,3 +105,36 @@ describe('Sidebar server expansion', () => {
     expect(filmsVisible()).toBe(false);
   });
 });
+
+describe('Sidebar for keyboard and screen-reader users', () => {
+  it('says whether each collapsible section is open', async () => {
+    const user = userEvent.setup();
+    renderSidebar();
+
+    const servers = screen.getByRole('button', { name: /Media servers/ });
+    const ubuntu = screen.getByRole('button', { name: /Ubuntu/ });
+    expect(ubuntu).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(ubuntu);
+    expect(ubuntu).toHaveAttribute('aria-expanded', 'true');
+    expect(servers).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('takes the collapsed menu out of the tab order, leaving the rail', () => {
+    render(
+      <MemoryRouter>
+        <Sidebar
+          mediaServers={MEDIA_SERVERS}
+          collapsed
+          onSelectLibrary={vi.fn()}
+          onSelectCollections={vi.fn()}
+          onSelectTrash={vi.fn()}
+          onOpenSearch={vi.fn()}
+        />
+      </MemoryRouter>
+    );
+
+    expect(document.querySelector('aside')).toHaveAttribute('inert');
+    expect(screen.getByRole('link', { name: 'Settings' })).toBeInTheDocument();
+  });
+});

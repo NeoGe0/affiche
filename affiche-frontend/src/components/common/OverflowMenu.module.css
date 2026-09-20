@@ -11,7 +11,7 @@
 
 .triggerSkin {
   padding: 8px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   color: var(--text-primary);
   background: transparent;
   border: 1px solid var(--border);
@@ -33,10 +33,10 @@
   min-width: 180px;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 6px;
   box-shadow: var(--shadow-lg);
-  z-index: 20;
+  z-index: var(--z-popover);
 }
 
 .dropdownTopStart {
@@ -52,8 +52,8 @@
   gap: 8px;
   width: 100%;
   padding: 8px 10px;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
   font-weight: 500;
   color: var(--text-primary);
   background: transparent;
@@ -80,6 +80,6 @@
 }
 
 .itemDanger:hover:not(:disabled) {
-  background-color: var(--error);
+  background-color: var(--error-fill);
   color: var(--text-on-fill);
 }

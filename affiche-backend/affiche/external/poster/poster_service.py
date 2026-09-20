@@ -19,6 +19,10 @@ class ProviderPoster(NamedTuple):
     provider: str
     rank: int = 0
     rank_score: float = 1.0
+    language: Optional[str] = None
+    textless: Optional[bool] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
 
 MIN_AGREEING_MEMBERS = 2
 
@@ -70,7 +74,7 @@ class PosterAggregatorService:
 
             result = self._ask(provider, lookup, None)
             if result:
-                return ProviderPoster(result, provider.name)
+                return ProviderPoster(str(result), provider.name)
 
         logger.warning(f"Could not find any poster for {title}")
         return None
@@ -91,7 +95,7 @@ class PosterAggregatorService:
                 language=language
             ), None)
             if result:
-                return ProviderPoster(result, provider.name)
+                return ProviderPoster(str(result), provider.name)
 
         logger.warning(f"No season poster found for {title} season {season_number}")
         return None
@@ -201,8 +205,12 @@ class PosterAggregatorService:
         urls = self._ask(provider, call, []) or []
         last = len(urls) - 1
         return [
-            ProviderPoster(url, provider.name, rank=index,
-                           rank_score=1.0 if last <= 0 else 1.0 - index / last)
+            ProviderPoster(str(url), provider.name, rank=index,
+                           rank_score=1.0 if last <= 0 else 1.0 - index / last,
+                           language=getattr(url, "language", None),
+                           textless=getattr(url, "textless", None),
+                           width=getattr(url, "width", None),
+                           height=getattr(url, "height", None))
             for index, url in enumerate(urls)
         ]
 

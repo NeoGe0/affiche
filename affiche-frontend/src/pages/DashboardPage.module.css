@@ -19,7 +19,7 @@
 .empty {
   padding: 24px 0;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .error {
@@ -27,7 +27,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   color: var(--error);
   background-color: var(--bg-card);
 }
@@ -41,14 +41,14 @@
 }
 
 .title {
-  font-size: 1.5rem;
+  font-size: var(--text-3xl);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .subtitle {
   margin-top: 4px;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-secondary);
 }
 
@@ -58,8 +58,8 @@
   gap: 8px;
   padding: 8px 14px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
   color: var(--text-primary);
   background-color: var(--bg-card);
   transition: background-color 0.15s;
@@ -81,7 +81,7 @@
   flex-direction: column;
   gap: 4px;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   background-color: var(--bg-card);
 }
 
@@ -98,7 +98,7 @@
 }
 
 .tileValue {
-  font-size: 1.5rem;
+  font-size: var(--text-3xl);
   font-weight: 600;
   color: var(--text-primary);
 
@@ -106,7 +106,7 @@
 }
 
 .tileLabel {
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
 }
 
@@ -115,14 +115,14 @@
 }
 
 .sectionTitle {
-  font-size: 1rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .sectionHint {
   margin: 2px 0 12px;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
@@ -145,7 +145,7 @@
   gap: 16px;
   width: 100%;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   text-align: left;
   background-color: var(--bg-card);
   transition: background-color 0.15s;
@@ -160,7 +160,7 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -168,7 +168,7 @@
 }
 
 .libraryServer {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
@@ -181,7 +181,7 @@
 .coverageTrack {
   flex: 1;
   height: 6px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   background-color: var(--bg-tertiary);
   overflow: hidden;
 }
@@ -190,14 +190,14 @@
   display: block;
   width: 100%;
   height: 100%;
-  background-color: var(--accent);
+  background-color: var(--accent-fill);
   transform-origin: left;
   transition: transform 0.2s ease;
 }
 
 .coverageValue {
   min-width: 3.5ch;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -207,7 +207,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   white-space: nowrap;
 }
 
@@ -234,7 +234,7 @@
   grid-template-columns: minmax(90px, auto) minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  font-size: 0.85rem;
+  font-size: var(--text-md);
 }
 
 .providerName {
@@ -246,7 +246,7 @@
 
 .providerTrack {
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   background-color: var(--bg-tertiary);
   overflow: hidden;
 }
@@ -254,8 +254,8 @@
 .providerFill {
   display: block;
   height: 100%;
-  border-radius: 4px;
-  background-color: var(--accent);
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-fill);
 }
 
 .providerCount {
@@ -274,13 +274,13 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  font-size: 0.85rem;
+  font-size: var(--text-md);
 }
 
 .taskStatus {
   padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.72rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-2xs);
   font-weight: 600;
   text-transform: capitalize;
   color: var(--text-secondary);

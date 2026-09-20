@@ -20,14 +20,14 @@
   gap: 10px;
   padding: 8px 12px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background-color: var(--bg-secondary);
 }
 
 .name {
   flex: 1;
   min-width: 0;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -35,7 +35,7 @@
 }
 
 .usage {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
 }
 
@@ -44,7 +44,7 @@
   align-items: center;
   justify-content: center;
   padding: 5px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-secondary);
   transition: background-color 0.15s, color 0.15s;
 }

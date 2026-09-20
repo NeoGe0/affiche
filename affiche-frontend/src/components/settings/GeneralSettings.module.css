@@ -2,10 +2,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   padding: 4px 10px;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--border);
   color: var(--text-muted);
 }
@@ -21,19 +21,19 @@
 }
 
 .mutedNote {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
   margin: 8px 0 0;
 }
 
 .infoValue {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-secondary);
   font-family: monospace;
 }
 
 .errorMsg {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--error);
   margin-left: 8px;
 }

@@ -82,7 +82,7 @@ export function AddProviderPanel({ existing, onClose, onAdded }: AddProviderPane
             title={!canSave ? 'Validate the credentials first' : undefined}
           >
             <Save size={16} />
-            {isSaving ? 'Saving...' : 'Add Provider'}
+            {isSaving ? 'Saving…' : 'Add provider'}
           </button>
         </>
       ) : undefined}
@@ -98,7 +98,7 @@ export function AddProviderPanel({ existing, onClose, onAdded }: AddProviderPane
             <ArrowLeft size={14} /> All providers
           </button>
         ) : null}
-        <h3 className={styles.title}>{meta ? providerLabel(meta.serviceName) : 'Add Provider'}</h3>
+        <h3 className={styles.title}>{meta ? providerLabel(meta.serviceName) : 'Add provider'}</h3>
         <p className={styles.description}>
           {meta ? meta.description : 'Pick a poster artwork provider to configure'}
         </p>

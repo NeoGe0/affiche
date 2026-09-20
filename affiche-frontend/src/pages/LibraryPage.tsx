@@ -2,7 +2,7 @@ import { useState, useEffect, useEffectEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Info } from 'lucide-react';
 import { Header } from '../components/layout';
-import { ItemGrid, ItemTable, ItemDetail, EpisodeList, LibraryRows, PosterBrowserModal, AlphabetIndex, SelectionBar, posterTargetFromItem } from '../components/library';
+import { ItemGrid, ItemTable, ItemDetail, EpisodeList, LibraryRows, LibraryStage, PosterBrowserModal, AlphabetIndex, SelectionBar, posterTargetFromItem, type StagePoster } from '../components/library';
 import { ConfirmModal } from '../components/common';
 import { errorMessage, libraryApi } from '../api';
 import {
@@ -10,19 +10,24 @@ import {
   useEventStream,
   useItemLock,
   useItemSelection,
+  useLibraryCoverage,
   useLibraryItemCounts,
   useLibraryItems,
+  useItemNeighbours,
   useLibraryListing,
   useLibraryRows,
+  useLibraryUploadSetting,
   useOpenItem,
   usePosterBrowser,
+  useStagePoster,
   useTaskTracking,
 } from '../hooks';
 import { useToast } from '../context/ToastContext';
-import type { Library, LibraryItem } from '../types';
+import type { Library, LibraryItem, TaskKind } from '../types';
 import { libraryPath } from '../routes';
 import { LIBRARY_ACTIONS, type LibraryActionName } from './libraryActions';
 import { confirmationCopy, type ConfirmAction } from './libraryConfirmations';
+import { progressPercent, taskSummary } from './taskSummary';
 import styles from './LibraryPage.module.css';
 
 interface LibraryPageProps {
@@ -75,7 +80,7 @@ export function LibraryPage({
   const [rowsRefreshKey, setRowsRefreshKey] = useState(0);
 
   const {
-    items, setItems, setTotal,
+    items, setItems, total, setTotal,
     isLoading, isLoadingMore, hasMore,
     fetchItems, handleLoadMore, loadUpTo,
   } = useLibraryItems({
@@ -107,14 +112,34 @@ export function LibraryPage({
     startTaskTracking, attachRunningTask,
     handleTaskStatus, handleTaskProgress, stopTask,
   } = useTaskTracking({
-    onTaskFinished: () => {
+    onTaskFinished: ({ status, kind }) => {
 
       fetchItems(true);
       setRowsRefreshKey((key) => key + 1);
       reloadFilterCounts();
       onRefreshLibraries();
+      if (status === 'completed') void announceCompletion(kind);
     },
   });
+
+  const announceCompletion = async (kind: TaskKind) => {
+    let failedCount: number | undefined;
+    if (kind === 'generate' && selectedLibrary) {
+      try {
+        const counts = await libraryApi.getLibraryItemCounts(selectedLibrary.media_server_id, selectedLibrary.id);
+        failedCount = counts.errors;
+      } catch {
+        failedCount = undefined;
+      }
+    }
+    const summary = taskSummary(kind, selectedLibrary?.name ?? mediaServerName ?? 'All libraries', failedCount);
+    toast.success(summary.message, {
+      title: summary.title,
+      ...(summary.offerFailed
+        ? { duration: 12000, action: { label: 'Show failed items', onClick: () => setFilter('errors') } }
+        : {}),
+    });
+  };
 
   const openItem = useOpenItem({
     allLibraries,
@@ -129,12 +154,40 @@ export function LibraryPage({
     onLockChanged: reloadFilterCounts,
   });
 
+  const coverage = useLibraryCoverage({
+    libraryId: selectedLibrary?.id,
+    enabled: !showRows && !isTrash,
+    refreshKey: rowsRefreshKey,
+  });
+
+  const stage = useStagePoster({
+    library: selectedLibrary,
+    items,
+    enabled: !showRows && !isTrash,
+  });
+
   const selection = useItemSelection({
     items,
     mediaServerId,
     onTaskStarted: (taskId) => startTaskTracking(taskId),
     refreshListing: fetchItems,
+    listingKey: `${mediaServerId}|${selectedLibraryId ?? 'all'}|${mode}|${debouncedSearch}|${filter}|${provider ?? ''}`,
   });
+
+  const autoUpload = useLibraryUploadSetting({ library: selectedLibrary, enabled: !showRows && !isTrash });
+
+  const handleSelectAllMatching = selectedLibrary
+    ? async () => {
+        try {
+          selection.selectAllMatching(await libraryApi.getLibraryItemIds(
+            selectedLibrary.media_server_id, selectedLibrary.id,
+            { search: debouncedSearch || undefined, status: filter === 'all' ? undefined : filter, provider },
+          ));
+        } catch (error) {
+          toast.error(errorMessage(error, 'Could not select every matching item.'), { title: 'Selection' });
+        }
+      }
+    : undefined;
 
   useEventStream({
     onItemProcessed: (libraryId, itemId, processed, posterVersion) => {
@@ -148,6 +201,7 @@ export function LibraryPage({
       );
 
       openItem.applyProcessedEvent(libraryId, itemId, processed, posterVersion);
+      if (processed) stage.offerGenerated(libraryId, itemId, posterVersion);
     },
     onLibrarySynced: (syncedMediaServerId, libraryId) => {
 
@@ -167,7 +221,7 @@ export function LibraryPage({
     onConnected: attachRunningTask,
   });
 
-  const title = selectedLibrary ? selectedLibrary.name : (isTrash ? 'All Libraries' : 'Home');
+  const title = selectedLibrary ? selectedLibrary.name : (isTrash ? 'All libraries' : 'Home');
 
   const closeOpenItem = useEffectEvent(() => {
     if (openItemId === undefined) openItem.open(null);
@@ -234,7 +288,7 @@ export function LibraryPage({
     onApplied: openItem.applyPosterApplied,
   });
 
-  const handleSyncLibraryClick = () => setConfirmAction('sync');
+  const handleSyncLibraryClick = () => runLibraryAction('sync');
   const handleSyncPostersClick = () => setConfirmAction('generate');
   const handleUploadPostersClick = () => setConfirmAction('upload');
   const handleResetPostersClick = () => {
@@ -257,6 +311,29 @@ export function LibraryPage({
     } catch (error) {
       setIsActionLoading(false);
       toast.error(errorMessage(error, spec.errorFallback), { title: spec.errorTitle });
+    }
+  };
+
+  const openNeighbours = useItemNeighbours({
+    library: selectedLibrary,
+    item: openItem.item,
+    items,
+    hasMore,
+    listing: { search: debouncedSearch || undefined, status: filter === 'all' ? undefined : filter, provider, sort },
+    enabled: !isTrash,
+  });
+
+  const listingEmptyMessage = debouncedSearch || filter !== 'all' || provider
+    ? { title: 'Nothing matches', hint: 'Try another search, or clear the filters.' }
+    : { title: 'No items yet', hint: 'Use Sync library in the ⋮ menu to fetch this library from the media server.' };
+
+  const handleOpenStagePoster = async (poster: StagePoster) => {
+    if (!selectedLibrary) return;
+    const listed = items.find((i) => i.id === poster.itemId);
+    try {
+      handleItemClick(listed ?? await libraryApi.getItem(selectedLibrary.media_server_id, poster.libraryId, poster.itemId));
+    } catch (error) {
+      toast.error(errorMessage(error, 'Could not open that item.'), { title: 'Library' });
     }
   };
 
@@ -305,8 +382,7 @@ export function LibraryPage({
     }
   };
 
-  const handleItemSyncClick = () => setConfirmAction('item-sync');
-  const handleItemGeneratePosterClick = () => setConfirmAction('item-generate');
+  const handleItemGeneratePosterClick = () => openItem.generatePoster();
   const handleItemResetClick = () => setConfirmAction('item-reset');
 
   const confirmed = (run: () => void) => () => {
@@ -315,13 +391,12 @@ export function LibraryPage({
   };
 
   const confirmHandlers: Record<ConfirmAction, () => void> = {
-    'sync': () => runLibraryAction('sync'),
     'generate': () => runLibraryAction('generate'),
     'upload': () => runLibraryAction('upload'),
     'reset': () => runLibraryAction('reset'),
-    'item-sync': confirmed(openItem.syncMetadata),
-    'item-generate': confirmed(openItem.generatePoster),
     'item-reset': confirmed(openItem.resetPoster),
+    'selection-generate': confirmed(selection.generate),
+    'selection-upload': confirmed(selection.upload),
     'selection-reset': confirmed(selection.reset),
     'empty-trash': executeEmptyTrash,
   };
@@ -332,6 +407,9 @@ export function LibraryPage({
       libraryName: selectedLibrary?.name || 'all libraries',
       itemName: openItem.item?.title || '',
       selectionCount: selection.count,
+
+      pendingCount: selectedLibrary && !debouncedSearch && !provider ? filterCounts?.unprocessed : undefined,
+      uploadsAutomatically: autoUpload,
     });
     return {
       ...copy,
@@ -347,13 +425,13 @@ export function LibraryPage({
     return (
       <div className={styles.emptyState}>
         <div className={styles.emptyContent}>
-          <h2>No Media Server Selected</h2>
+          <h2>No media server selected</h2>
           <p>Select a media server from the sidebar or add one in settings.</p>
           <button
             className={styles.emptyButton}
             onClick={() => navigate('/settings?tab=media-servers')}
           >
-            Go to Settings
+            Go to settings
           </button>
         </div>
       </div>
@@ -364,7 +442,7 @@ export function LibraryPage({
     return (
       <>
         <Header
-          title="No Libraries"
+          title="No libraries"
           parentLabel={mediaServerName}
           onSyncLibrary={handleSyncLibraryClick}
           onSyncPosters={handleSyncPostersClick}
@@ -380,9 +458,11 @@ export function LibraryPage({
         />
         <div className={styles.emptyState}>
           <div className={styles.emptyContent}>
-            <h2>No Libraries Found</h2>
-            <p>This media server doesn't have any libraries synced yet.</p>
-            <p>Click "Sync Library" to fetch libraries from your media server.</p>
+            <h2>No libraries yet</h2>
+            <p>This media server has no libraries in Affiche yet.</p>
+            <button className={styles.emptyButton} onClick={handleSyncLibraryClick}>
+              Sync libraries
+            </button>
           </div>
         </div>
         {confirmModalProps && (
@@ -416,11 +496,17 @@ export function LibraryPage({
         <ItemDetail
           item={openItem.item}
           mediaServerId={openItem.library?.media_server_id}
+          mediaServerName={mediaServerName}
           onBack={handleBackToListing}
-          onSync={handleItemSyncClick}
+          previousItem={openNeighbours.previous}
+          nextItem={openNeighbours.next}
+          onPrevious={openNeighbours.previous ? () => handleItemClick(openNeighbours.previous!) : undefined}
+          onNext={openNeighbours.next ? () => handleItemClick(openNeighbours.next!) : undefined}
+          onSync={openItem.syncMetadata}
           onGeneratePoster={handleItemGeneratePosterClick}
+          uploadsAutomatically={autoUpload}
           onReset={handleItemResetClick}
-          onSelectPoster={() => posterBrowser.open(null)}
+          onSelectPoster={(posterUrl) => posterBrowser.open(null, posterUrl)}
           onUpload={openItem.uploadPoster}
           onToggleLock={openItem.toggleLock}
           onSeasonSelectPoster={(season) => posterBrowser.open(season)}
@@ -438,6 +524,7 @@ export function LibraryPage({
             onSave={posterBrowser.save}
             isSaving={posterBrowser.isSaving}
             defaultUpload={posterBrowser.uploadDefault}
+            initialPoster={posterBrowser.initialPoster}
           />
         )}
         {confirmModalProps && (
@@ -474,6 +561,7 @@ export function LibraryPage({
         provider={showRows ? undefined : provider}
         onProviderChange={showRows ? undefined : setProvider}
         filterCounts={showRows ? undefined : filterCounts}
+        pendingCount={selectedLibrary && !debouncedSearch && !provider ? filterCounts?.unprocessed : undefined}
         viewMode={showRows ? undefined : viewMode}
         onViewModeChange={showRows ? undefined : setViewMode}
         selectMode={showRows ? undefined : selection.isSelectMode}
@@ -495,14 +583,29 @@ export function LibraryPage({
         <SelectionBar
           count={selection.count}
           allSelected={items.length > 0 && items.every((item) => selection.isSelected(item.id))}
+          matchingTotal={isTrash ? undefined : total}
+          isAllMatching={selection.isAllMatching}
+          onSelectAllMatching={isTrash ? undefined : handleSelectAllMatching}
           isBusy={selection.isBusy}
           onToggleAll={selection.toggleAll}
           onClear={selection.clear}
-          onGenerate={selection.generate}
-          onUpload={selection.upload}
+          onGenerate={() => setConfirmAction('selection-generate')}
+          onUpload={() => setConfirmAction('selection-upload')}
           onLock={selection.lock}
           onUnlock={selection.unlock}
           onReset={() => setConfirmAction('selection-reset')}
+        />
+      )}
+      {!showRows && !isTrash && selectedLibrary && (
+        <LibraryStage
+          libraryName={selectedLibrary.name}
+          poster={stage.poster}
+          stats={coverage}
+          autoUpload={autoUpload}
+          serverName={mediaServerName}
+          onChangeAutoUpload={() => navigate('/settings?tab=media-servers')}
+          runPercent={isActionLoading && taskKind === 'generate' ? progressPercent(taskProgress) : null}
+          onOpenPoster={handleOpenStagePoster}
         />
       )}
       {showRows ? (
@@ -521,10 +624,11 @@ export function LibraryPage({
           onLoadMore={handleLoadMore}
           isLoadingMore={isLoadingMore}
           variant={isTrash ? 'trash' : 'default'}
+          emptyMessage={listingEmptyMessage}
           onRestore={isTrash ? handleRestoreItem : undefined}
           sort={sort}
           onSortChange={setSort}
-          onToggleSelect={isTrash ? undefined : (item) => selection.toggle(item.id)}
+          onToggleSelect={isTrash ? undefined : (item, extend) => selection.toggle(item.id, extend)}
           onToggleSelectAll={selection.toggleAll}
           isSelected={(item) => selection.isSelected(item.id)}
           selectMode={selection.isSelectMode}
@@ -540,9 +644,10 @@ export function LibraryPage({
           onLoadMore={handleLoadMore}
           isLoadingMore={isLoadingMore}
           variant={isTrash ? 'trash' : 'default'}
+          emptyMessage={listingEmptyMessage}
           onRestore={isTrash ? handleRestoreItem : undefined}
           showAnchors={alphabet.isEnabled}
-          onToggleSelect={isTrash ? undefined : (item) => selection.toggle(item.id)}
+          onToggleSelect={isTrash ? undefined : (item, extend) => selection.toggle(item.id, extend)}
           isSelected={(item) => selection.isSelected(item.id)}
           selectMode={selection.isSelectMode}
           onToggleLock={isTrash ? undefined : itemLock.toggle}

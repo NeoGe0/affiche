@@ -60,7 +60,7 @@ export function ProviderOrderForm({
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? 'Saving...' : 'Save Order'}
+            {isSaving ? 'Saving…' : 'Save order'}
           </button>
         </div>
       )}

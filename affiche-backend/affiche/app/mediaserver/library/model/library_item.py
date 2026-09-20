@@ -17,6 +17,7 @@ class LibraryItem(BaseModel):
     updated_at: Optional[datetime] = None
     last_seen_at: Optional[datetime] = None
     poster_uploaded_at: Optional[datetime] = None
+    poster_generated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
 
     imdb_id: Optional[str] = None

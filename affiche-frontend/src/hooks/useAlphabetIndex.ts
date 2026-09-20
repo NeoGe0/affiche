@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { errorMessage, libraryApi } from '../api';
 import { useToast } from '../context/ToastContext';
+import { scrollBehavior } from '../motion';
 import { PAGE_SIZE } from './useLibraryItems';
 import type {
   AlphaIndexEntry,
@@ -88,7 +89,7 @@ export function useAlphabetIndex({
   }, [isTrash, hasLibrary, search, listingKey]);
 
   const scrollToLetter = useCallback((letter: string) => {
-    document.getElementById(`alpha-anchor-${letter}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById(`alpha-anchor-${letter}`)?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
   }, []);
 
   const handleLetterClick = useCallback(async (letter: string) => {

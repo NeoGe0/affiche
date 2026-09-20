@@ -1,8 +1,8 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
-import { errorMessage, libraryApi } from '../api';
+import { dashboardApi, errorMessage, libraryApi } from '../api';
 import { useToast } from '../context/ToastContext';
-import type { Library, LibraryItem } from '../types';
+import type { ItemStats, Library, LibraryItem } from '../types';
 
 export const ROW_SIZE = 20;
 
@@ -11,6 +11,8 @@ export interface LibraryRow {
   items: LibraryItem[];
 
   total: number;
+
+  stats?: ItemStats;
 }
 
 interface UseLibraryRowsOptions {
@@ -37,16 +39,22 @@ export function useLibraryRows({
     const mine = ++request.current;
     setIsLoading(true);
     try {
-      const pages = await Promise.all(libraries.map((library) =>
-        libraryApi.getLibraryItems(library.media_server_id, library.id, {
-          page: 0, pageSize: ROW_SIZE, sortBy: 'added_at', sortDir: 'desc',
-        })));
+
+      const [pages, summary] = await Promise.all([
+        Promise.all(libraries.map((library) =>
+          libraryApi.getLibraryItems(library.media_server_id, library.id, {
+            page: 0, pageSize: ROW_SIZE, sortBy: 'added_at', sortDir: 'desc',
+          }))),
+        dashboardApi.getSummary().catch(() => null),
+      ]);
       if (mine !== request.current) return;
 
+      const statsByLibrary = new Map(summary?.libraries.map((row) => [row.library_id, row.stats]));
       setRows(libraries.map((library, index) => ({
         library,
         items: pages[index].items,
         total: pages[index].total,
+        stats: statsByLibrary.get(library.id),
       })));
     } catch (error) {
       if (mine !== request.current) return;

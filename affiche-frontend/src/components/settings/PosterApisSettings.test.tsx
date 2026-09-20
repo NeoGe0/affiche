@@ -88,7 +88,7 @@ describe('PosterApisSettings save failures', () => {
     const user = await openCard('TMDB');
     await user.click(screen.getByRole('button', { name: /^save$/i }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/saved/i);
+    expect(await screen.findByRole('status')).toHaveTextContent(/saved/i);
   });
 });
 
@@ -110,7 +110,7 @@ describe('PosterApisSettings open-API provider', () => {
   it('asks for no API token', async () => {
     await openCard('TVmaze');
 
-    expect(screen.queryByLabelText('API Token')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('API token')).not.toBeInTheDocument();
   });
 
   it('saves the enabled toggle without sending a token', async () => {
@@ -191,7 +191,7 @@ describe('PosterApisSettings URL field', () => {
 
     await user.clear(screen.getByLabelText('API URL'));
     await user.type(screen.getByLabelText('API URL'), 'http://nas:8111');
-    await user.type(screen.getByLabelText('API Token'), 'a-key');
+    await user.type(screen.getByLabelText('API token'), 'a-key');
     await user.click(screen.getByRole('button', { name: /validate/i }));
 
     await waitFor(() => expect(testProvider).toHaveBeenCalledWith(

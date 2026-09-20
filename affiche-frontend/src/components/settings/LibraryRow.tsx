@@ -197,7 +197,7 @@ export function LibraryRow({
           </div>
 
           <div className={sectionStyles.settingsGroup}>
-            <h4 className={sectionStyles.settingsLabel}>Provider Priority</h4>
+            <h4 className={sectionStyles.settingsLabel}>Provider priority</h4>
             <p className={sectionStyles.settingDescription}>
               Drag to reorder. First provider with a result will be used.
             </p>
@@ -209,7 +209,7 @@ export function LibraryRow({
           </div>
 
           <div className={sectionStyles.settingsGroup}>
-            <h4 className={sectionStyles.settingsLabel}>Poster Style</h4>
+            <h4 className={sectionStyles.settingsLabel}>Poster style</h4>
             <p className={sectionStyles.settingDescription}>
               {isCustomStyle
                 ? 'This library overrides the global style options.'
@@ -227,7 +227,7 @@ export function LibraryRow({
               onClick={onDelete}
             >
               <Trash2 size={14} />
-              Delete Library
+              Delete library
             </button>
           </div>
 

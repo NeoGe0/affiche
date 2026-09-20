@@ -11,12 +11,12 @@
 
 .title {
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .description {
   margin: 0 0 10px 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
   line-height: 1.5;
 }
@@ -44,8 +44,8 @@
   padding: 8px 10px;
   background: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.8rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
   color: var(--text-secondary);
 }
 

@@ -1,4 +1,4 @@
-import { Loader2, Search, Upload } from 'lucide-react';
+import { ChevronDown, Loader2, Search, Upload } from 'lucide-react';
 
 import { POSTER_LANGUAGES } from '../../constants/languages';
 import { providerLabel } from '../../constants/providers';
@@ -36,6 +36,13 @@ interface PosterBrowserToolbarProps {
     isStaging: boolean;
   };
 
+  find: {
+    isOpen: boolean;
+    onToggle: () => void;
+  };
+
+  resultCount?: number;
+
   seasonSource?: {
     seasonNumber: number;
     onSeasonNumberChange: (value: number) => void;
@@ -50,32 +57,13 @@ export function PosterBrowserToolbar({
   search,
   filters,
   custom,
+  find,
+  resultCount,
   seasonSource,
 }: PosterBrowserToolbarProps) {
   return (
     <div className={styles.toolbar}>
       <div className={styles.toolbarRow}>
-        <div className={`${styles.inputGroup} ${styles.titleInput}`}>
-          <label htmlFor="search-title">Search by title</label>
-          <input
-            id="search-title"
-            type="text"
-            placeholder="Enter movie or show title..."
-            value={search.title}
-            onChange={(e) => search.onTitleChange(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && search.onSubmit()}
-          />
-        </div>
-        <div className={`${styles.inputGroup} ${styles.yearInput}`}>
-          <label htmlFor="search-year">Year</label>
-          <input
-            id="search-year"
-            type="number"
-            placeholder="Optional"
-            value={search.year}
-            onChange={(e) => search.onYearChange(e.target.value)}
-          />
-        </div>
         <div className={styles.inputGroup}>
           <label htmlFor="poster-language">Language</label>
           <select
@@ -122,64 +110,106 @@ export function PosterBrowserToolbar({
             ))}
           </select>
         </div>
+        {resultCount !== undefined && (
+          <span className={styles.count}>
+            {resultCount} {resultCount === 1 ? 'poster' : 'posters'}
+          </span>
+        )}
         <button
-          className={styles.searchButton}
-          onClick={search.onSubmit}
-          disabled={!search.title.trim() || search.isSearching}
+          type="button"
+          className={`${styles.searchButton} ${styles.findToggle}`}
+          aria-expanded={find.isOpen}
+          aria-controls="poster-find-elsewhere"
+          onClick={find.onToggle}
         >
-          {search.isSearching ? <Loader2 size={16} className="spin" /> : <Search size={16} />}
-          Search
+          Find elsewhere
+          <ChevronDown size={16} className={find.isOpen ? styles.chevronOpen : undefined} />
         </button>
       </div>
 
-      <div className={styles.toolbarRow}>
-        <div className={`${styles.inputGroup} ${styles.titleInput}`}>
-          <label htmlFor="custom-poster-url">Use your own image</label>
-          <input
-            id="custom-poster-url"
-            type="text"
-            placeholder="Paste an image URL…"
-            value={custom.url}
-            onChange={(e) => custom.onUrlChange(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && custom.onAddUrl()}
-            disabled={custom.isStaging}
-          />
+      {find.isOpen && (
+        <div className={styles.findPanel} id="poster-find-elsewhere">
+          <div className={styles.findGroup}>
+            <div className={`${styles.inputGroup} ${styles.titleInput}`}>
+              <label htmlFor="search-title">Search by title</label>
+              <input
+                id="search-title"
+                type="text"
+                placeholder="Enter movie or show title…"
+                value={search.title}
+                onChange={(e) => search.onTitleChange(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && search.onSubmit()}
+              />
+            </div>
+            <div className={`${styles.inputGroup} ${styles.yearInput}`}>
+              <label htmlFor="search-year">Year</label>
+              <input
+                id="search-year"
+                type="number"
+                placeholder="Optional"
+                value={search.year}
+                onChange={(e) => search.onYearChange(e.target.value)}
+              />
+            </div>
+            <button
+              className={styles.searchButton}
+              onClick={search.onSubmit}
+              disabled={!search.title.trim() || search.isSearching}
+            >
+              {search.isSearching ? <Loader2 size={16} className="spin" /> : <Search size={16} />}
+              Search
+            </button>
+          </div>
+
+          <div className={styles.findGroup}>
+            <div className={`${styles.inputGroup} ${styles.titleInput}`}>
+              <label htmlFor="custom-poster-url">Use your own image</label>
+              <input
+                id="custom-poster-url"
+                type="text"
+                placeholder="Paste an image URL…"
+                value={custom.url}
+                onChange={(e) => custom.onUrlChange(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && custom.onAddUrl()}
+                disabled={custom.isStaging}
+              />
+            </div>
+            <button
+              className={styles.searchButton}
+              onClick={custom.onAddUrl}
+              disabled={!custom.url.trim() || custom.isStaging}
+            >
+              {custom.isStaging ? <Loader2 size={16} className="spin" /> : 'Add'}
+            </button>
+            <label
+              className={`${styles.searchButton} ${styles.uploadLabel} ${custom.isStaging ? styles.uploadLabelBusy : ''}`}
+            >
+              <Upload size={16} />
+              From file…
+              <input
+                type="file"
+                accept="image/*"
+                className={styles.fileInput}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) custom.onPickFile(file);
+                  e.target.value = '';
+                }}
+                disabled={custom.isStaging}
+              />
+            </label>
+          </div>
         </div>
-        <button
-          className={styles.searchButton}
-          onClick={custom.onAddUrl}
-          disabled={!custom.url.trim() || custom.isStaging}
-        >
-          {custom.isStaging ? <Loader2 size={16} className="spin" /> : 'Add'}
-        </button>
-        <label
-          className={`${styles.searchButton} ${styles.uploadLabel} ${custom.isStaging ? styles.uploadLabelBusy : ''}`}
-        >
-          <Upload size={16} />
-          Upload
-          <input
-            type="file"
-            accept="image/*"
-            className={styles.fileInput}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) custom.onPickFile(file);
-              e.target.value = '';
-            }}
-            disabled={custom.isStaging}
-          />
-        </label>
-      </div>
+      )}
 
       {seasonSource && (
         <div className={styles.toolbarRow}>
           <div className={styles.sourceGroup}>
             <span className={styles.sourceLabel}>Artwork source</span>
-            <div className={styles.segmented} role="tablist">
+            <div className={styles.segmented} role="group" aria-label="Artwork source">
               <button
                 type="button"
-                role="tab"
-                aria-selected={!seasonSource.useShowArt}
+                aria-pressed={!seasonSource.useShowArt}
                 className={`${styles.segment} ${!seasonSource.useShowArt ? styles.segmentActive : ''}`}
                 onClick={() => seasonSource.onUseShowArtChange(false)}
               >
@@ -187,8 +217,7 @@ export function PosterBrowserToolbar({
               </button>
               <button
                 type="button"
-                role="tab"
-                aria-selected={seasonSource.useShowArt}
+                aria-pressed={seasonSource.useShowArt}
                 className={`${styles.segment} ${seasonSource.useShowArt ? styles.segmentActive : ''}`}
                 onClick={() => seasonSource.onUseShowArtChange(true)}
               >

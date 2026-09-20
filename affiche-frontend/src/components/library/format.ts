@@ -25,10 +25,11 @@ export function formatDate(value?: string | null): string {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-export function posterStatus(item: LibraryItem): string {
-  if (item.poster_uploaded_at) return `Uploaded ${formatDateTime(item.poster_uploaded_at)}`;
-  if (item.processed || item.has_poster) return 'Generated (not uploaded)';
-  return 'None';
+export function posterStatusDetail(item: LibraryItem): string {
+  return [
+    item.poster_uploaded_at ? `Uploaded ${formatDateTime(item.poster_uploaded_at)}` : null,
+    item.poster_provider ? posterSource(item.poster_provider) : null,
+  ].filter(Boolean).join(' · ');
 }
 
 export function canReset(item: LibraryItem): boolean {

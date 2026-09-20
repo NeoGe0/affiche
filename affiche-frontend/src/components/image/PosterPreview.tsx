@@ -69,7 +69,7 @@ export function PosterPreview({
         className={`${styles.canvas} ${error ? styles.canvasHidden : ""}`}
       />
       {isLoading && !error && (
-        <div className={styles.loading}>Loading preview...</div>
+        <div className={styles.loading}>Loading preview…</div>
       )}
       {error && (
         <div className={styles.error}>

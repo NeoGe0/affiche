@@ -2,6 +2,42 @@
 
   --sidebar-width: 240px;
   --header-height: 56px;
+
+  --text-micro: 0.6rem;
+  --text-2xs: 0.7rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8rem;
+  --text-md: 0.85rem;
+  --text-base: 0.9rem;
+  --text-lg: 1rem;
+  --text-xl: 1.1rem;
+  --text-2xl: 1.25rem;
+  --text-3xl: 1.5rem;
+
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-pill: 999px;
+
+  --z-rail: 5;
+  --z-sticky: 10;
+  --z-popover: 20;
+  --z-sidebar-rail: 99;
+  --z-sidebar: 100;
+  --z-sidebar-backdrop: 101;
+  --z-sidebar-overlay: 102;
+  --z-modal: 200;
+  --z-modal-elevated: 300;
+  --z-toast: 1000;
+}
+
+@media (max-width: 699px) {
+  :root {
+    --header-height: 104px;
+  }
 }
 
 :root,
@@ -20,20 +56,39 @@
   --bg-hover: #3d3d3d;
   --bg-card: #2a2a2a;
   --text-primary: #f0f0f0;
-  --text-secondary: #9a9a9a;
-  --text-muted: #666666;
-  --accent: #5c9ded;
+
+  --text-secondary: #ababab;
+  --text-muted: #9c9c9c;
+  --accent: #5f9fed;
   --accent-hover: #7ab3f5;
-  --success: #5cb85c;
+  --success: #65bc65;
   --warning: #f0ad4e;
-  --warning-hover: #d9932c;
-  --error: #d9534f;
-  --error-hover: #c33c38;
+  --error: #ec7b76;
   --border: #3a3a3a;
+
+  --accent-fill: #2f6fd0;
+  --accent-fill-hover: #245bb0;
+  --success-fill: #2e8540;
+  --success-fill-hover: #256b34;
+  --warning-fill: #a86400;
+  --warning-fill-hover: #874f00;
+  --error-fill: #c9443f;
+  --error-fill-hover: #a52020;
+
+  --focus-ring: #7ab3f5;
 
   --text-on-fill: #ffffff;
 
   --error-tint: rgba(217, 83, 79, 0.12);
+
+  --notice-error-edge: rgba(236, 123, 118, 0.5);
+  --notice-error-tint: rgba(236, 123, 118, 0.1);
+  --notice-warning-edge: rgba(240, 173, 78, 0.5);
+  --notice-warning-tint: rgba(240, 173, 78, 0.1);
+  --notice-success-edge: rgba(101, 188, 101, 0.5);
+  --notice-success-tint: rgba(101, 188, 101, 0.1);
+  --notice-info-edge: rgba(95, 159, 237, 0.5);
+  --notice-info-tint: rgba(95, 159, 237, 0.1);
 
   --overlay-scrim: rgba(0, 0, 0, 0.5);
 
@@ -68,19 +123,36 @@
   --bg-card: #ffffff;
   --text-primary: #1b1d21;
   --text-secondary: #5c6370;
-  --text-muted: #848b98;
-
-  --accent: #2f6fd0;
+  --text-muted: #5f6672;
+  --accent: #2a64bb;
   --accent-hover: #245bb0;
-  --success: #2e7d32;
-  --warning: #a05f00;
-  --warning-hover: #874f00;
-  --error: #c62828;
-  --error-hover: #a52020;
+  --success: #2b742e;
+  --warning: #935700;
+  --error: #c32727;
   --border: #dcdfe4;
+
+  --accent-fill: #2f6fd0;
+  --accent-fill-hover: #245bb0;
+  --success-fill: #2e7d32;
+  --success-fill-hover: #256b34;
+  --warning-fill: #a05f00;
+  --warning-fill-hover: #874f00;
+  --error-fill: #c62828;
+  --error-fill-hover: #a52020;
+
+  --focus-ring: #2f6fd0;
 
   --text-on-fill: #ffffff;
   --error-tint: rgba(198, 40, 40, 0.1);
+
+  --notice-error-edge: rgba(198, 40, 40, 0.45);
+  --notice-error-tint: rgba(198, 40, 40, 0.07);
+  --notice-warning-edge: rgba(160, 95, 0, 0.45);
+  --notice-warning-tint: rgba(160, 95, 0, 0.08);
+  --notice-success-edge: rgba(46, 125, 50, 0.45);
+  --notice-success-tint: rgba(46, 125, 50, 0.07);
+  --notice-info-edge: rgba(47, 111, 208, 0.45);
+  --notice-info-tint: rgba(47, 111, 208, 0.07);
 
   --overlay-scrim: rgba(0, 0, 0, 0.5);
   --backdrop: rgba(15, 18, 22, 0.45);
@@ -149,6 +221,20 @@ input, select {
   font-size: inherit;
 }
 
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -160,7 +246,7 @@ input, select {
 
 ::-webkit-scrollbar-thumb {
   background: var(--bg-tertiary);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -185,6 +271,15 @@ input, select {
 
 .text-error {
   color: var(--error);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .spin {

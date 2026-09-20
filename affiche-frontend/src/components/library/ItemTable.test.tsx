@@ -32,6 +32,14 @@ function renderTable(props: Partial<React.ComponentProps<typeof ItemTable>> = {}
 const titleButton = () => screen.getByRole('button', { name: 'Arrival' });
 const header = (name: string | RegExp) => screen.getByRole('columnheader', { name });
 
+describe('ItemTable status', () => {
+  it('reads the failure out with the Failed pill, not only as a hover tooltip', () => {
+    renderTable({ items: [item({ processed: false, error_message: 'No poster found' })] });
+
+    expect(screen.getByText(': No poster found')).toBeInTheDocument();
+  });
+});
+
 describe('ItemTable rows', () => {
   it('opens an item from the keyboard, through a focusable control in the title cell', () => {
     const onItemClick = vi.fn();

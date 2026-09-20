@@ -11,12 +11,12 @@
 
 .title {
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .description {
   margin: 0 0 10px 0;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--text-muted);
   line-height: 1.5;
 }
@@ -38,9 +38,9 @@
   padding: 8px 38px 8px 10px;
   background-color: var(--bg-primary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   transition: border-color 0.15s;
 }
 
@@ -68,7 +68,7 @@
   padding: 4px;
   background: none;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: pointer;
   transition: color 0.15s;

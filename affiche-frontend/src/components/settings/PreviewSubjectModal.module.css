@@ -13,11 +13,11 @@
 .librarySelect {
   flex: 1 1 200px;
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .searchWrapper {
@@ -37,11 +37,11 @@
 .searchInput {
   width: 100%;
   padding: 8px 10px 8px 32px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .searchInput::placeholder {
@@ -57,7 +57,7 @@
 .error {
   margin-bottom: 12px;
   color: var(--error);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
 }
 
 .state {
@@ -68,7 +68,7 @@
   padding: 40px 16px;
   text-align: center;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .list {
@@ -90,7 +90,7 @@
   width: 100%;
   padding: 10px 12px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   background: none;
   text-align: left;
   cursor: pointer;
@@ -105,23 +105,23 @@
 .itemTitle {
   flex: 1;
   color: var(--text-primary);
-  font-size: 0.92rem;
+  font-size: var(--text-base);
 }
 
 .itemMeta {
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
 }
 
 .loadMore {
   width: 100%;
   margin-top: 12px;
   padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background-color: transparent;
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   transition: all 0.15s;
 }
 
@@ -137,23 +137,15 @@
 .cancelButton {
   flex: 1;
   padding: 10px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background-color: transparent;
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   transition: all 0.15s;
 }
 
 .cancelButton:hover {
   background-color: var(--bg-hover);
-}
-
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }

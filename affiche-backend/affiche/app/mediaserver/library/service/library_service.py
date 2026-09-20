@@ -63,6 +63,9 @@ class LibraryService:
     def find_items(self, search: LibraryItemSearch) -> List[LibraryItem]:
         return self.library_repo.find_items(search)
 
+    def find_item_ids(self, search: LibraryItemSearch) -> List[int]:
+        return self.library_repo.find_item_ids(search)
+
     def count_items(self, search: LibraryItemSearch) -> int:
         return self.library_repo.count_items(search)
 

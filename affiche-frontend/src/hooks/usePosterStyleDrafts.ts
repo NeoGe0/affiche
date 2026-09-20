@@ -27,10 +27,16 @@ export function usePosterStyleDrafts(posterConfig: PosterConfig | null) {
     },
     changeQuality: setQualityDraft,
 
-    reset: () => {
+    reset: (): (() => void) | null => {
+      if (overlayDraft === null && textDraft === null && qualityDraft === null) return null;
       setOverlayDraft(null);
       setTextDraft(null);
       setQualityDraft(null);
+      return () => {
+        setOverlayDraft(overlayDraft);
+        setTextDraft(textDraft);
+        setQualityDraft(qualityDraft);
+      };
     },
   };
 }

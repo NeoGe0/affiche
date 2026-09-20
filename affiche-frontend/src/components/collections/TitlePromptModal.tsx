@@ -50,6 +50,7 @@ export function TitlePromptModal({
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') submit(); }}
             placeholder="Collection name"
+            aria-label="Collection name"
             autoFocus
           />
         </div>

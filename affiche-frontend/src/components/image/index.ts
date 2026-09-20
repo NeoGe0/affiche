@@ -1,5 +1,6 @@
 export { PosterPreview } from "./PosterPreview"
 export { PosterCompareSlider } from "./PosterCompareSlider"
+export { PosterFade } from "./PosterFade"
 export { PosterStyleControls } from "./PosterStyleControls"
 export { fontChoices } from "./fontChoices"
 export { fontBaseName } from "./fontName"

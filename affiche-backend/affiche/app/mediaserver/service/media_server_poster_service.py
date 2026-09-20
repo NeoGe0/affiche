@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional, Callable, List, NamedTuple
 
@@ -452,6 +453,7 @@ class LibraryPosterService:
         uploaded = upload and self._uploader.upload_if_changed(item, stored.path, stored.digest, connector)
 
         item.processed = True
+        item.poster_generated_at = datetime.now(timezone.utc)
         item.poster_provider = provider
         item.style_hash = self._decorator.style_fingerprint(overlay_options, text_options, apply_style)
         if not uploaded:

@@ -51,8 +51,8 @@ class AuthService:
         username = (username or "").strip()
         if not username:
             raise AuthError("Username is required")
-        if not password:
-            raise AuthError("Password is required")
+        if len(password or "") < MIN_PASSWORD_LENGTH:
+            raise AuthError(f"Password must be at least {MIN_PASSWORD_LENGTH} characters")
         if self.has_admin():
             raise AuthError("An admin account already exists")
         return self._repository.create(username, _hash_password(password))

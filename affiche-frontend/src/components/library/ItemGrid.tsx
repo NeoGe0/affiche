@@ -17,7 +17,9 @@ interface ItemGridProps {
 
   showAnchors?: boolean;
 
-  onToggleSelect?: (item: LibraryItem) => void;
+  onToggleSelect?: (item: LibraryItem, extend: boolean) => void;
+
+  emptyMessage?: { title: string; hint: string };
   isSelected?: (item: LibraryItem) => boolean;
 
   selectMode?: boolean;
@@ -37,6 +39,7 @@ export function ItemGrid({
   onRestore,
   showAnchors = false,
   onToggleSelect,
+  emptyMessage,
   isSelected,
   selectMode = false,
   onToggleLock,
@@ -47,8 +50,8 @@ export function ItemGrid({
   if (isLoading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.spinner} />
-        <span>Loading items...</span>
+        <div className={`${styles.spinner} spin`} />
+        <span>Loading items…</span>
       </div>
     );
   }
@@ -63,8 +66,8 @@ export function ItemGrid({
           </>
         ) : (
           <>
-            <p>No items found</p>
-            <p className="text-muted">Sync your library to see items here</p>
+            <p>{emptyMessage?.title ?? 'No items yet'}</p>
+            <p className="text-muted">{emptyMessage?.hint ?? 'Sync this library to fetch its items from the media server.'}</p>
           </>
         )}
       </div>
@@ -92,7 +95,7 @@ export function ItemGrid({
               onClick={onItemClick ? () => onItemClick(item) : undefined}
               variant={variant}
               onRestore={onRestore ? () => onRestore(item) : undefined}
-              onToggleSelect={onToggleSelect ? () => onToggleSelect(item) : undefined}
+              onToggleSelect={onToggleSelect ? (extend) => onToggleSelect(item, extend) : undefined}
               isSelected={isSelected?.(item)}
               selectMode={selectMode}
               onToggleLock={onToggleLock ? () => onToggleLock(item) : undefined}
@@ -107,8 +110,8 @@ export function ItemGrid({
       <div ref={loadMoreRef} className={styles.loadMoreTrigger}>
         {isLoadingMore && (
           <div className={styles.loadingMore}>
-            <div className={styles.spinner} />
-            <span>Loading more...</span>
+            <div className={`${styles.spinner} spin`} />
+            <span>Loading more…</span>
           </div>
         )}
       </div>

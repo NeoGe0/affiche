@@ -7,6 +7,8 @@ export { LanguageOrderList } from './LanguageOrderList';
 export { AfficheLogo } from './AfficheLogo';
 export { activationProps } from './activation';
 export { MediaServerIcon, LibraryTypeIcon } from './MediaServerIcon';
+export { PasswordRules } from './PasswordRules';
+export { passwordRules, MIN_PASSWORD_LENGTH } from './passwordRequirements';
 export { OverflowMenu } from './OverflowMenu';
 export type { OverflowMenuItem } from './OverflowMenu';
 export { TaskProgressBar } from './TaskProgressBar';

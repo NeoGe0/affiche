@@ -3,6 +3,7 @@ import type { TaskKind } from '../../types';
 const RUNNING_VERB: Partial<Record<TaskKind, string>> = {
   sync: 'Syncing',
   generate: 'Generating',
+  upload: 'Uploading',
   reset: 'Resetting',
 };
 

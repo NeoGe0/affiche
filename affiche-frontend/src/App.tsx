@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Layout } from './components/layout';
-import { ChangePasswordPage, CollectionsPage, DashboardPage, LibraryPage, SettingsPage, LoginPage, SetupPage } from './pages';
+import { ChangePasswordPage, CollectionsPage, DashboardPage, LibraryPage, SettingsPage, LoginPage, SetupPage, WelcomePage } from './pages';
 import { libraryApi, mediaServerApi } from './api';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
@@ -78,7 +78,7 @@ function AppContent() {
   const selectedServerLibraries = selectedServer?.libraries || [];
 
   if (isLoading) {
-    return <CenteredMessage>Loading...</CenteredMessage>;
+    return <CenteredMessage>Loading…</CenteredMessage>;
   }
 
   return (
@@ -148,10 +148,20 @@ function AppContent() {
         {
 }
         <Route
+          path="welcome"
+          element={
+            <WelcomePage
+              mediaServers={mediaServers}
+              onDataChanged={fetchData}
+              onOpenLibrary={handleSelectLibrary}
+            />
+          }
+        />
+        {
+}
+        <Route
           path="*"
-          element={defaultServerId
-            ? <Navigate to={libraryPath(defaultServerId)} replace />
-            : <CenteredMessage>No media server configured yet.</CenteredMessage>}
+          element={<Navigate to={defaultServerId ? libraryPath(defaultServerId) : '/welcome'} replace />}
         />
       </Routes>
     </Layout>
@@ -203,20 +213,23 @@ function AppRoutes() {
   );
 }
 
-function App() {
+function Root() {
   return (
-    <BrowserRouter>
-      {
-}
-      <ThemeProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <AppRoutes />
-          </AuthProvider>
-        </ToastProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+
+    <ThemeProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
+}
+
+const router = createBrowserRouter([{ path: '*', element: <Root /> }]);
+
+function App() {
+  return <RouterProvider router={router} />;
 }
 
 export default App;

@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { LibraryItem } from '../../types';
+import { scrollBehavior } from '../../motion';
+import type { ItemStats, LibraryItem } from '../../types';
+import { CoverageMeter } from './CoverageMeter';
 import { ItemCard } from './ItemCard';
 import styles from './ItemRow.module.css';
 
@@ -10,6 +12,8 @@ interface ItemRowProps {
   title: string;
 
   subtitle?: string;
+
+  stats?: ItemStats;
   items: LibraryItem[];
   onItemClick: (item: LibraryItem) => void;
 
@@ -20,7 +24,7 @@ interface ItemRowProps {
 }
 
 export function ItemRow({
-  title, subtitle, items, onItemClick, onOpenAll, isLoading = false,
+  title, subtitle, stats, items, onItemClick, onOpenAll, isLoading = false,
   emptyLabel = 'Nothing here yet.',
 }: ItemRowProps) {
   const track = useRef<HTMLDivElement>(null);
@@ -38,7 +42,7 @@ export function ItemRow({
     const el = track.current;
     if (!el) return;
     const page = Math.max(el.clientWidth - CARD_STRIDE, CARD_STRIDE);
-    el.scrollBy({ left: direction * page, behavior: 'smooth' });
+    el.scrollBy({ left: direction * page, behavior: scrollBehavior() });
   };
 
   const heading = (
@@ -59,6 +63,7 @@ export function ItemRow({
         ) : (
           <div className={styles.heading}>{heading}</div>
         )}
+        {stats && <CoverageMeter label={title} stats={stats} />}
         {items.length > 0 && !isLoading && (
           <div className={styles.arrows}>
             <button

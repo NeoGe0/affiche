@@ -7,7 +7,7 @@ describe('listingPath', () => {
     expect(libraryPath(1, 5)).toBe('/servers/1/libraries/5');
   });
 
-  it('uses the sentinel for the merged "All Libraries" listing', () => {
+  it('uses the sentinel for the merged "All libraries" listing', () => {
     expect(libraryPath(1)).toBe('/servers/1/libraries/all');
   });
 

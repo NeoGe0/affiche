@@ -54,6 +54,20 @@ describe('PosterCandidateGrid', () => {
     expect(onSelect).toHaveBeenCalledWith('https://cdn.mediux.io/b.jpg');
   });
 
+  it('says under each poster what its provider reported, and names it for screen readers', () => {
+    renderGrid([
+      { ...CANDIDATES[0], textless: true, width: 680, height: 1000 },
+      CANDIDATES[1],
+    ]);
+
+    expect(screen.getByText('Textless')).toBeInTheDocument();
+    expect(screen.getByText(/680×1000/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Poster 1 from TMDB, Textless, 680 by 1000, small' }))
+      .toBeInTheDocument();
+
+    expect(screen.getByRole('button', { name: 'Poster 2 from MediUX' })).toBeInTheDocument();
+  });
+
   it('renders nothing to badge when the grid is empty', () => {
     renderGrid([]);
 

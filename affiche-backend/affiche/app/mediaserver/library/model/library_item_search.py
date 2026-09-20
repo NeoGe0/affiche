@@ -10,6 +10,8 @@ class ItemStatusFilter(str, Enum):
     UNPROCESSED = "unprocessed"
     ERRORS = "errors"
     LOCKED = "locked"
+    READY = "ready"
+    UPLOADED = "uploaded"
 
 NO_PROVIDER = "none"
 
@@ -34,12 +36,16 @@ class LibraryItemSearch(SearchCriteria):
     @model_validator(mode='after')
     def _expand_and_check(self) -> 'LibraryItemSearch':
         if self.status is not None:
-            if self.processed is not None or self.has_error is not None or self.locked is not None:
-                raise ValueError("pass either `status` or `processed`/`has_error`/`locked`, not both")
+            if (self.processed is not None or self.has_error is not None
+                    or self.locked is not None or self.uploaded is not None):
+                raise ValueError(
+                    "pass either `status` or `processed`/`has_error`/`locked`/`uploaded`, not both")
             expanded = {
                 ItemStatusFilter.UNPROCESSED: {'processed': False, 'has_error': False},
                 ItemStatusFilter.ERRORS: {'has_error': True},
                 ItemStatusFilter.LOCKED: {'locked': True},
+                ItemStatusFilter.READY: {'processed': True, 'has_error': False, 'uploaded': False},
+                ItemStatusFilter.UPLOADED: {'uploaded': True},
             }[self.status]
             for field, value in expanded.items():
                 object.__setattr__(self, field, value)

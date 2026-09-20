@@ -1,10 +1,10 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 
 import { LibraryPage } from './LibraryPage';
-import { libraryApi, tasksApi } from '../api';
+import { dashboardApi, libraryApi, tasksApi } from '../api';
 import type { Library, LibraryItem } from '../types';
 
 vi.mock('../api', () => ({
@@ -33,12 +33,19 @@ vi.mock('../api', () => ({
     uploadItemPoster: vi.fn(),
     getItemWithSeasons: vi.fn(),
     getItem: vi.fn(),
+    getLibraryItemIds: vi.fn(),
+    getLibrarySettings: vi.fn(),
+    generateSelectedPosters: vi.fn(),
+    uploadSelectedPosters: vi.fn(),
+    resetSelectedPosters: vi.fn(),
+    setItemsLock: vi.fn(),
   },
   tasksApi: {
     getRunningBlockingTask: vi.fn(),
     cancelTask: vi.fn(),
   },
   postersApi: {},
+  dashboardApi: { getSummary: vi.fn().mockRejectedValue(new Error('not needed here')) },
 
   errorMessage: (error: unknown, fallback: string) =>
     error instanceof Error && error.message ? error.message : fallback,
@@ -112,6 +119,8 @@ beforeEach(() => {
   vi.mocked(libraryApi.getLibraryAlphaIndex).mockResolvedValue([]);
   vi.mocked(libraryApi.getLibraryItemCounts).mockResolvedValue({ total: 0, unprocessed: 0, errors: 0, locked: 0, providers: {} });
   getRunningBlockingTask.mockResolvedValue(null);
+  vi.mocked(dashboardApi.getSummary).mockRejectedValue(new Error('not needed here'));
+  vi.mocked(libraryApi.getLibrarySettings).mockRejectedValue(new Error('not needed here'));
 });
 
 afterEach(() => {
@@ -182,7 +191,7 @@ describe('LibraryPage — task tracking', () => {
 
     renderPage();
 
-    expect(await screen.findByText('Uploading posters...')).toBeInTheDocument();
+    expect(await screen.findByText('Uploading… 30%')).toBeInTheDocument();
     expect(stopButton()).toBeInTheDocument();
   });
 
@@ -194,7 +203,7 @@ describe('LibraryPage — task tracking', () => {
       message: 'Uploading posters...',
     } as Awaited<ReturnType<typeof tasksApi.getRunningBlockingTask>>);
     const { onRefreshLibraries } = renderPage();
-    await screen.findByText('Uploading posters...');
+    await screen.findByText(/Uploading…/);
     getLibraryItems.mockClear();
 
     act(() => handlers.onTaskStatus?.('task-1', 'completed', 'poster_upload_2'));
@@ -202,6 +211,44 @@ describe('LibraryPage — task tracking', () => {
     await waitFor(() => expect(stopButton()).not.toBeInTheDocument());
     expect(onRefreshLibraries).toHaveBeenCalled();
     expect(getLibraryItems).toHaveBeenCalled();
+  });
+
+  it('ends a finished generation run with a summary that leads to the failed items', async () => {
+    getRunningBlockingTask.mockResolvedValue({
+      task_id: 'task-1',
+      status: 'running',
+      task_name: 'poster_sync_2',
+      message: 'Generating posters...',
+    } as Awaited<ReturnType<typeof tasksApi.getRunningBlockingTask>>);
+    toast.success.mockClear();
+    renderPage();
+    await screen.findByText('Generating posters...');
+    vi.mocked(libraryApi.getLibraryItemCounts)
+      .mockResolvedValue({ total: 10, unprocessed: 0, errors: 2, locked: 0, providers: {} });
+
+    act(() => handlers.onTaskStatus?.('task-1', 'completed', 'poster_sync_2'));
+
+    await waitFor(() => expect(toast.success).toHaveBeenCalled());
+    const [message, options] = toast.success.mock.calls[0];
+    expect(message).toContain('2 items failed');
+    expect(options).toMatchObject({ title: 'Posters generated', action: { label: 'Show failed items' } });
+  });
+
+  it('does not announce a run that failed or was cancelled as finished', async () => {
+    getRunningBlockingTask.mockResolvedValue({
+      task_id: 'task-1',
+      status: 'running',
+      task_name: 'poster_sync_2',
+      message: 'Generating posters...',
+    } as Awaited<ReturnType<typeof tasksApi.getRunningBlockingTask>>);
+    toast.success.mockClear();
+    renderPage();
+    await screen.findByText('Generating posters...');
+
+    act(() => handlers.onTaskStatus?.('task-1', 'cancelled', 'poster_sync_2'));
+
+    await waitFor(() => expect(stopButton()).not.toBeInTheDocument());
+    expect(toast.success).not.toHaveBeenCalled();
   });
 
   it('ignores status for a task it is not tracking', async () => {
@@ -212,7 +259,7 @@ describe('LibraryPage — task tracking', () => {
       message: 'Uploading posters...',
     } as Awaited<ReturnType<typeof tasksApi.getRunningBlockingTask>>);
     renderPage();
-    await screen.findByText('Uploading posters...');
+    await screen.findByText(/Uploading…/);
 
     act(() => handlers.onTaskStatus?.('someone-elses-task', 'completed', 'poster_upload_2'));
 
@@ -240,6 +287,22 @@ describe('LibraryPage — listing', () => {
     expect(screen.getAllByText('Fringe')).toHaveLength(1);
 
     expect(screen.getByRole('heading', { name: /Home/ })).toBeInTheDocument();
+  });
+
+  it('labels each row with its poster coverage from the one summary request', async () => {
+    const stats = { total: 40, processed: 30, unprocessed: 8, errors: 2, locked: 0, uploaded: 25 };
+    vi.mocked(dashboardApi.getSummary).mockResolvedValueOnce({
+      libraries: [{ library_id: 2, library_name: 'Movies', library_type: 'movie', enabled: true,
+                    media_server_id: 1, media_server_name: 'Plex', media_server_type: 'plex', stats }],
+    } as unknown as Awaited<ReturnType<typeof dashboardApi.getSummary>>);
+
+    renderPage({ libraries: [MOVIES, SHOWS], allLibraries: [MOVIES, SHOWS], selectedLibraryId: undefined });
+
+    expect(await screen.findByText('75%')).toBeInTheDocument();
+    expect(screen.getByText('30 of 40 have a poster · 2 failed')).toBeInTheDocument();
+
+    expect(screen.getByRole('button', { name: /^Shows/ })).toBeInTheDocument();
+    expect(screen.getAllByText(/have a poster/)).toHaveLength(1);
   });
 
   it('asks each library only for the newest page, not for a listing behind the rows', async () => {
@@ -282,6 +345,96 @@ describe('LibraryPage — listing', () => {
   });
 });
 
+describe('LibraryPage — the poster stage', () => {
+  it('stages the most recently generated poster while nothing runs', async () => {
+    getLibraryItems.mockImplementation(async (_server, _library, options) =>
+      options?.sortBy === 'poster_generated_at'
+        ? page([item({ id: 20, title: 'Blank' }), item({ id: 21, title: 'Heat', processed: true, has_poster: true, poster_version: 'h1' })])
+        : page([item({ id: 10, title: 'Alien' })])
+    );
+    renderPage();
+
+    expect(await screen.findByText('Latest poster in Movies')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Heat' })).toBeInTheDocument();
+  });
+
+  it('leads the library with its coverage, even before any item has a poster', async () => {
+    const stats = { total: 10, processed: 5, unprocessed: 4, errors: 1, locked: 0, uploaded: 3 };
+    vi.mocked(dashboardApi.getSummary).mockResolvedValueOnce({
+      libraries: [{ library_id: 2, library_name: 'Movies', library_type: 'movie', enabled: true,
+                    media_server_id: 1, media_server_name: 'Plex', media_server_type: 'plex', stats }],
+    } as unknown as Awaited<ReturnType<typeof dashboardApi.getSummary>>);
+
+    renderPage();
+
+    expect(await screen.findByText('50%')).toBeInTheDocument();
+    expect(screen.getByText('5 of 10 have a poster · 1 failed')).toBeInTheDocument();
+    expect(screen.queryByText(/Latest poster in/)).not.toBeInTheDocument();
+  });
+
+  it('shows no stage when there is neither a poster nor coverage to show', async () => {
+    renderPage();
+    await screen.findByText('Alien');
+
+    expect(screen.queryByRole('region', { name: /poster stage/ })).not.toBeInTheDocument();
+  });
+
+  it('names the pending count on the generate button once it is counted', async () => {
+    vi.mocked(libraryApi.getLibraryItemCounts)
+      .mockResolvedValue({ total: 10, unprocessed: 4, errors: 0, locked: 0, providers: {} });
+
+    renderPage();
+
+    expect(await screen.findByRole('button', { name: /Generate 4 posters/ })).toBeInTheDocument();
+  });
+});
+
+describe('LibraryPage — working through a large library', () => {
+  it('selects every match, not only the loaded page, and acts on all of them', async () => {
+    getLibraryItems.mockResolvedValue(page([item({ id: 10, title: 'Alien' }), item({ id: 11, title: 'Heat' })], 3000));
+    vi.mocked(libraryApi.getLibraryItemIds).mockResolvedValue(Array.from({ length: 3000 }, (_, i) => i + 1));
+    vi.mocked(libraryApi.uploadSelectedPosters).mockResolvedValue({ task_id: 't' } as never);
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(await screen.findByLabelText('Select Alien'));
+    await user.click(screen.getByRole('button', { name: /Select all 3,000 matching/ }));
+
+    expect(await screen.findByText('All 3,000 matching selected')).toBeInTheDocument();
+    expect(libraryApi.getLibraryItemIds).toHaveBeenCalledWith(1, 2, { search: undefined, status: undefined, provider: undefined });
+
+    await user.click(within(screen.getByRole('region', { name: 'Selection actions' })).getByRole('button', { name: /Upload/ }));
+    await user.click(await screen.findByRole('button', { name: 'Upload 3000' }));
+    await waitFor(() => expect(libraryApi.uploadSelectedPosters).toHaveBeenCalled());
+    expect(vi.mocked(libraryApi.uploadSelectedPosters).mock.calls[0][1]).toHaveLength(3000);
+  });
+
+  it('extends a selection with shift-click', async () => {
+    getLibraryItems.mockResolvedValue(page([
+      item({ id: 10, title: 'Alien' }), item({ id: 11, title: 'Blade Runner' }), item({ id: 12, title: 'Heat' }),
+    ]));
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(await screen.findByLabelText('Select Alien'));
+    await user.keyboard('{Shift>}');
+    await user.click(screen.getByLabelText('Select Heat'));
+    await user.keyboard('{/Shift}');
+
+    expect(await screen.findByText('3 selected')).toBeInTheDocument();
+  });
+
+  it('says a generate run will upload when the library uploads automatically', async () => {
+    vi.mocked(libraryApi.getLibrarySettings).mockResolvedValue({ upload_enabled: true } as never);
+    const user = userEvent.setup();
+    renderPage();
+
+    expect(await screen.findByText('New posters go straight to Plex')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Generate posters/ }));
+    expect(await screen.findByRole('button', { name: 'Generate & upload' })).toBeInTheDocument();
+  });
+});
+
 describe('LibraryPage — filter counts', () => {
   const getCounts = vi.mocked(libraryApi.getLibraryItemCounts);
 
@@ -300,8 +453,8 @@ describe('LibraryPage — filter counts', () => {
     await openFilters();
 
     expect(await filterRow(/^All items 1,234$/)).toBeInTheDocument();
-    expect(await filterRow(/^Unprocessed 57$/)).toBeInTheDocument();
-    expect(await filterRow(/^With errors 3$/)).toBeInTheDocument();
+    expect(await filterRow(/^No poster yet 57$/)).toBeInTheDocument();
+    expect(await filterRow(/^Failed 3$/)).toBeInTheDocument();
   });
 
   it('offers no filter controls on the home, which steers no listing', async () => {
@@ -320,7 +473,7 @@ describe('LibraryPage — filter counts', () => {
     await openFilters();
 
     expect(await filterRow(/^All items$/)).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: 'With errors' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Failed' })).toBeInTheDocument();
   });
 
   it('offers a provider bucket per provenance the library holds', async () => {
@@ -349,7 +502,7 @@ describe('LibraryPage — filter counts', () => {
     const user = await openFilters();
 
     await user.click(await filterRow(/^MediUX/));
-    await user.click(await filterRow(/^Unprocessed/));
+    await user.click(await filterRow(/^No poster yet/));
 
     await waitFor(() => {
       expect(getLibraryItems).toHaveBeenLastCalledWith(
@@ -366,11 +519,11 @@ describe('LibraryPage — filter counts', () => {
     await screen.findByText('Alien');
     const user = await openFilters();
     await user.click(await filterRow(/^MediUX/));
-    await user.click(await filterRow(/^Unprocessed/));
+    await user.click(await filterRow(/^No poster yet/));
 
     await user.keyboard('{Escape}');
 
-    expect(screen.getByTitle('Remove the Unprocessed filter')).toBeInTheDocument();
+    expect(screen.getByTitle('Remove the No poster yet filter')).toBeInTheDocument();
     expect(screen.getByTitle('Remove the MediUX filter')).toBeInTheDocument();
   });
 
@@ -382,7 +535,7 @@ describe('LibraryPage — filter counts', () => {
     await screen.findByText('Alien');
     const user = await openFilters();
     await user.click(await filterRow(/^MediUX/));
-    await user.click(await filterRow(/^Unprocessed/));
+    await user.click(await filterRow(/^No poster yet/));
     await user.keyboard('{Escape}');
 
     await user.click(screen.getByTitle('Remove the MediUX filter'));
@@ -405,13 +558,13 @@ describe('LibraryPage — filter counts', () => {
     getCounts.mockResolvedValue({ total: 10, unprocessed: 10, errors: 0, locked: 0, providers: {} });
     renderPage();
     await openFilters();
-    await filterRow(/^Unprocessed 10$/);
+    await filterRow(/^No poster yet 10$/);
 
     getCounts.mockResolvedValue({ total: 10, unprocessed: 0, errors: 2, locked: 0, providers: {} });
     act(() => handlers.onTaskStatus?.('task-1', 'completed', 'poster_sync_2'));
 
-    expect(await filterRow(/^Unprocessed 0$/)).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: 'With errors 2' })).toBeInTheDocument();
+    expect(await filterRow(/^No poster yet 0$/)).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Failed 2' })).toBeInTheDocument();
   });
 });
 
@@ -428,14 +581,14 @@ describe('LibraryPage — actions that fail', () => {
     return utils;
   };
 
-  const runMenuAction = async (item: string | RegExp, confirmLabel: string) => {
+  const runMenuAction = async (item: string | RegExp, confirmLabel?: string) => {
     const user = userEvent.setup();
     const utils = renderPage();
     await screen.findByText('Alien');
 
     await user.click(screen.getByRole('button', { name: 'Library actions' }));
     await user.click(await screen.findByRole('menuitem', { name: item }));
-    await user.click(await screen.findByRole('button', { name: confirmLabel }));
+    if (confirmLabel) await user.click(await screen.findByRole('button', { name: confirmLabel }));
 
     return utils;
   };
@@ -443,7 +596,7 @@ describe('LibraryPage — actions that fail', () => {
   it('reports a library sync the backend refused, instead of going quiet', async () => {
     vi.mocked(libraryApi.syncLibrary).mockRejectedValue(new Error('Plex is unreachable'));
 
-    await runMenuAction(/Sync library/, 'Sync');
+    await runMenuAction(/Sync library/);
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Plex is unreachable', { title: 'Sync failed' })
@@ -453,7 +606,7 @@ describe('LibraryPage — actions that fail', () => {
   it('does not leave the header looking like a task is running', async () => {
     vi.mocked(libraryApi.syncLibrary).mockRejectedValue(new Error('nope'));
 
-    await runMenuAction(/Sync library/, 'Sync');
+    await runMenuAction(/Sync library/);
 
     await waitFor(() => expect(toast.error).toHaveBeenCalled());
     expect(stopButton()).toBeNull();
@@ -462,7 +615,7 @@ describe('LibraryPage — actions that fail', () => {
   it('reports a generation that never started', async () => {
     vi.mocked(libraryApi.syncLibraryPosters).mockRejectedValue(new Error('No provider configured'));
 
-    await runHeaderAction(/Generate Posters/, 'Generate');
+    await runHeaderAction(/Generate posters/, 'Generate');
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('No provider configured', {
@@ -474,7 +627,7 @@ describe('LibraryPage — actions that fail', () => {
   it('falls back to a readable sentence when the rejection carries no message', async () => {
     vi.mocked(libraryApi.syncLibrary).mockRejectedValue('boom');
 
-    await runMenuAction(/Sync library/, 'Sync');
+    await runMenuAction(/Sync library/);
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Could not start the library sync.', {
@@ -489,8 +642,8 @@ describe('LibraryPage — actions that fail', () => {
     renderPage();
 
     await user.click(await screen.findByText('Alien'));
-    await user.click(await screen.findByRole('button', { name: /Generate Poster/ }));
-    await user.click(await screen.findByRole('button', { name: 'Generate' }));
+
+    await user.click(await screen.findByRole('button', { name: /^Generate poster$/i }));
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Poster source is down', {

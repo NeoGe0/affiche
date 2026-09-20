@@ -7,7 +7,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 20px;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-secondary);
   background: transparent;
   transition: color 0.15s;
@@ -30,7 +30,7 @@
   justify-content: center;
   width: 52px;
   height: 52px;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   color: var(--text-secondary);
   background-color: var(--bg-tertiary);
   flex-shrink: 0;
@@ -42,7 +42,7 @@
 }
 
 .title {
-  font-size: 1.6rem;
+  font-size: var(--text-3xl);
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
@@ -52,7 +52,7 @@
 
 .subtitle {
   margin-top: 2px;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-muted);
 }
 
@@ -68,8 +68,8 @@
   gap: 6px;
   padding: 8px 14px;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
   color: var(--text-secondary);
   background-color: var(--bg-card);
   transition: background-color 0.15s, color 0.15s;
@@ -98,9 +98,10 @@
   display: block;
   margin-bottom: 16px;
   padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-md);
   color: var(--text-secondary);
+  border: 1px solid var(--border);
   background-color: var(--bg-card);
 }
 
@@ -116,14 +117,14 @@
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   background-color: var(--bg-card);
 }
 
 .memberTitle {
   flex: 1;
   min-width: 0;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
@@ -131,14 +132,14 @@
 }
 
 .memberYear {
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   color: var(--text-muted);
 }
 
 .remove {
   display: flex;
   padding: 5px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text-muted);
   background: transparent;
   transition: color 0.15s, background-color 0.15s;
@@ -146,7 +147,7 @@
 
 .remove:hover:not(:disabled) {
   color: var(--error);
-  background-color: var(--bg-hover);
+  background-color: var(--error-tint);
 }
 
 .remove:disabled {
@@ -156,6 +157,6 @@
 
 .empty {
   padding: 32px 0;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--text-secondary);
 }

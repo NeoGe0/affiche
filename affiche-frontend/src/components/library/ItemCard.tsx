@@ -1,9 +1,10 @@
-import { CheckCircle, Circle, RotateCcw, AlertTriangle, Lock, Unlock } from 'lucide-react';
+import { useId } from 'react';
+import { RotateCcw, Lock, Unlock } from 'lucide-react';
 import { libraryApi } from '../../api';
 import { usePosterImage } from '../../hooks';
 import type { LibraryItem } from '../../types';
-import { activationProps } from '../common';
 import { failureTooltip } from './format';
+import { POSTER_STATE_LABEL, posterState } from './posterState';
 import styles from './ItemCard.module.css';
 
 interface ItemCardProps {
@@ -13,7 +14,7 @@ interface ItemCardProps {
   variant?: 'default' | 'trash';
   onRestore?: () => void;
 
-  onToggleSelect?: () => void;
+  onToggleSelect?: (extend: boolean) => void;
   isSelected?: boolean;
 
   selectMode?: boolean;
@@ -30,6 +31,8 @@ export function ItemCard({
   selectMode = false, onToggleLock, isLockPending = false, anchorLetter,
 }: ItemCardProps) {
   const isTrash = variant === 'trash';
+  const failure = isTrash ? undefined : failureTooltip(item);
+  const failureId = useId();
 
   const inSelectMode = selectMode && !!onToggleSelect;
   const activate = inSelectMode ? onToggleSelect : onClick;
@@ -47,12 +50,24 @@ export function ItemCard({
 
   return (
     <div
-      className={`${styles.card} ${isTrash ? styles.trash : ''} ${isSelected ? styles.selected : ''} ${inSelectMode ? styles.selectMode : ''}`}
-      {...activationProps(activate)}
-      aria-pressed={inSelectMode ? isSelected : undefined}
+      className={`${styles.card} ${isTrash ? styles.trash : ''} ${isSelected ? styles.selected : ''} ${inSelectMode ? styles.selectMode : ''} ${activate ? styles.openable : ''}`}
+
+      onClick={activate ? (e) => activate(e.shiftKey) : undefined}
       id={anchorLetter ? `alpha-anchor-${anchorLetter}` : undefined}
       style={anchorLetter ? { scrollMarginTop: 'calc(var(--header-height) + 16px)' } : undefined}
     >
+      {
+}
+      {activate && (
+        <button
+          type="button"
+          className={styles.open}
+          onClick={(e) => { e.stopPropagation(); activate(e.shiftKey); }}
+          aria-pressed={inSelectMode ? isSelected : undefined}
+          aria-label={inSelectMode ? item.title : `Open ${item.title}`}
+          aria-describedby={failure ? failureId : undefined}
+        />
+      )}
       <div className={styles.poster}>
         {onToggleSelect && (
 
@@ -63,7 +78,7 @@ export function ItemCard({
             <input
               type="checkbox"
               checked={isSelected}
-              onChange={onToggleSelect}
+              onChange={(e) => onToggleSelect((e.nativeEvent as MouseEvent).shiftKey === true)}
               aria-label={`Select ${item.title}`}
             />
           </label>
@@ -90,15 +105,6 @@ export function ItemCard({
           />
         )}
 
-        {!isTrash && item.error_message && (
-          <div className={styles.badges}>
-            <span className={`${styles.badge} ${styles.failedBadge}`} title={failureTooltip(item)}>
-              <AlertTriangle size={12} />
-              Failed
-            </span>
-          </div>
-        )}
-
         {
 
 }
@@ -122,7 +128,7 @@ export function ItemCard({
           </button>
         )}
 
-        {isTrash ? (
+        {isTrash && (
           onRestore && (
             <button
               className={styles.restoreButton}
@@ -136,23 +142,24 @@ export function ItemCard({
               <span>Restore</span>
             </button>
           )
-        ) : (
-          <div className={styles.status}>
-            {item.error_message ? (
-              <AlertTriangle size={20} className={styles.failed} />
-            ) : item.processed ? (
-              <CheckCircle size={20} className={styles.processed} />
-            ) : (
-              <Circle size={20} className={styles.pending} />
-            )}
-          </div>
         )}
       </div>
       <div className={styles.info}>
         <h3 className={styles.title} title={item.title}>
           {item.title}
         </h3>
-        {item.year && <span className={styles.year}>{item.year}</span>}
+        <div className={styles.meta}>
+          {!isTrash && (
+            <span className={`${styles.state} ${styles[posterState(item)]}`} title={failure}>
+              <span className={styles.stateDot} aria-hidden="true" />
+              {POSTER_STATE_LABEL[posterState(item)]}
+            </span>
+          )}
+          {failure && (
+            <span id={failureId} className="visually-hidden">{failure}</span>
+          )}
+          {item.year && <span className={styles.year}>{item.year}</span>}
+        </div>
       </div>
     </div>
   );

@@ -22,6 +22,7 @@ export function AlphabetIndex({ entries, onLetterClick }: AlphabetIndexProps) {
             className={styles.letter}
             disabled={!enabled}
             onClick={() => enabled && onLetterClick(letter)}
+            aria-label={letter === '#' ? 'Titles starting with a number or symbol' : `Titles starting with ${letter}`}
           >
             {letter}
           </button>

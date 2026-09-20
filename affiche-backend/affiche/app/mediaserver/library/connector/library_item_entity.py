@@ -28,6 +28,7 @@ class LibraryItemEntity(Base):
     updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     last_seen_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     poster_uploaded_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    poster_generated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     deleted_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     imdb_id: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)

@@ -124,6 +124,21 @@ describe('CollectionsPage', () => {
     expect(toast.error.mock.calls[0][0]).toMatch(/would not delete/i);
   });
 
+  it('says that removing a member changes the collection on the media server', async () => {
+    vi.mocked(collectionsApi.getCollection).mockResolvedValue({
+      ...collection(),
+      members: [{ id: 5, library_id: 2, title: 'Aliens', type: 'movie', processed: true, locked: false, has_poster: true }],
+    } as never);
+
+    renderPage();
+    fireEvent.click(await screen.findByText('Alien Saga'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Remove Aliens from Alien Saga' }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog).toHaveTextContent('on Plex? The change is made on the server straight away.');
+    expect(within(dialog).getByRole('button', { name: 'Remove on server' })).toBeInTheDocument();
+  });
+
   it('reports how many members the media server holds beyond what Affiche synced', async () => {
     getCollections.mockResolvedValue({
       collections: [collection({ member_count: 2, child_count: 7 })],
@@ -170,13 +185,13 @@ describe('CollectionsPage', () => {
     renderPage();
 
     fireEvent.click(await screen.findByText('Alien Saga'));
-    fireEvent.click(await screen.findByRole('button', { name: /select poster/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /choose artwork/i }));
 
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByRole('heading', { name: /Alien Saga/ })).toBeInTheDocument();
   });
 
-  it('defaults the upload toggle to the library setting', async () => {
+  it('offers Save & upload as the default for a library that uploads', async () => {
 
     getCollections.mockResolvedValue({
       collections: [collection()], total: 1, page: 0, page_size: 50,
@@ -185,13 +200,13 @@ describe('CollectionsPage', () => {
     renderPage();
 
     fireEvent.click(await screen.findByText('Alien Saga'));
-    fireEvent.click(await screen.findByRole('button', { name: /select poster/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /choose artwork/i }));
     await screen.findByRole('dialog');
 
-    expect(await screen.findByLabelText(/upload to library/i)).toBeChecked();
+    expect(await screen.findByText(/This library uploads new posters/)).toBeInTheDocument();
   });
 
-  it('leaves the upload toggle off for a library that does not upload', async () => {
+  it('keeps Save as the default for a library that does not upload', async () => {
     getCollections.mockResolvedValue({
       collections: [collection()], total: 1, page: 0, page_size: 50,
     });
@@ -201,10 +216,11 @@ describe('CollectionsPage', () => {
     renderPage();
 
     fireEvent.click(await screen.findByText('Alien Saga'));
-    fireEvent.click(await screen.findByRole('button', { name: /select poster/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /choose artwork/i }));
     await screen.findByRole('dialog');
 
-    expect(await screen.findByLabelText(/upload to library/i)).not.toBeChecked();
+    expect(await screen.findByText(/Save keeps the poster in Affiche\./)).toBeInTheDocument();
+    expect(screen.queryByText(/This library uploads new posters/)).not.toBeInTheDocument();
   });
 
   it('does not browse providers for a collection no catalogue matched', async () => {
@@ -216,7 +232,7 @@ describe('CollectionsPage', () => {
     renderPage();
 
     fireEvent.click(await screen.findByText('Alien Saga'));
-    fireEvent.click(await screen.findByRole('button', { name: /select poster/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /choose artwork/i }));
     await screen.findByRole('dialog');
 
     expect(postersApi.getPosters).not.toHaveBeenCalled();
@@ -233,7 +249,7 @@ describe('CollectionsPage', () => {
     renderPage();
 
     fireEvent.click(await screen.findByText('Alien Saga'));
-    fireEvent.click(await screen.findByRole('button', { name: /select poster/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /choose artwork/i }));
     await screen.findByRole('dialog');
 
     await waitFor(() => expect(postersApi.getCollectionPosters).toHaveBeenCalled());

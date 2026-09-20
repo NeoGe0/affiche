@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 import { Modal } from '../common';
+import { useToast } from '../../context/ToastContext';
 import {
   usePosterBrowseQuery,
   usePosterCandidates,
@@ -34,6 +35,8 @@ interface PosterBrowserModalProps {
   defaultUpload?: boolean;
 
   canUpload?: boolean;
+
+  initialPoster?: string;
 }
 
 export function PosterBrowserModal({
@@ -44,17 +47,19 @@ export function PosterBrowserModal({
   isSaving = false,
   defaultUpload = false,
   canUpload = true,
+  initialPoster,
 }: PosterBrowserModalProps) {
   const { config: posterConfig } = usePosterConfig();
   const { isAnyProviderConfigured, configuredProviders } = useProviderStatus();
+  const toast = useToast();
 
   const { title: itemTitle, year, mediaType, tmdbId, tvdbId, collectionId } = target;
   const isSeason = seasonNumber !== undefined;
   const defaultTitle = isSeason ? `Season ${seasonNumber}` : itemTitle;
 
-  const [selectedPoster, setSelectedPoster] = useState<string | null>(null);
+  const [selectedPoster, setSelectedPoster] = useState<string | null>(initialPoster ?? null);
   const [showEditPanel, setShowEditPanel] = useState(false);
-  const [uploadToLibrary, setUploadToLibrary] = useState(defaultUpload);
+  const [findOpen, setFindOpen] = useState(false);
 
   const query = usePosterBrowseQuery({
     itemTitle,
@@ -94,20 +99,37 @@ export function PosterBrowserModal({
 
   const titleLanguageEnabled = isAnyProviderConfigured && (tmdbId !== undefined || tvdbId !== undefined);
 
-  const handleSave = () => {
-    if (!selectedPoster) return;
-    onSave(selectedPoster, {
+  const save = (posterUrl: string, upload: boolean) => {
+    onSave(posterUrl, {
       overlayOptions,
       textOptions,
       jpegQuality: quality,
       title: titleDraft.title,
-      upload: uploadToLibrary,
+      upload,
     });
   };
 
+  const handleSave = (upload: boolean) => {
+    if (selectedPoster) save(selectedPoster, upload);
+  };
+
+  const saveFromGrid = (posterUrl: string) => {
+    if (isSaving) return;
+    setSelectedPoster(posterUrl);
+    save(posterUrl, canUpload && defaultUpload);
+  };
+
+  const resetStyle = () => {
+    const undo = style.reset();
+    if (undo) toast.info('Style reset to defaults', { action: { label: 'Undo', onClick: undo } });
+  };
+
+  const isEditing = showEditPanel && !!overlayOptions && !!textOptions;
+  const sortedPosters = sortPosterCandidates(candidates.posters, query.sort);
+
   const modalTitle = isSeason
-    ? `Select Poster for "${itemTitle}" - Season ${seasonNumber}`
-    : `Select Poster for "${itemTitle}"`;
+    ? `Choose artwork for ${itemTitle}, season ${seasonNumber}`
+    : `Choose artwork for ${itemTitle}`;
 
   return (
     <>
@@ -149,6 +171,8 @@ export function PosterBrowserModal({
               onPickFile: (file) => stageCustom({ file }),
               isStaging: candidates.isStagingCustom,
             }}
+            find={{ isOpen: findOpen, onToggle: () => setFindOpen((open) => !open) }}
+            resultCount={candidates.isLoading ? undefined : sortedPosters.length}
             seasonSource={
               isSeason
                 ? {
@@ -164,13 +188,35 @@ export function PosterBrowserModal({
 
           <div className={styles.mainArea}>
             <PosterCandidateGrid
-              posters={sortPosterCandidates(candidates.posters, query.sort)}
+              posters={sortedPosters}
               selected={selectedPoster}
               isLoading={candidates.isLoading}
               onSelect={setSelectedPoster}
+              onActivate={saveFromGrid}
+              compact={isEditing}
+              onFindElsewhere={findOpen ? undefined : () => setFindOpen(true)}
             />
 
-            {!showEditPanel && (
+            {isEditing ? (
+              <PosterEditPanel
+                imageUrl={selectedPoster}
+                title={titleDraft.title}
+                onTitleChange={titleDraft.changeTitle}
+                titleLanguage={titleDraft.language}
+                onTitleLanguageChange={titleDraft.changeLanguage}
+                titleLanguageEnabled={titleLanguageEnabled}
+                isTranslating={titleDraft.isTranslating}
+                titleNotFound={titleDraft.notFound}
+                overlayOptions={overlayOptions}
+                textOptions={textOptions}
+                jpegQuality={quality}
+                onOverlayChange={style.changeOverlay}
+                onTextChange={style.changeText}
+                onQualityChange={style.changeQuality}
+                onReset={resetStyle}
+                onClose={() => setShowEditPanel(false)}
+              />
+            ) : (
               <PosterPreviewPane
                 imageUrl={selectedPoster}
                 title={titleDraft.title}
@@ -183,16 +229,13 @@ export function PosterBrowserModal({
         </div>
 
         <div className={styles.footer}>
-          {canUpload && (
-            <label className={styles.uploadToggle}>
-              <input
-                type="checkbox"
-                checked={uploadToLibrary}
-                onChange={(e) => setUploadToLibrary(e.target.checked)}
-              />
-              <span>Upload to library</span>
-            </label>
-          )}
+          <p className={styles.footerNote}>
+            {!canUpload
+              ? 'The poster is kept in Affiche.'
+              : defaultUpload
+                ? "This library uploads new posters: Save & upload replaces the media server's artwork, keeping its current one for Reset. Save keeps the poster in Affiche only."
+                : "Save keeps the poster in Affiche. Save & upload also replaces the media server's artwork, keeping its current one for Reset."}
+          </p>
           <button
             className={`${styles.footerButton} ${styles.cancel}`}
             onClick={onClose}
@@ -200,44 +243,34 @@ export function PosterBrowserModal({
           >
             Cancel
           </button>
-          <button
-            className={`${styles.footerButton} ${styles.save}`}
-            onClick={handleSave}
-            disabled={!selectedPoster || isSaving}
-          >
-            {isSaving ? (
-              <>
-                <Loader2 size={16} className="spin" />
-                Saving...
-              </>
-            ) : (
-              'Save'
-            )}
-          </button>
+          {isSaving ? (
+            <button className={`${styles.footerButton} ${styles.save}`} disabled>
+              <Loader2 size={16} className="spin" />
+              Saving…
+            </button>
+          ) : (
+            <>
+              {}
+              <button
+                className={`${styles.footerButton} ${canUpload && defaultUpload ? styles.secondary : styles.save}`}
+                onClick={() => handleSave(false)}
+                disabled={!selectedPoster}
+              >
+                Save
+              </button>
+              {canUpload && (
+                <button
+                  className={`${styles.footerButton} ${defaultUpload ? styles.save : styles.secondary}`}
+                  onClick={() => handleSave(true)}
+                  disabled={!selectedPoster}
+                >
+                  Save &amp; upload
+                </button>
+              )}
+            </>
+          )}
         </div>
       </Modal>
-
-      {}
-      {showEditPanel && selectedPoster && overlayOptions && textOptions && (
-        <PosterEditPanel
-          imageUrl={selectedPoster}
-          title={titleDraft.title}
-          onTitleChange={titleDraft.changeTitle}
-          titleLanguage={titleDraft.language}
-          onTitleLanguageChange={titleDraft.changeLanguage}
-          titleLanguageEnabled={titleLanguageEnabled}
-          isTranslating={titleDraft.isTranslating}
-          titleNotFound={titleDraft.notFound}
-          overlayOptions={overlayOptions}
-          textOptions={textOptions}
-          jpegQuality={quality}
-          onOverlayChange={style.changeOverlay}
-          onTextChange={style.changeText}
-          onQualityChange={style.changeQuality}
-          onReset={style.reset}
-          onClose={() => setShowEditPanel(false)}
-        />
-      )}
     </>
   );
 }

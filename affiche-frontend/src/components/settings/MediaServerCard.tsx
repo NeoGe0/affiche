@@ -114,7 +114,7 @@ export function MediaServerCard({
                 disabled={isSaving}
               >
                 <Save size={14} />
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {isSaving ? 'Saving…' : 'Save changes'}
               </button>
             </div>
           )}
@@ -178,7 +178,7 @@ export function MediaServerCard({
                   onClick={onAddLibraries}
                 >
                   <RefreshCw size={14} />
-                  Add Libraries
+                  Add libraries
                 </button>
               </div>
             </>
@@ -223,7 +223,7 @@ export function MediaServerCard({
                   placement="top-start"
                   triggerClassName={sectionStyles.menuTrigger}
                   items={[
-                    { icon: <Trash2 size={16} />, label: 'Delete Server', onClick: onDeleteServer,
+                    { icon: <Trash2 size={16} />, label: 'Delete server', onClick: onDeleteServer,
                       danger: true },
                   ]}
                 />

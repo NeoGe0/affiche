@@ -73,7 +73,7 @@ export function ServerTokenPanel({
           className={`${sectionStyles.outlineButton} ${sectionStyles.outlineButtonAccent}`}
           disabled={!canSubmit}
         >
-          {isBusy ? 'Checking...' : 'Update'}
+          {isBusy ? 'Checking…' : 'Update'}
         </button>
       </div>
     </form>

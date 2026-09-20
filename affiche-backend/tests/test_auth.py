@@ -40,6 +40,11 @@ def test_create_admin_validates_input(clean_session):
     with pytest.raises(AuthError):
         svc.create_admin("admin", "")
 
+def test_create_admin_holds_the_same_minimum_as_every_other_password(clean_session):
+    svc = _service(clean_session)
+    with pytest.raises(AuthError, match="at least 8"):
+        svc.create_admin("admin", "short")
+
 def test_token_round_trip(clean_session):
     svc = _service(clean_session)
     user = svc.create_admin("admin", "s3cret-pass")

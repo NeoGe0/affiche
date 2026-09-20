@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import requests
 
 from affiche.config.http_config import HTTP_TIMEOUT
-from affiche.external.poster.provider.base_provider import BaseUrlMode, ExternalProvider
+from affiche.external.poster.provider.base_provider import BaseUrlMode, ExternalProvider, PosterImage
 
 logger = logging.getLogger(__name__)
 
@@ -143,7 +143,8 @@ class ShokoClient(ExternalProvider):
             width = image.get("Width") or 0
             if width and width < self.MIN_POSTER_WIDTH:
                 continue
-            candidates.append((width, url))
+            candidates.append((width, PosterImage(url, language=image.get("LanguageCode"),
+                                                  width=width, height=image.get("Height"))))
 
         candidates.sort(key=lambda candidate: candidate[0], reverse=True)
         return [url for _, url in candidates]

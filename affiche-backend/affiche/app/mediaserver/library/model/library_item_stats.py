@@ -7,6 +7,7 @@ class LibraryItemStats(BaseModel):
     errors: int = 0
     locked: int = 0
     uploaded: int = 0
+    ready: int = 0
 
     def __add__(self, other: 'LibraryItemStats') -> 'LibraryItemStats':
         return LibraryItemStats(**{

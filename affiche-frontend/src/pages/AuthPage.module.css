@@ -12,7 +12,7 @@
   max-width: 380px;
   background-color: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-2xl);
   padding: 32px;
   box-shadow: var(--shadow-xl);
 }
@@ -27,7 +27,7 @@
 }
 
 .brandText {
-  font-size: 1.25rem;
+  font-size: var(--text-2xl);
   font-weight: 600;
   letter-spacing: 0.26em;
   text-transform: uppercase;
@@ -45,7 +45,7 @@
 .subtitle {
   text-align: center;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   margin-bottom: 24px;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .label {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-secondary);
 }
@@ -70,11 +70,11 @@
 .input {
   width: 100%;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   transition: border-color 0.15s;
 }
 
@@ -86,16 +86,16 @@
 .submit {
   margin-top: 4px;
   padding: 11px 14px;
-  border-radius: 8px;
-  background-color: var(--accent);
+  border-radius: var(--radius-lg);
+  background-color: var(--accent-fill);
   color: var(--text-on-fill);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 600;
   transition: background-color 0.15s;
 }
 
 .submit:hover:not(:disabled) {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
 }
 
 .submit:disabled {
@@ -104,19 +104,20 @@
 }
 
 .error {
-  background-color: var(--error-tint);
-  border: 1px solid var(--error);
+  background-color: var(--notice-error-tint);
+  border: 1px solid var(--notice-error-edge);
   color: var(--error);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 10px 12px;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
 }
 
 .notice {
-  border: 1px solid var(--warning);
+  border: 1px solid var(--notice-warning-edge);
+  background-color: var(--notice-warning-tint);
   color: var(--text-secondary);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 10px 12px;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   line-height: 1.5;
 }
