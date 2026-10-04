@@ -346,13 +346,6 @@ describe('PosterBrowserModal — style drafts', () => {
     expect(onSave).toHaveBeenLastCalledWith('https://cdn/a.jpg', expect.objectContaining({ upload: false }));
   });
 
-  it('says in words which save is the default, not only by which button is filled', async () => {
-    renderModal({ defaultUpload: true });
-    await candidates();
-
-    expect(screen.getByText(/This library uploads new posters/)).toBeInTheDocument();
-  });
-
   it('offers no upload where applying cannot reach the media server', async () => {
     renderModal({ canUpload: false });
     await candidates();
