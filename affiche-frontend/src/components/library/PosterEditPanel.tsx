@@ -72,9 +72,6 @@ export function PosterEditPanel({
             <div className={styles.previewPlaceholder}>No poster selected</div>
           )}
         </div>
-        <p className={styles.previewNote}>
-          Pick any poster in the grid: it takes this style straight away.
-        </p>
       </div>
 
       <div className={styles.content}>

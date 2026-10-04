@@ -32,7 +32,7 @@ from affiche.config.dependencies import (
     get_poster_aggregator,
     get_provider_service,
 )
-from affiche.external.poster.poster_service import PosterAggregatorService
+from affiche.external.poster.poster_service import PosterAggregatorService, TmdbSeasonMatch
 
 router = APIRouter()
 
@@ -151,6 +151,10 @@ def get_season_posters(
         season_number: int = Query(..., description="Season number"),
         tmdb_id: Optional[int] = Query(None),
         tvdb_id: Optional[int] = Query(None),
+        tmdb_id_override: Optional[int] = Query(
+            None, description="TMDB series to ask instead, when it files this season separately"),
+        tmdb_season_number_override: Optional[int] = Query(
+            None, description="Which season of that series; defaults to season_number"),
         provider: Optional[str] = Query(None),
         language: Optional[str] = Query(None),
         aggregator: PosterAggregatorService = Depends(get_poster_aggregator)
@@ -158,12 +162,19 @@ def get_season_posters(
     if not tmdb_id and not tvdb_id:
         raise HTTPException(status_code=400, detail="At least one of tmdb_id or tvdb_id required")
 
+    match = TmdbSeasonMatch(
+        tmdb_id=tmdb_id_override,
+        season_number=(season_number if tmdb_season_number_override is None
+                       else tmdb_season_number_override),
+    ) if tmdb_id_override else None
+
     return aggregator.get_all_season_posters(
         season_number=season_number,
         tmdb_id=tmdb_id,
         tvdb_id=tvdb_id,
         language=language or None,
-        provider_name=provider
+        provider_name=provider,
+        tmdb_match=match,
     )
 
 @router.get("/fonts")

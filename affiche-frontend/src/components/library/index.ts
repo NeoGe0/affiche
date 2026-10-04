@@ -10,6 +10,8 @@ export { ItemDetail } from './ItemDetail';
 export { EpisodeList } from './EpisodeList';
 export { PosterBrowserModal } from './PosterBrowserModal';
 export { PosterCompareModal } from './PosterCompareModal';
+export { RenameItemModal } from './RenameItemModal';
+export { TitleCleanupPanel } from './TitleCleanupPanel';
 export { posterTargetFromCollection, posterTargetFromItem, type PosterTarget } from './posterTarget';
 export { parseViewMode, DEFAULT_VIEW_MODE } from './viewMode';
 export { providerFilterOptions, type ProviderFilterOption } from './providerFilter';

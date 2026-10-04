@@ -3,13 +3,14 @@ from enum import Enum
 from typing import Dict, Optional, List, Tuple
 
 from fastapi import HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from affiche.api.schemas.settings_schema import OverlayOptionsResponse, TextOptionsResponse
 from affiche.app.filestore.filestore import FileStoreService
 from affiche.app.image import custom_poster
 from affiche.app.image.model import OverlayOptions, TextOptions
 from affiche.app.mediaserver.library.model import ItemStatusFilter, LibraryItemSearch, SortDir
+from affiche.app.mediaserver.library.service.item_rename_service import MAX_TITLE_LENGTH
 
 PROCESSED_NO_POSTER_ERROR = "Marked as processed but no poster was generated — this item needs attention."
 
@@ -109,6 +110,9 @@ class ItemSeason(BaseModel):
     imdb_id: Optional[str] = None
     tmdb_id: Optional[int] = None
     tvdb_id: Optional[int] = None
+
+    tmdb_id_override: Optional[int] = None
+    tmdb_season_number_override: Optional[int] = None
 
     poster_url: Optional[str] = None
     poster_provider: Optional[str] = None
@@ -210,6 +214,58 @@ class LibraryStyleStaleness(BaseModel):
 
 class ItemLockRequest(BaseModel):
     locked: bool
+
+class TitleProposalResponse(BaseModel):
+    item_id: int
+    current_title: str
+    proposed_title: str
+    provider: Optional[str] = None
+    status: str = "pending"
+    error: Optional[str] = None
+
+class TitleCheckProgress(BaseModel):
+    running: bool = False
+    checked: int = 0
+    total: int = 0
+    mismatched: int = 0
+
+class TitleCleanupState(BaseModel):
+    proposals: List[TitleProposalResponse] = Field(default_factory=list)
+    check: TitleCheckProgress = Field(default_factory=TitleCheckProgress)
+
+class TitleCleanupRequest(BaseModel):
+    item_ids: List[int] = Field(..., min_length=1)
+    regenerate: bool = False
+
+class ItemRenameRequest(BaseModel):
+    title: str = Field(..., max_length=MAX_TITLE_LENGTH)
+
+    @field_validator("title")
+    @classmethod
+    def _not_blank(cls, value: str) -> str:
+        trimmed = value.strip()
+        if not trimmed:
+            raise ValueError("A title is required.")
+        return trimmed
+
+class MatchedTitle(BaseModel):
+    title: str
+    provider: str
+
+class ItemTitleSuggestions(BaseModel):
+    current: str
+    matched: Optional[MatchedTitle] = None
+    reason: Optional[str] = None
+
+class SeasonTmdbMatchSuggestion(BaseModel):
+    tmdb_id: int
+    tmdb_season_number: int
+    series_name: str
+    reason: str
+
+class SeasonTmdbMatchRequest(BaseModel):
+    tmdb_id: Optional[int] = Field(None, ge=1)
+    tmdb_season_number: Optional[int] = Field(None, ge=0)
 
 class ItemSelectionRequest(BaseModel):
     item_ids: List[int] = Field(..., min_length=1)

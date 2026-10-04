@@ -73,6 +73,8 @@ def _bucket_sums():
         'locked': func.sum(case((LibraryItemEntity.locked.is_(True), 1), else_=0)),
         'uploaded': func.sum(case((LibraryItemEntity.poster_uploaded_at.is_not(None), 1), else_=0)),
         'ready': func.sum(case((_ready_clause(), 1), else_=0)),
+        'mismatched_titles': func.sum(
+            case((LibraryItemEntity.title_mismatched.is_(True), 1), else_=0)),
     }
 
 def _stats_from_row(row) -> LibraryItemStats:
@@ -151,12 +153,17 @@ class AlchemyLibraryConnector:
         )
 
     def _item_upsert_stmt(self, item: LibraryItem):
-        data = item.model_dump(exclude={'id', 'processed'})
+        data = item.model_dump(exclude={'id', 'processed', 'title_mismatched',
+                                        'title_checked_at', 'catalogue_title',
+                                        'catalogue_provider'})
         stmt = insert(LibraryItemEntity).values(**data, processed=False)
-        return stmt.on_conflict_do_update(
-            index_elements=['external_id', 'library_id'],
-            set_={col: stmt.excluded[col] for col in self._update_columns()}
+        updates = {col: stmt.excluded[col] for col in self._update_columns()}
+        updates['title_checked_at'] = case(
+            (LibraryItemEntity.title != stmt.excluded.title, None),
+            else_=LibraryItemEntity.title_checked_at,
         )
+        return stmt.on_conflict_do_update(
+            index_elements=['external_id', 'library_id'], set_=updates)
 
     def _search_query(self, search: LibraryItemSearch) -> Query:
         query = self._session.query(LibraryItemEntity)
@@ -194,6 +201,15 @@ class AlchemyLibraryConnector:
         if search.uploaded is not None:
             query = query.filter(LibraryItemEntity.poster_uploaded_at.is_not(None) if search.uploaded
                                  else LibraryItemEntity.poster_uploaded_at.is_(None))
+
+        if search.title_mismatched is not None:
+            query = query.filter(
+                LibraryItemEntity.title_mismatched.is_(bool(search.title_mismatched)))
+
+        if search.title_unchecked is not None:
+            query = query.filter(LibraryItemEntity.title_checked_at.is_(None)
+                                 if search.title_unchecked
+                                 else LibraryItemEntity.title_checked_at.is_not(None))
 
         if search.external_ids is not None:
             query = query.filter(LibraryItemEntity.external_id.in_(search.external_ids))

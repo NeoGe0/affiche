@@ -3,16 +3,27 @@ from dataclasses import dataclass
 from typing import Callable, NamedTuple, Optional, List, TypeVar
 
 from affiche.app.service_configuration.exceptions import NoProvidersConfiguredError
-from affiche.external.poster.provider.base_provider import ExternalProvider
+from affiche.external.poster import season_match
+from affiche.external.poster.season_match import SeasonMatchSuggestion
+from affiche.external.poster.provider.base_provider import ExternalProvider, SeriesFacts
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
+class TitleMatch(NamedTuple):
+    title: str
+    provider: str
+
 @dataclass
 class MediaIds:
     tmdb_id: Optional[int] = None
     tvdb_id: Optional[int] = None
+
+@dataclass(frozen=True)
+class TmdbSeasonMatch:
+    tmdb_id: int
+    season_number: int
 
 class ProviderPoster(NamedTuple):
     url: str
@@ -85,12 +96,14 @@ class PosterAggregatorService:
                                 tvdb_id: int,
                                 season_number: int,
                                 provider_order: List[str],
-                                language: Optional[str] = None
+                                language: Optional[str] = None,
+                                tmdb_match: Optional[TmdbSeasonMatch] = None,
                                 ) -> Optional[ProviderPoster]:
         for provider in self._get_providers_by_order(provider_order):
+            ids, number = self._season_lookup(provider, tmdb_id, season_number, tmdb_match)
             result = self._ask(provider, lambda p=provider: p.get_season_poster(
-                season_number=season_number,
-                tmdb_id=tmdb_id,
+                season_number=number,
+                tmdb_id=ids,
                 tvdb_id=tvdb_id,
                 language=language
             ), None)
@@ -124,19 +137,30 @@ class PosterAggregatorService:
                                tmdb_id: Optional[int] = None,
                                tvdb_id: Optional[int] = None,
                                language: Optional[str] = None,
-                               provider_name: Optional[str] = None
+                               provider_name: Optional[str] = None,
+                               tmdb_match: Optional[TmdbSeasonMatch] = None,
                                ) -> List[ProviderPoster]:
         all_posters: List[ProviderPoster] = []
 
         for provider in self._providers_to_ask(provider_name):
+            ids, number = self._season_lookup(provider, tmdb_id, season_number, tmdb_match)
             all_posters.extend(self._tag(provider, lambda p=provider: p.get_all_season_posters(
-                season_number=season_number,
-                tmdb_id=tmdb_id,
+                season_number=number,
+                tmdb_id=ids,
                 tvdb_id=tvdb_id,
                 language=language,
             )))
 
         return all_posters
+
+    @staticmethod
+    def _season_lookup(provider: ExternalProvider,
+                       tmdb_id: Optional[int],
+                       season_number: int,
+                       tmdb_match: Optional[TmdbSeasonMatch]) -> tuple[Optional[int], int]:
+        if tmdb_match and provider.name == "tmdb":
+            return tmdb_match.tmdb_id, tmdb_match.season_number
+        return tmdb_id, season_number
 
     def get_all_collection_posters(self,
                                    collection_id: int,
@@ -165,6 +189,75 @@ class PosterAggregatorService:
                 if votes[found] >= MIN_AGREEING_MEMBERS:
                     return found
         return None
+
+    MAX_CANDIDATES = 4
+
+    def suggest_season_match(self,
+                             show_title: str,
+                             season_number: int,
+                             tvdb_id: Optional[int] = None) -> Optional[SeasonMatchSuggestion]:
+        tvdb, tmdb = self._get_provider("tvdb"), self._get_provider("tmdb")
+        if not tvdb or not tmdb or not tvdb_id:
+            return None
+
+        target = self._ask(tvdb, lambda: tvdb.describe_season(season_number, tvdb_id=tvdb_id), None)
+        if not target or not season_match.is_distinctive(target.name, season_number):
+            return None
+
+        for query in season_match.queries(show_title, target.name):
+            found = self._ask(tmdb, lambda q=query: tmdb.find_series(q), []) or []
+            for candidate in found[:self.MAX_CANDIDATES]:
+                facts = self._ask(tmdb, lambda c=candidate: tmdb.describe_series(c.id), None)
+                if not facts:
+                    continue
+                picked = season_match.pick_season(facts, target)
+                if picked:
+                    return SeasonMatchSuggestion(
+                        tmdb_id=facts.id,
+                        season_number=picked.number,
+                        series_name=facts.name,
+                        reason=season_match.describe(facts, picked, target),
+                    )
+        return None
+
+    def title_from_ids(self, media_type: str, language: str,
+                       tmdb_id: Optional[int] = None,
+                       tvdb_id: Optional[int] = None) -> Optional[TitleMatch]:
+        if not tmdb_id and not tvdb_id:
+            return None
+
+        for provider in self.providers:
+            found = self._ask(provider, lambda p=provider: p.get_translated_title(
+                media_type=media_type, language=language,
+                tmdb_id=tmdb_id, tvdb_id=tvdb_id,
+            ), None)
+            if found:
+                return TitleMatch(title=found, provider=provider.name)
+        return None
+
+    def alternative_titles(self, media_type: str,
+                           tmdb_id: Optional[int] = None,
+                           tvdb_id: Optional[int] = None) -> List[str]:
+        if not tmdb_id and not tvdb_id:
+            return []
+
+        seen: set[str] = set()
+        names: List[str] = []
+        for provider in self.providers:
+            found = self._ask(provider, lambda p=provider: p.get_alternative_titles(
+                media_type=media_type, tmdb_id=tmdb_id, tvdb_id=tvdb_id), []) or []
+            for name in found:
+                key = name.casefold()
+                if key not in seen:
+                    seen.add(key)
+                    names.append(name)
+        return names
+
+    def describe_tmdb_series(self, tmdb_id: int) -> Optional[SeriesFacts]:
+        tmdb = self._get_provider("tmdb")
+        if not tmdb:
+            return None
+        return self._ask(tmdb, lambda: tmdb.describe_series(tmdb_id), None)
 
     def _collection_providers(self, provider_name: Optional[str]) -> List[ExternalProvider]:
         return [p for p in self._providers_to_ask(provider_name) if p.supports_collections]

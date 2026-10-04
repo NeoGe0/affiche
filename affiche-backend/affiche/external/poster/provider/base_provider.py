@@ -1,5 +1,6 @@
 import threading
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, List
 
@@ -25,6 +26,20 @@ class PosterImage(str):
         image.width = width or None
         image.height = height or None
         return image
+
+@dataclass(frozen=True)
+class SeriesSeason:
+    number: int
+    name: Optional[str] = None
+    episode_count: Optional[int] = None
+    year: Optional[int] = None
+
+@dataclass(frozen=True)
+class SeriesFacts:
+    id: int
+    name: str
+    year: Optional[int] = None
+    seasons: List[SeriesSeason] = field(default_factory=list)
 
 class ExternalProvider(ABC):
 
@@ -134,6 +149,28 @@ class ExternalProvider(ABC):
             year: Optional[int] = None,
     ) -> Optional[str]:
         return None
+
+    def describe_season(
+            self,
+            season_number: int,
+            tmdb_id: Optional[int] = None,
+            tvdb_id: Optional[int] = None,
+    ) -> Optional[SeriesSeason]:
+        return None
+
+    def find_series(self, title: str, year: Optional[int] = None) -> List[SeriesFacts]:
+        return []
+
+    def describe_series(self, series_id: int) -> Optional[SeriesFacts]:
+        return None
+
+    def get_alternative_titles(
+            self,
+            media_type: str,
+            tmdb_id: Optional[int] = None,
+            tvdb_id: Optional[int] = None,
+    ) -> List[str]:
+        return []
 
     def get_translated_title(
             self,

@@ -1,4 +1,4 @@
-from typing import Mapping, Optional, List
+from typing import Mapping, Optional, List, Set
 
 from sqlalchemy import update
 from sqlalchemy.dialects.sqlite import insert
@@ -32,12 +32,26 @@ class AlchemyLibrarySeasonConnector:
                     continue
                 entity.external_id = external_id
                 entity.poster_hash = None
+                entity.poster_uploaded_at = None
                 rekeyed += 1
             self._session.commit()
         except Exception:
             self._session.rollback()
             raise
         return rekeyed
+
+    def set_tmdb_match(self,
+                       season_id: int,
+                       tmdb_id: Optional[int],
+                       season_number: Optional[int]) -> Optional[LibrarySeason]:
+        entity = self._session.get(LibrarySeasonEntity, season_id)
+        if entity is None:
+            return None
+        entity.tmdb_id_override = tmdb_id
+        entity.tmdb_season_number_override = season_number if tmdb_id is not None else None
+        self._session.commit()
+        self._session.refresh(entity)
+        return LibrarySeason.model_validate(entity)
 
     def create_or_update_seasons_batch(self, seasons: List[LibrarySeason]) -> None:
         commit_batch_with_fallback(
@@ -67,6 +81,29 @@ class AlchemyLibrarySeasonConnector:
             query = query.filter(LibrarySeasonEntity.processed == processed)
 
         return [LibrarySeason.model_validate(s) for s in query.all()]
+
+    def find_show_ids(self,
+                      library_id: int,
+                      processed: bool,
+                      uploaded: Optional[bool] = None) -> List[int]:
+        query = (self._session.query(LibrarySeasonEntity.show_id)
+                 .filter(LibrarySeasonEntity.library_id == library_id)
+                 .filter(LibrarySeasonEntity.processed == processed))
+
+        if uploaded is not None:
+            query = query.filter(LibrarySeasonEntity.poster_uploaded_at.is_not(None) if uploaded
+                                 else LibrarySeasonEntity.poster_uploaded_at.is_(None))
+
+        return [row[0] for row in query.distinct().all()]
+
+    def find_known_external_ids(self, library_id: int, external_ids: List[str]) -> Set[str]:
+        if not external_ids:
+            return set()
+        rows = (self._session.query(LibrarySeasonEntity.external_id)
+                .filter(LibrarySeasonEntity.library_id == library_id)
+                .filter(LibrarySeasonEntity.external_id.in_(external_ids))
+                .all())
+        return {row[0] for row in rows}
 
     def _season_update_columns(self) -> list[str]:
         return [

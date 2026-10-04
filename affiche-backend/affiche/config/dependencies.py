@@ -9,6 +9,7 @@ from affiche.app.auth.service.auth_service import AuthService
 from affiche.app.auth.service.user_repository import UserRepository
 from affiche.app.dashboard import DashboardService
 from affiche.app.mediaserver.service.collection_poster_service import CollectionPosterService
+from affiche.app.mediaserver.service.season_match_service import SeasonMatchService
 from affiche.app.provider_stats import ProviderStatsService
 from affiche.app.search import SearchService
 from affiche.app.task_history.service.task_history_service import TaskHistoryService
@@ -25,6 +26,9 @@ from affiche.app.mediaserver.library import LibraryService
 from affiche.app.mediaserver.library.seasons.library_season_service import LibrarySeasonService
 from affiche.app.mediaserver.library.episodes.library_episode_service import LibraryEpisodeService
 from affiche.app.mediaserver.library.collections.library_collection_service import LibraryCollectionService
+from affiche.app.mediaserver.library.service.item_rename_service import ItemRenameService
+from affiche.app.mediaserver.library.service.title_check_service import TitleCheckService
+from affiche.app.mediaserver.library.service.title_cleanup_service import TitleCleanupService
 from affiche.app.mediaserver.service.media_server_poster_service import LibraryPosterService
 from affiche.app.mediaserver.service.source_poster_service import SourcePosterService
 from affiche.app.mediaserver.library.settings.library_settings_service import LibrarySettingsService
@@ -35,6 +39,7 @@ from affiche.app.mediaserver.service.plex_sync_service import PlexSynchronisatio
 from affiche.app.mediaserver.service.media_server_repository import MediaServerRepository
 from affiche.app.mediaserver.service.media_server_service import MediaServerService
 from affiche.app.mediaserver.library.sync.media_server_synchronisation_service import MediaServerSynchronisationService
+from affiche.app.service_configuration.exceptions import NoProvidersConfiguredError
 from affiche.app.service_configuration.provider_service import ProviderService
 from affiche.app.service_configuration.service.configuration_repository import ConfigurationRepository
 from affiche.app.service_configuration.service.service_configuration_service import ServiceConfigurationService
@@ -70,6 +75,8 @@ class ServiceContainer:
         self._connector_factory: Optional[MediaServerConnectorFactory] = None
         self._font_store: Optional[FontStore] = None
         self._collection_file_store: Optional[FileStoreService] = None
+        self._title_cleanup_service: Optional[TitleCleanupService] = None
+        self._title_check_service: Optional[TitleCheckService] = None
 
     @property
     def file_store(self) -> FileStoreService:
@@ -207,6 +214,13 @@ class ServiceContainer:
     def library_collection_service(self, session: Session) -> LibraryCollectionService:
         return LibraryCollectionService(session, self.connector_factory)
 
+    def item_rename_service(self, session: Session) -> ItemRenameService:
+        try:
+            aggregator = self.poster_aggregator(session)
+        except NoProvidersConfiguredError:
+            aggregator = None
+        return ItemRenameService(session, self.connector_factory, aggregator)
+
     def library_service(self, session: Session) -> LibraryService:
         return LibraryService(session, self.file_store, self.app_settings_store)
 
@@ -258,6 +272,33 @@ class ServiceContainer:
         return SourcePosterService(
             session_factory=session_factory or SessionLocal,
             file_store=self.file_store,
+        )
+
+    @property
+    def title_check_service(self) -> TitleCheckService:
+        if self._title_check_service is None:
+            self._title_check_service = TitleCheckService(
+                session_factory=SessionLocal,
+                rename_service_factory=self.item_rename_service,
+            )
+        return self._title_check_service
+
+    @property
+    def title_cleanup_service(self) -> TitleCleanupService:
+        if self._title_cleanup_service is None:
+            self._title_cleanup_service = TitleCleanupService(
+                session_factory=SessionLocal,
+                rename_service_factory=self.item_rename_service,
+            )
+        return self._title_cleanup_service
+
+    def season_match_service(
+            self,
+            session_factory: Callable[[], Session] = None
+    ) -> SeasonMatchService:
+        return SeasonMatchService(
+            session_factory=session_factory or SessionLocal,
+            aggregator_factory=self.poster_aggregator,
         )
 
     def collection_poster_service(
@@ -354,6 +395,17 @@ def get_library_collection_service(
         session: Session = Depends(get_db)
 ) -> LibraryCollectionService:
     return container.library_collection_service(session)
+
+def get_title_cleanup_service() -> TitleCleanupService:
+    return container.title_cleanup_service
+
+def get_title_check_service() -> TitleCheckService:
+    return container.title_check_service
+
+def get_item_rename_service(
+        session: Session = Depends(get_db)
+) -> ItemRenameService:
+    return container.item_rename_service(session)
 
 def get_dashboard_service(
         session: Session = Depends(get_db)

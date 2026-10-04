@@ -12,6 +12,9 @@ interface UsePosterCandidatesOptions {
 
   seasonNumber?: number;
 
+  tmdbIdOverride?: number;
+  tmdbSeasonNumberOverride?: number;
+
   provider: string;
 
   language: string;
@@ -23,6 +26,8 @@ export function usePosterCandidates({
   tvdbId,
   collectionId,
   seasonNumber,
+  tmdbIdOverride,
+  tmdbSeasonNumberOverride,
   provider,
   language,
 }: UsePosterCandidatesOptions) {
@@ -55,6 +60,8 @@ export function usePosterCandidates({
               season_number: seasonNumber,
               tmdb_id: tmdbId,
               tvdb_id: tvdbId,
+              tmdb_id_override: tmdbIdOverride,
+              tmdb_season_number_override: tmdbSeasonNumberOverride,
               provider: provider || undefined,
               language: language || undefined,
             })
@@ -79,7 +86,8 @@ export function usePosterCandidates({
 
   useEffect(() => {
     refetch();
-  }, [seasonNumber, provider, language, canBrowse, collectionId]);
+  }, [seasonNumber, tmdbIdOverride, tmdbSeasonNumberOverride, provider, language, canBrowse,
+      collectionId]);
 
   const search = async (name: string, year?: number) => {
     setIsSearching(true);

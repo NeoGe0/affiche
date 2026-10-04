@@ -30,6 +30,11 @@ class LibraryEnumerator(Protocol):
     def get_libraries(self) -> List[RemoteLibrary]:
         ...
 
+class ItemTitleWriter(Protocol):
+
+    def rename_item(self, external_id: str, title: str) -> bool:
+        ...
+
 class CollectionWriter(Protocol):
 
     def create_collection(self, library_external_id: str, title: str,

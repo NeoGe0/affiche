@@ -38,6 +38,9 @@ export const postersApi = {
     season_number: number;
     tmdb_id?: number;
     tvdb_id?: number;
+
+    tmdb_id_override?: number;
+    tmdb_season_number_override?: number;
     provider?: string;
     language?: string;
   }): Promise<PosterCandidate[]> => {
@@ -45,6 +48,13 @@ export const postersApi = {
     searchParams.set('season_number', params.season_number.toString());
     if (params.tmdb_id) searchParams.set('tmdb_id', params.tmdb_id.toString());
     if (params.tvdb_id) searchParams.set('tvdb_id', params.tvdb_id.toString());
+    if (params.tmdb_id_override) {
+      searchParams.set('tmdb_id_override', params.tmdb_id_override.toString());
+    }
+    if (params.tmdb_season_number_override !== undefined) {
+      searchParams.set('tmdb_season_number_override',
+        params.tmdb_season_number_override.toString());
+    }
     if (params.provider) searchParams.set('provider', params.provider);
     if (params.language) searchParams.set('language', params.language);
     return api.get(`/service/posters/season?${searchParams.toString()}`);

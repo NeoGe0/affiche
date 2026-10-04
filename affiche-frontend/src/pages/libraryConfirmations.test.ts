@@ -16,12 +16,22 @@ describe('confirmationCopy', () => {
 
   it('marks exactly the destructive actions as danger', () => {
     const actions: ConfirmAction[] = [
-      'generate', 'upload', 'reset', 'item-reset',
+      'generate', 'upload', 'reset', 'season-match', 'item-reset',
       'selection-generate', 'selection-upload', 'selection-reset', 'empty-trash',
     ];
     const danger = actions.filter((a) => confirmationCopy(a, ctx).variant === 'danger');
 
     expect(danger).toEqual(['reset', 'item-reset', 'selection-reset', 'empty-trash']);
+  });
+
+  it('says the season match corrects some seasons and leaves the rest', () => {
+    const { message, variant } = confirmationCopy('season-match', ctx);
+
+    expect(message).toContain('Movies');
+
+    expect(message).toMatch(/left for you|by hand/);
+    expect(message).toContain('already matched are not touched');
+    expect(variant).toBeUndefined();
   });
 
   it('offers the unprocessed opt-in only on the library-wide reset', () => {

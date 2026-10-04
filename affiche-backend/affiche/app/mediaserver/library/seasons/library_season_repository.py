@@ -1,4 +1,4 @@
-from typing import List, Mapping, Optional
+from typing import List, Mapping, Optional, Set
 
 from sqlalchemy.orm import Session
 
@@ -19,6 +19,12 @@ class LibrarySeasonRepository:
     def rekey_seasons(self, adoptions: Mapping[int, str]) -> int:
         return self._connector.rekey_seasons(adoptions)
 
+    def set_tmdb_match(self,
+                       season_id: int,
+                       tmdb_id: Optional[int],
+                       season_number: Optional[int]) -> Optional[LibrarySeason]:
+        return self._connector.set_tmdb_match(season_id, tmdb_id, season_number)
+
     def create_or_update(self, seasons: List[LibrarySeason]) -> None:
         self._connector.create_or_update_seasons_batch(seasons)
 
@@ -27,4 +33,13 @@ class LibrarySeasonRepository:
                             library_id: int,
                             processed: Optional[bool] = None) -> List[LibrarySeason]:
         return self._connector.get_seasons_by_show(show_id, library_id, processed)
+
+    def find_known_external_ids(self, library_id: int, external_ids: List[str]) -> Set[str]:
+        return self._connector.find_known_external_ids(library_id, external_ids)
+
+    def find_show_ids(self,
+                      library_id: int,
+                      processed: bool,
+                      uploaded: Optional[bool] = None) -> List[int]:
+        return self._connector.find_show_ids(library_id, processed, uploaded)
 

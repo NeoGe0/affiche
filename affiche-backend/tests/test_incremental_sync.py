@@ -12,7 +12,7 @@ from affiche.app.mediaserver.library.settings.connector.library_settings_entity 
 )
 from affiche.app.mediaserver.library.settings.model.library_settings import AutoPickupAction
 from affiche.app.mediaserver.library.sync.incremental import (
-    FULL_SYNC_MAX_AGE, RECENT_ITEM_LIMIT, may_run_incrementally,
+    FULL_SYNC_MAX_AGE, RECENT_ITEM_LIMIT, may_run_incrementally, shows_gaining_seasons,
 )
 from affiche.app.mediaserver.model.media_server import MediaServerType
 from affiche.app.mediaserver.service.jellyfin_sync_service import JellyfinSynchronisationService
@@ -69,7 +69,8 @@ def _plex(recent, full=None):
     connector.get_library_items.return_value = full if full is not None else recent
     return svc, library_service, settings_service, connector
 
-LIBRARY = SimpleNamespace(name="L", external_id="7", id=7)
+LIBRARY = SimpleNamespace(name="L", external_id="7", id=7, type="movie")
+SHOW_LIBRARY = SimpleNamespace(name="S", external_id="8", id=8, type="show")
 
 @pytest.mark.parametrize("build,run", [
     (_jellyfin, "_sync_single_library"),
@@ -131,6 +132,89 @@ def test_a_filled_window_falls_back_to_a_full_enumeration(build, run):
     connector.get_library_items.assert_called_once()
     library_service.reconcile_deletions.assert_called_once()
     settings_service.mark_full_sync.assert_called_once()
+
+def test_a_season_we_hold_asks_for_nothing():
+    assert shows_gaining_seasons({"s1": "show-a"}, {"s1"}, set()) == []
+
+def test_a_new_season_names_its_show_once():
+    recent = {"s1": "show-a", "s2": "show-a", "s3": "show-b", "s4": "show-c"}
+
+    assert shows_gaining_seasons(recent, {"s4"}, set()) == ["show-a", "show-b"]
+
+def test_a_show_the_item_window_already_lists_is_left_to_it():
+    assert shows_gaining_seasons({"s1": "show-a"}, set(), {"show-a"}) == []
+
+def test_a_window_of_nothing_but_new_seasons_gives_up():
+    recent = {f"s{i}": f"show-{i}" for i in range(RECENT_ITEM_LIMIT)}
+
+    assert shows_gaining_seasons(recent, set(), set()) is None
+
+def _show(i):
+    show = _item(i)
+    show.type = "show"
+    return show
+
+def _with_seasons(build, recent_seasons, known):
+    svc, library_service, settings_service, connector = build([_item(1)], full=[_item(1), _item(2)])
+    connector.get_recently_added_seasons.return_value = recent_seasons
+    connector.get_library_item.side_effect = lambda show_id, *_: _show(show_id)
+    connector.get_show_seasons.return_value = []
+    svc.season_service = MagicMock()
+    svc.season_service.find_known_external_ids.return_value = known
+    svc._sync_seasons = MagicMock()
+    svc._episodes_tracked = lambda library: False
+    return svc, library_service, settings_service, connector
+
+@pytest.mark.parametrize("build,run", [
+    (_jellyfin, "_sync_single_library"),
+    (_plex, "_sync_library"),
+])
+def test_incremental_rereads_an_old_show_that_gained_a_season(build, run):
+    svc, library_service, _, connector = _with_seasons(build, {"s9": "42"}, known=set())
+
+    getattr(svc, run)(connector, SHOW_LIBRARY, incremental=True)
+
+    connector.get_library_items.assert_not_called()
+    assert [show.id for show in svc._sync_seasons.call_args.args[2]] == ["42"]
+    library_service.reconcile_deletions.assert_not_called()
+
+@pytest.mark.parametrize("build,run", [
+    (_jellyfin, "_sync_single_library"),
+    (_plex, "_sync_library"),
+])
+def test_incremental_fetches_no_show_when_every_recent_season_is_known(build, run):
+    svc, _, _, connector = _with_seasons(build, {"s9": "42"}, known={"s9"})
+
+    getattr(svc, run)(connector, SHOW_LIBRARY, incremental=True)
+
+    connector.get_library_item.assert_not_called()
+    svc._sync_seasons.assert_not_called()
+
+@pytest.mark.parametrize("build,run", [
+    (_jellyfin, "_sync_single_library"),
+    (_plex, "_sync_library"),
+])
+def test_a_window_full_of_new_seasons_falls_back_to_a_full_enumeration(build, run):
+    recent = {f"s{i}": f"show-{i}" for i in range(RECENT_ITEM_LIMIT)}
+    svc, _, settings_service, connector = _with_seasons(build, recent, known=set())
+
+    getattr(svc, run)(connector, SHOW_LIBRARY, incremental=True)
+
+    connector.get_library_items.assert_called_once()
+    settings_service.mark_full_sync.assert_called_once()
+
+@pytest.mark.parametrize("build,run", [
+    (_jellyfin, "_sync_single_library"),
+    (_plex, "_sync_library"),
+])
+def test_a_failed_season_lookup_does_not_fail_the_pass(build, run):
+    svc, library_service, _, connector = _with_seasons(build, {}, known=set())
+    connector.get_recently_added_seasons.side_effect = RuntimeError("server said no")
+
+    getattr(svc, run)(connector, SHOW_LIBRARY, incremental=True)
+
+    connector.get_library_items.assert_not_called()
+    library_service.create_or_update_items_batch.assert_called_once()
 
 class _RecordingTaskService:
     def __init__(self):

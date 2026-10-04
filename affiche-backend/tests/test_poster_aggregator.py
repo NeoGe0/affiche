@@ -10,11 +10,13 @@ class StubProvider(ExternalProvider):
 
     def __init__(self, name: str, poster: Optional[str] = None, title: Optional[str] = None,
                  search_id: Optional[str] = None, raises: bool = False,
-                 posters: Optional[List[str]] = None):
+                 posters: Optional[List[str]] = None,
+                 alternatives: Optional[List[str]] = None):
         self._name = name
         self._poster = poster
         self._posters = posters
         self._title = title
+        self._alternatives = alternatives or []
         self._search_id = search_id
         self._raises = raises
         self.calls = 0
@@ -58,6 +60,9 @@ class StubProvider(ExternalProvider):
     def get_translated_title(self, media_type, language, tmdb_id=None, tvdb_id=None,
                              season_number=None) -> Optional[str]:
         return self._answer(self._title)
+
+    def get_alternative_titles(self, media_type, tmdb_id=None, tvdb_id=None) -> List[str]:
+        return self._answer(list(self._alternatives))
 
     def test_connection(self, api_token) -> bool:
         return True
@@ -251,6 +256,83 @@ class TestGetTranslatedTitle:
 
         assert aggregator.get_translated_title(media_type="movie", language="fr",
                                                tvdb_id=2) == "Blade Runner"
+
+class TestTitleFromIds:
+
+    def test_names_the_provider_that_answered(self):
+        aggregator = PosterAggregatorService([
+            StubProvider("tmdb", title="The Matrix"),
+            StubProvider("tvdb", title="Matrix, The"),
+        ])
+
+        found = aggregator.title_from_ids(media_type="movie", language="en", tmdb_id=603)
+
+        assert (found.title, found.provider) == ("The Matrix", "tmdb")
+
+    def test_a_provider_that_cannot_answer_falls_through_to_the_next(self):
+        aggregator = PosterAggregatorService([
+            StubProvider("tmdb", title=None),
+            StubProvider("tvdb", title="Blade Runner"),
+        ])
+
+        assert aggregator.title_from_ids(media_type="movie", language="fr",
+                                        tvdb_id=2).provider == "tvdb"
+
+    def test_a_raising_provider_falls_through_to_the_next(self):
+        aggregator = PosterAggregatorService([
+            StubProvider("tmdb", raises=True),
+            StubProvider("tvdb", title="Blade Runner"),
+        ])
+
+        assert aggregator.title_from_ids(media_type="movie", language="fr",
+                                        tvdb_id=2).title == "Blade Runner"
+
+    def test_no_answer_anywhere_is_none_rather_than_an_empty_match(self):
+        aggregator = PosterAggregatorService([StubProvider("tmdb", title=None)])
+
+        assert aggregator.title_from_ids(media_type="movie", language="en", tmdb_id=1) is None
+
+    def test_no_id_asks_nobody(self):
+        tmdb = StubProvider("tmdb", title="The Matrix")
+        aggregator = PosterAggregatorService([tmdb])
+
+        assert aggregator.title_from_ids(media_type="movie", language="en") is None
+        assert tmdb.calls == 0
+
+class TestAlternativeTitles:
+
+    def test_every_provider_contributes_its_names(self):
+        aggregator = PosterAggregatorService([
+            StubProvider("tmdb", alternatives=["Act of Vengeance"]),
+            StubProvider("tvdb", alternatives=["The Terrorist"]),
+        ])
+
+        assert aggregator.alternative_titles("movie", tmdb_id=51794) == [
+            "Act of Vengeance", "The Terrorist"]
+
+    def test_the_same_name_from_two_catalogues_is_listed_once(self):
+        aggregator = PosterAggregatorService([
+            StubProvider("tmdb", alternatives=["Act of Vengeance"]),
+            StubProvider("tvdb", alternatives=["act of vengeance", "The Terrorist"]),
+        ])
+
+        assert aggregator.alternative_titles("movie", tmdb_id=51794) == [
+            "Act of Vengeance", "The Terrorist"]
+
+    def test_a_raising_provider_costs_its_own_names_and_no_more(self):
+        aggregator = PosterAggregatorService([
+            StubProvider("tmdb", raises=True),
+            StubProvider("tvdb", alternatives=["The Terrorist"]),
+        ])
+
+        assert aggregator.alternative_titles("movie", tmdb_id=51794) == ["The Terrorist"]
+
+    def test_no_id_asks_nobody(self):
+        tmdb = StubProvider("tmdb", alternatives=["Act of Vengeance"])
+        aggregator = PosterAggregatorService([tmdb])
+
+        assert aggregator.alternative_titles("movie") == []
+        assert tmdb.calls == 0
 
 class CollectionStub(ExternalProvider):
 

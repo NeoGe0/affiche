@@ -19,8 +19,12 @@ class LibrarySeason(BaseModel):
     tmdb_id: Optional[int] = None
     tvdb_id: Optional[int] = None
 
+    tmdb_id_override: Optional[int] = None
+    tmdb_season_number_override: Optional[int] = None
+
     poster_url: Optional[str] = None
     poster_hash: Optional[str] = None
+    poster_uploaded_at: Optional[datetime] = None
     poster_provider: Optional[str] = None
     style_hash: Optional[str] = None
     processed: bool = False
@@ -30,6 +34,7 @@ class SeasonPosterState(BaseModel):
 
     processed: Optional[bool] = None
     poster_hash: Optional[str] = None
+    poster_uploaded_at: Optional[datetime] = None
     poster_provider: Optional[str] = None
     style_hash: Optional[str] = None
 

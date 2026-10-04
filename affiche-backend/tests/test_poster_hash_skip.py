@@ -15,6 +15,7 @@ from affiche.app.mediaserver.library.model import LibraryItem, LibrarySeason
 POSTER_BYTES = b"poster-bytes"
 STYLE_HASH = "style-fingerprint"
 POSTER_HASH = poster_digest(POSTER_BYTES)
+UPLOADED_AT = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
 def _fake_session_scope(repo):
     @contextmanager
@@ -153,7 +154,7 @@ def test_process_season_poster_skips_upload_when_hash_matches(monkeypatch):
     svc = _service_with_mocks()
     season_service = MagicMock()
     connector = MagicMock()
-    season = _season(poster_hash=POSTER_HASH)
+    season = _season(poster_hash=POSTER_HASH, poster_uploaded_at=UPLOADED_AT)
 
     assert svc._process_season_poster(season_service, MagicMock(), season, _item(type="show"), "http://poster",
                                       connector, upload=True) is True
@@ -163,6 +164,7 @@ def test_process_season_poster_skips_upload_when_hash_matches(monkeypatch):
     assert seasons == [season]
     assert changes["processed"] is True
     assert "poster_hash" not in changes
+    assert "poster_uploaded_at" not in changes
 
 def test_process_season_poster_uploads_and_stores_hash_when_content_differs(monkeypatch):
     monkeypatch.setattr(poster_module, "event_manager", MagicMock())
@@ -176,13 +178,17 @@ def test_process_season_poster_uploads_and_stores_hash_when_content_differs(monk
                                       connector, upload=True) is True
 
     connector.upload_poster.assert_called_once()
-    assert ([season], {"poster_hash": POSTER_HASH}) in _season_updates(season_service)
+    (_, uploaded), (_, generated) = _season_updates(season_service)
+    assert uploaded["poster_hash"] == POSTER_HASH
+    assert uploaded["poster_uploaded_at"] is not None
+    assert "poster_uploaded_at" not in generated
 
 def test_upload_existing_season_posters_skips_unchanged_seasons():
     svc = _service_with_mocks()
     connector = MagicMock()
     connector.upload_poster.return_value = True
-    unchanged = _season(id=7, season_number=1, external_id="s1", poster_hash=POSTER_HASH)
+    unchanged = _season(id=7, season_number=1, external_id="s1", poster_hash=POSTER_HASH,
+                        poster_uploaded_at=UPLOADED_AT)
     changed = _season(id=8, season_number=2, external_id="s2", poster_hash="stale-hash")
     season_service = MagicMock()
     season_service.get_item_seasons.return_value = [unchanged, changed]
@@ -191,7 +197,10 @@ def test_upload_existing_season_posters_skips_unchanged_seasons():
 
     connector.upload_poster.assert_called_once()
     assert connector.upload_poster.call_args.args[0] == "s2"
-    assert _season_updates(season_service) == [([changed], {"poster_hash": POSTER_HASH})]
+    (updated, changes), = _season_updates(season_service)
+    assert updated == [changed]
+    assert changes["poster_hash"] == POSTER_HASH
+    assert changes["poster_uploaded_at"] is not None
 
 def test_reset_season_posters_clears_poster_hash(monkeypatch):
     monkeypatch.setattr(resetter_module, "event_manager", MagicMock())
@@ -222,7 +231,7 @@ def test_reset_season_posters_leaves_a_failed_season_untouched(monkeypatch):
 
     (updated, changes), = _season_updates(season_service)
     assert updated == [reset_ok]
-    assert changes == {"processed": False, "poster_hash": None,
+    assert changes == {"processed": False, "poster_hash": None, "poster_uploaded_at": None,
                        "poster_provider": None, "style_hash": None}
     season_service.create_or_update.assert_called_once_with([reset_ok])
     assert svc._file_store.delete.call_count == 1

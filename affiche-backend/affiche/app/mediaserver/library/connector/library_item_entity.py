@@ -53,6 +53,12 @@ class LibraryItemEntity(Base):
     media_bitrate: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     media_size_bytes: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True)
 
+    title_mismatched: Mapped[bool] = mapped_column(default=False, server_default=false(),
+                                                   nullable=False)
+    title_checked_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    catalogue_title: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    catalogue_provider: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+
     processed: Mapped[bool] = mapped_column(default=False)
     locked: Mapped[bool] = mapped_column(default=False, server_default=false(), nullable=False)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

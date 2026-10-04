@@ -5,7 +5,12 @@ from typing import Optional, List
 import requests
 from tvdb_v4_official import TVDB
 
-from affiche.external.poster.provider.base_provider import BaseUrlMode, ExternalProvider, PosterImage
+from affiche.external.poster.provider.base_provider import (
+    BaseUrlMode,
+    ExternalProvider,
+    PosterImage,
+    SeriesSeason,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +93,27 @@ class TVDBClient(ExternalProvider):
             return []
         return self._fetch_all_season_posters(tvdb_id, season_number)
 
+    def describe_season(self,
+                        season_number: int,
+                        tmdb_id: Optional[int] = None,
+                        tvdb_id: Optional[int] = None) -> Optional[SeriesSeason]:
+        if not tvdb_id:
+            return None
+        try:
+            season = self._official_season(tvdb_id, season_number)
+            if not season:
+                return None
+            extended = self.tvdb.get_season_extended(season["id"]) or {}
+            return SeriesSeason(
+                number=season_number,
+                name=self._season_name(season["id"], extended),
+                episode_count=len(extended.get("episodes") or []) or None,
+                year=self._year(extended.get("year")),
+            )
+        except Exception as e:
+            logger.error(f"Error describing TVDB season {tvdb_id} S{season_number}: {e}")
+            return None
+
     def search_by_title(
             self,
             title: str,
@@ -137,6 +163,29 @@ class TVDBClient(ExternalProvider):
             return response.status_code == 200
         except requests.RequestException:
             return False
+
+    def _official_season(self, tvdb_id: int, season_number: int) -> Optional[dict]:
+        seasons = (self.tvdb.get_series_extended(tvdb_id) or {}).get("seasons") or []
+        official = [s for s in seasons
+                    if (s.get("type") or {}).get("type", "official") == "official"]
+        return next((s for s in (official or seasons) if s.get("number") == season_number), None)
+
+    def _season_name(self, season_id: int, extended: dict) -> Optional[str]:
+        name = (extended.get("name") or "").strip()
+        if name:
+            return name
+        try:
+            translation = self.tvdb.get_season_translation(season_id, "eng") or {}
+            return (translation.get("name") or "").strip() or None
+        except Exception:
+            return None
+
+    @staticmethod
+    def _year(raw) -> Optional[int]:
+        try:
+            return int(str(raw)[:4])
+        except (TypeError, ValueError):
+            return None
 
     def _fetch_season_poster(
             self,

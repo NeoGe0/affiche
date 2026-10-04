@@ -4,7 +4,12 @@ from typing import Optional, List
 import requests
 
 from affiche.config.http_config import HTTP_TIMEOUT
-from affiche.external.poster.provider.base_provider import ExternalProvider, PosterImage
+from affiche.external.poster.provider.base_provider import (
+    ExternalProvider,
+    PosterImage,
+    SeriesFacts,
+    SeriesSeason,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +116,69 @@ class TMDBClient(ExternalProvider):
             logger.error(f"Error searching TMDB for '{title}': {e}")
             return None
 
+    def find_series(self, title: str, year: Optional[int] = None) -> List[SeriesFacts]:
+        try:
+            params = {"query": title}
+            if year:
+                params["first_air_date_year"] = str(year)
+            response = self.session.get(f"{self.base_url}/search/tv", params=params,
+                                        timeout=HTTP_TIMEOUT)
+            response.raise_for_status()
+            return [SeriesFacts(id=r["id"], name=r.get("name") or "",
+                                year=self._year(r.get("first_air_date")))
+                    for r in response.json().get("results", []) if r.get("id")]
+        except requests.RequestException as e:
+            logger.error(f"Error searching TMDB series for '{title}': {e}")
+            return []
+
+    def describe_series(self, series_id: int) -> Optional[SeriesFacts]:
+        try:
+            response = self.session.get(f"{self.base_url}/tv/{series_id}", timeout=HTTP_TIMEOUT)
+            response.raise_for_status()
+            data = response.json()
+            return SeriesFacts(
+                id=data["id"],
+                name=data.get("name") or "",
+                year=self._year(data.get("first_air_date")),
+                seasons=[SeriesSeason(number=s["season_number"],
+                                      name=s.get("name"),
+                                      episode_count=s.get("episode_count") or None,
+                                      year=self._year(s.get("air_date")))
+                         for s in data.get("seasons", []) if s.get("season_number") is not None],
+            )
+        except requests.RequestException as e:
+            logger.error(f"Error describing TMDB series {series_id}: {e}")
+            return None
+
+    def get_alternative_titles(
+            self,
+            media_type: str,
+            tmdb_id: Optional[int] = None,
+            tvdb_id: Optional[int] = None,
+    ) -> List[str]:
+        if not tmdb_id:
+            return []
+        try:
+            provider_media_type = self._get_provider_media_type(media_type)
+            response = self.session.get(
+                f"{self.base_url}/{provider_media_type}/{tmdb_id}",
+                params={"append_to_response": "alternative_titles"}, timeout=HTTP_TIMEOUT)
+            response.raise_for_status()
+            data = response.json()
+
+            if provider_media_type == "movie":
+                primary = [data.get("title"), data.get("original_title")]
+                entries = (data.get("alternative_titles") or {}).get("titles") or []
+            else:
+                primary = [data.get("name"), data.get("original_name")]
+                entries = (data.get("alternative_titles") or {}).get("results") or []
+
+            names = primary + [entry.get("title") for entry in entries]
+            return [name for name in names if name]
+        except requests.RequestException as e:
+            logger.error(f"Error fetching TMDB alternative titles for {tmdb_id}: {e}")
+            return []
+
     def get_translated_title(
             self,
             media_type: str,
@@ -201,6 +269,13 @@ class TMDBClient(ExternalProvider):
                            textless=no_language,
                            width=poster.get("width"),
                            height=poster.get("height"))
+
+    @staticmethod
+    def _year(raw) -> Optional[int]:
+        try:
+            return int(str(raw)[:4])
+        except (TypeError, ValueError):
+            return None
 
     def _get_provider_media_type(self, media_type: str) -> str:
         return "movie" if media_type == "movie" else "tv"

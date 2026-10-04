@@ -27,8 +27,12 @@ class LibrarySeasonEntity(Base):
     tmdb_id: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
     tvdb_id: Mapped[Optional[str]] = mapped_column(String(150), nullable=True)
 
+    tmdb_id_override: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    tmdb_season_number_override: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
     poster_url: Mapped[Optional[str]] = mapped_column(String(2048), nullable=True)
     poster_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    poster_uploaded_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     poster_provider: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     style_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     processed: Mapped[bool] = mapped_column(default=False)

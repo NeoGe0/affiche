@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { Header } from './Header';
 import type { TaskKind } from '../../types';
@@ -55,5 +56,38 @@ describe('Header progress bar', () => {
     renderHeader('other');
 
     expect(screen.getByText('Resetting posters — Films')).toBeTruthy();
+  });
+});
+
+describe('Header season matching', () => {
+  const renderWith = (onMatchSeasons?: () => void) =>
+    render(
+      <Header
+        title="Shows"
+        onSyncLibrary={noop}
+        onSyncPosters={noop}
+        onResetPosters={noop}
+        onMatchSeasons={onMatchSeasons}
+      />,
+    );
+
+  it('offers the sweep when a library is open', async () => {
+    const user = userEvent.setup();
+    const onMatchSeasons = vi.fn();
+    renderWith(onMatchSeasons);
+
+    await user.click(screen.getByRole('button', { name: 'Library actions' }));
+    await user.click(screen.getByRole('menuitem', { name: 'Match seasons' }));
+
+    expect(onMatchSeasons).toHaveBeenCalled();
+  });
+
+  it('leaves it out with no library to sweep', async () => {
+    const user = userEvent.setup();
+    renderWith(undefined);
+
+    await user.click(screen.getByRole('button', { name: 'Library actions' }));
+
+    expect(screen.queryByRole('menuitem', { name: 'Match seasons' })).toBeNull();
   });
 });

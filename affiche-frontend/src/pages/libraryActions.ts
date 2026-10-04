@@ -2,7 +2,7 @@ import { libraryApi } from '../api';
 import type { TaskKind } from '../types';
 import type { Library, SyncTaskResponse } from '../types';
 
-export type LibraryActionName = 'sync' | 'generate' | 'upload' | 'reset';
+export type LibraryActionName = 'sync' | 'generate' | 'upload' | 'reset' | 'season-match';
 
 export interface LibraryActionScope {
   mediaServerId: number;
@@ -31,6 +31,15 @@ export const LIBRARY_ACTIONS: Record<LibraryActionName, LibraryActionSpec> = {
     taskKind: 'sync',
     errorTitle: 'Sync failed',
     errorFallback: 'Could not start the library sync.',
+  },
+  'season-match': {
+
+    request: ({ library }) =>
+      library
+        ? libraryApi.resolveSeasonTmdbMatches(library.media_server_id, library.id)
+        : Promise.reject(new Error('Open a library to match its seasons.')),
+    errorTitle: 'Season matching failed',
+    errorFallback: 'Could not start the season matching.',
   },
   generate: {
     request: ({ mediaServerId, library }) =>

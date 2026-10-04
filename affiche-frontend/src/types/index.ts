@@ -36,7 +36,10 @@ export interface Library {
   enabled?: boolean;
 }
 
-export type ItemStatusFilter = 'unprocessed' | 'errors' | 'locked' | 'ready' | 'uploaded';
+export type ItemStatusFilter =
+  | 'unprocessed' | 'errors' | 'locked' | 'ready' | 'uploaded'
+
+  | 'mismatched_titles';
 
 export const NO_PROVIDER = 'none';
 
@@ -134,6 +137,9 @@ export interface ItemSeason {
   imdb_id?: string;
   tmdb_id?: string;
   tvdb_id?: string;
+
+  tmdb_id_override?: number | null;
+  tmdb_season_number_override?: number | null;
   poster_url?: string;
 
   poster_provider?: string | null;
@@ -144,6 +150,52 @@ export interface ItemSeason {
 
   source_poster_version?: string | null;
 }
+
+export interface SeasonTmdbMatchSuggestion {
+  tmdb_id: number;
+  tmdb_season_number: number;
+  series_name: string;
+  reason: string;
+}
+
+export interface TitleCheckProgress {
+  running: boolean;
+  checked: number;
+  total: number;
+  mismatched: number;
+}
+
+export interface TitleCleanupState {
+  proposals: TitleProposal[];
+  check: TitleCheckProgress;
+}
+
+export interface TitleProposal {
+  item_id: number;
+  current_title: string;
+  proposed_title: string;
+  provider?: string | null;
+  status: 'pending' | 'renamed' | 'failed';
+  error?: string | null;
+}
+
+export interface MatchedTitle {
+  title: string;
+  provider: string;
+}
+
+export interface ItemTitleSuggestions {
+  current: string;
+  matched?: MatchedTitle | null;
+
+  reason?: NoSuggestionReason | null;
+}
+
+export type NoSuggestionReason =
+  | 'no_id'
+  | 'not_configured'
+  | 'not_found'
+  | 'already_correct';
 
 export interface LibraryItemWithSeasons extends LibraryItem {
   seasons: ItemSeason[];
@@ -205,6 +257,8 @@ export interface ItemStatusCounts {
   ready?: number;
 
   uploaded?: number;
+
+  mismatched_titles?: number;
 }
 
 export interface ItemStats {

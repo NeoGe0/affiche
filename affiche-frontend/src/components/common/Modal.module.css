@@ -16,6 +16,8 @@
   width: 100%;
   max-height: calc(100vh - 48px);
   overflow-y: auto;
+
+  overscroll-behavior: contain;
   position: relative;
   box-shadow: var(--shadow-xl);
   animation: slideIn 0.15s ease-out;

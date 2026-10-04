@@ -1,5 +1,5 @@
 import { useState, useEffect, useEffectEvent, type ReactNode } from 'react';
-import { ArrowLeft, ChevronLeft, ChevronRight, RefreshCw, Image, RotateCcw, ExternalLink, CheckCircle, Circle, Loader2, Images, Upload, AlertTriangle, Lock, Unlock, Columns2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, RefreshCw, Image, RotateCcw, ExternalLink, CheckCircle, Circle, Loader2, Images, Upload, AlertTriangle, Lock, Unlock, Columns2, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 import { errorMessage, libraryApi } from '../../api';
 import type { PosterVariant } from '../../api/libraries';
 import { useToast } from '../../context/ToastContext';
@@ -38,6 +38,8 @@ interface ItemDetailProps {
   onSelectPoster: (posterUrl?: string) => void;
   onUpload: () => void;
   onToggleLock: () => void;
+
+  onRename?: () => void;
   onSeasonSelectPoster?: (season: ItemSeason) => void;
   onSeasonClick?: (season: ItemSeason) => void;
   isLoading?: boolean;
@@ -62,6 +64,7 @@ export function ItemDetail({
   onSelectPoster,
   onUpload,
   onToggleLock,
+  onRename,
   onSeasonSelectPoster,
   onSeasonClick,
   isLoading,
@@ -304,6 +307,12 @@ export function ItemDetail({
               triggerClassName={styles.actionButton}
               items={[
                 { icon: <RefreshCw size={16} />, label: 'Sync metadata', onClick: onSync, disabled: isLoading },
+                ...(onRename ? [{
+                  icon: <Pencil size={16} />,
+                  label: 'Rename…',
+                  onClick: onRename,
+                  disabled: isLoading,
+                }] : []),
                 {
                   icon: <RotateCcw size={16} />,
                   label: 'Reset poster',
