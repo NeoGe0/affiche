@@ -152,6 +152,19 @@ class PlexService(MediaServerConnector):
             logger.exception("Error fetching recently added items")
             raise
 
+    def get_recently_added_seasons(self, library_id: int, limit: int) -> Dict[str, str]:
+        try:
+            section = self.plex.library.sectionByID(library_id)
+            seasons = section.search(libtype='season', sort='addedAt:desc', maxresults=limit)
+            return {str(season.ratingKey): str(season.parentRatingKey) for season in seasons}
+
+        except NotFound:
+            logger.error(f"Library with ID {library_id} not found")
+            raise
+        except Exception:
+            logger.exception("Error fetching recently added seasons")
+            raise
+
     def _to_library_item(self, item, library_id: int) -> PlexLibraryItem:
         data = self._extract_item_metadata(item)
         return PlexLibraryItem(
@@ -234,6 +247,14 @@ class PlexService(MediaServerConnector):
         except Exception:
             logger.exception("Failed to create Plex collection '%s'", title)
             return None
+
+    def rename_item(self, external_id: str, title: str) -> bool:
+        try:
+            self.plex.fetchItem(int(external_id)).editTitle(title)
+            return True
+        except Exception:
+            logger.exception("Failed to rename Plex item %s", external_id)
+            return False
 
     def rename_collection(self, external_id: str, title: str) -> bool:
         try:

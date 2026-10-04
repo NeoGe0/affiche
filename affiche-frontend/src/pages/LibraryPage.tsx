@@ -2,7 +2,7 @@ import { useState, useEffect, useEffectEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Info } from 'lucide-react';
 import { Header } from '../components/layout';
-import { ItemGrid, ItemTable, ItemDetail, EpisodeList, LibraryRows, LibraryStage, PosterBrowserModal, AlphabetIndex, SelectionBar, posterTargetFromItem, type StagePoster } from '../components/library';
+import { ItemGrid, ItemTable, ItemDetail, EpisodeList, LibraryRows, LibraryStage, PosterBrowserModal, RenameItemModal, TitleCleanupPanel, AlphabetIndex, SelectionBar, posterTargetFromItem, type StagePoster } from '../components/library';
 import { ConfirmModal } from '../components/common';
 import { errorMessage, libraryApi } from '../api';
 import {
@@ -23,6 +23,7 @@ import {
   useTaskTracking,
 } from '../hooks';
 import { useToast } from '../context/ToastContext';
+import type { TmdbMatch } from '../hooks/usePosterBrowseQuery';
 import type { Library, LibraryItem, TaskKind } from '../types';
 import { libraryPath } from '../routes';
 import { LIBRARY_ACTIONS, type LibraryActionName } from './libraryActions';
@@ -295,6 +296,9 @@ export function LibraryPage({
     setResetIncludeUnprocessed(false);
     setConfirmAction('reset');
   };
+  const handleMatchSeasonsClick = () => setConfirmAction('season-match');
+
+  const [isCleaningTitles, setIsCleaningTitles] = useState(false);
 
   const runLibraryAction = async (action: LibraryActionName) => {
     setConfirmAction(null);
@@ -382,7 +386,41 @@ export function LibraryPage({
     }
   };
 
+  const [isRenaming, setIsRenaming] = useState(false);
+
+  const handleRenameConfirm = async (title: string, regenerate: boolean) => {
+    if (await openItem.rename(title, regenerate)) setIsRenaming(false);
+  };
+
   const handleItemGeneratePosterClick = () => openItem.generatePoster();
+
+  const findSeasonTmdbMatch = async () => {
+    const item = openItem.item;
+    const season = posterBrowser.season;
+    if (!item || !season || !openItem.library) return null;
+    try {
+      const found = await libraryApi.suggestSeasonTmdbMatch(
+        openItem.library.media_server_id, item.library_id, item.id, season.season_number);
+      return {
+        tmdbId: found.tmdb_id,
+        seasonNumber: found.tmdb_season_number,
+        reason: found.reason,
+      };
+    } catch {
+      return null;
+    }
+  };
+
+  const saveSeasonTmdbMatch = async (match: TmdbMatch) => {
+    const item = openItem.item;
+    const season = posterBrowser.season;
+    if (!item || !season || !openItem.library) return;
+    await libraryApi.setSeasonTmdbMatch(
+      openItem.library.media_server_id, item.library_id, item.id, season.season_number,
+      match.tmdbId, match.seasonNumber,
+    );
+    openItem.refreshImages();
+  };
   const handleItemResetClick = () => setConfirmAction('item-reset');
 
   const confirmed = (run: () => void) => () => {
@@ -394,6 +432,7 @@ export function LibraryPage({
     'generate': () => runLibraryAction('generate'),
     'upload': () => runLibraryAction('upload'),
     'reset': () => runLibraryAction('reset'),
+    'season-match': () => runLibraryAction('season-match'),
     'item-reset': confirmed(openItem.resetPoster),
     'selection-generate': confirmed(selection.generate),
     'selection-upload': confirmed(selection.upload),
@@ -509,6 +548,7 @@ export function LibraryPage({
           onSelectPoster={(posterUrl) => posterBrowser.open(null, posterUrl)}
           onUpload={openItem.uploadPoster}
           onToggleLock={openItem.toggleLock}
+          onRename={openItem.library ? () => setIsRenaming(true) : undefined}
           onSeasonSelectPoster={(season) => posterBrowser.open(season)}
           onSeasonClick={openItem.openSeason}
           isLoading={isActionLoading}
@@ -520,11 +560,29 @@ export function LibraryPage({
           <PosterBrowserModal
             target={posterTargetFromItem(openItem.item)}
             seasonNumber={posterBrowser.season?.season_number}
+            tmdbMatch={{
+              tmdbId: posterBrowser.season?.tmdb_id_override ?? null,
+              seasonNumber: posterBrowser.season?.tmdb_season_number_override ?? null,
+            }}
+            onTmdbMatchChange={posterBrowser.season ? saveSeasonTmdbMatch : undefined}
+            onTmdbMatchFind={posterBrowser.season ? findSeasonTmdbMatch : undefined}
             onClose={posterBrowser.close}
             onSave={posterBrowser.save}
             isSaving={posterBrowser.isSaving}
             defaultUpload={posterBrowser.uploadDefault}
             initialPoster={posterBrowser.initialPoster}
+          />
+        )}
+        {isRenaming && openItem.library && (
+          <RenameItemModal
+            mediaServerId={openItem.library.media_server_id}
+            libraryId={openItem.item.library_id}
+            itemId={openItem.item.id}
+            currentTitle={openItem.item.title}
+            mediaServerName={mediaServerName}
+            isBusy={isActionLoading}
+            onConfirm={handleRenameConfirm}
+            onClose={() => setIsRenaming(false)}
           />
         )}
         {confirmModalProps && (
@@ -547,6 +605,8 @@ export function LibraryPage({
         onSyncPosters={handleSyncPostersClick}
         onUploadPosters={handleUploadPostersClick}
         onResetPosters={handleResetPostersClick}
+        onMatchSeasons={selectedLibrary ? handleMatchSeasonsClick : undefined}
+        onCleanTitles={selectedLibrary ? () => setIsCleaningTitles(true) : undefined}
         onRefreshItems={handleRefreshItems}
         onEmptyTrash={handleEmptyTrashClick}
         onStopTask={stopTask}
@@ -656,6 +716,16 @@ export function LibraryPage({
       )}
       {alphabet.isEnabled && alphabet.entries.length > 0 && (
         <AlphabetIndex entries={alphabet.entries} onLetterClick={alphabet.handleLetterClick} />
+      )}
+      {isCleaningTitles && selectedLibrary && mediaServerId && (
+        <TitleCleanupPanel
+          mediaServerId={mediaServerId}
+          libraryId={selectedLibrary.id}
+          libraryName={selectedLibrary.name}
+          mediaServerName={mediaServerName}
+          onStarted={(taskId) => startTaskTracking(taskId)}
+          onClose={() => setIsCleaningTitles(false)}
+        />
       )}
       {confirmModalProps && (
         <ConfirmModal

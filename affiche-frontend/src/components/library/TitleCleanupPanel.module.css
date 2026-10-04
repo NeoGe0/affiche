@@ -1,0 +1,244 @@
+.content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+  padding: 4px 24px 16px;
+}
+
+.loading,
+.empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 0;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+}
+
+.empty {
+  display: block;
+  line-height: 1.5;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.checkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  transition: background-color 0.15s;
+}
+
+.checkButton:hover:not(:disabled) {
+  background-color: var(--bg-hover);
+}
+
+.checkButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.progressLine {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.progressTrack {
+  height: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  background-color: var(--bg-tertiary);
+}
+
+.progressBar {
+  height: 100%;
+  background-color: var(--accent-fill);
+  transition: width 0.3s ease-out;
+}
+
+.selectAll {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  cursor: pointer;
+}
+
+.selectAll input {
+  accent-color: var(--accent);
+}
+
+.selectCount {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  border-radius: var(--radius-md);
+}
+
+.row:hover {
+  background-color: var(--bg-hover);
+}
+
+.rowMain {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.rowMain input {
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+
+.rowMain svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.renamed {
+  color: var(--success);
+}
+
+.failed {
+  color: var(--error);
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.current {
+  font-family: monospace;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.proposed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.provider {
+  flex: none;
+  margin-top: 2px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.rowError {
+  margin: 0 10px 8px 36px;
+  font-size: var(--text-sm);
+  color: var(--error);
+}
+
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 4px;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.checkbox input {
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+
+.checkboxNote {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.footerNote {
+  margin-right: auto;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color 0.15s;
+}
+
+.primary {
+  color: var(--text-on-fill);
+  background-color: var(--accent-fill);
+}
+
+.primary:hover:not(:disabled) {
+  background-color: var(--accent-fill-hover);
+}
+
+.secondary {
+  color: var(--text-secondary);
+  background-color: var(--bg-tertiary);
+}
+
+.secondary:hover:not(:disabled) {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
+.primary:disabled,
+.secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

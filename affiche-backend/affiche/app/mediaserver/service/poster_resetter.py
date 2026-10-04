@@ -75,6 +75,7 @@ class PosterResetter:
         season_service.update_seasons(reset_seasons, SeasonPosterState(
             processed=False,
             poster_hash=None,
+            poster_uploaded_at=None,
             poster_provider=None,
             style_hash=None,
         ))

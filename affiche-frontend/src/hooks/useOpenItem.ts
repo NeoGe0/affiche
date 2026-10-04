@@ -98,15 +98,17 @@ export function useOpenItem({
     errorFallback,
     setBusy,
     message,
-  }: ItemActionSpec<T>) => {
-    if (!item || !library) return;
+  }: ItemActionSpec<T>): Promise<boolean> => {
+    if (!item || !library) return false;
 
     setBusy?.(true);
     if (message) setPageMessage(message);
     try {
       onSuccess(await request(library.media_server_id, item.library_id, item.id));
+      return true;
     } catch (error) {
       toast.error(errorMessage(error, errorFallback), { title: errorTitle });
+      return false;
     } finally {
       setBusy?.(false);
       if (message) setPageMessage(null);
@@ -168,6 +170,23 @@ export function useOpenItem({
       errorFallback: 'Failed to change the lock on this item.',
     });
 
+  const rename = async (title: string, regenerate: boolean) => {
+    const renamed = await run({
+      request: (mediaServerId, libraryId, itemId) =>
+        libraryApi.renameItem(mediaServerId, libraryId, itemId, title),
+      onSuccess: (updated) => {
+        setItem((prev) => (prev && prev.id === updated.id ? { ...prev, ...updated } : prev));
+        refreshListing(true);
+      },
+      errorTitle: 'Rename failed',
+      errorFallback: 'Failed to rename this item.',
+      setBusy: setPageBusy,
+      message: 'Renaming…',
+    });
+    if (renamed && regenerate) await generatePoster();
+    return renamed;
+  };
+
   const uploadPoster = () =>
     run({
       request: libraryApi.uploadItemPoster,
@@ -195,5 +214,6 @@ export function useOpenItem({
     resetPoster,
     uploadPoster,
     toggleLock,
+    rename,
   };
 }

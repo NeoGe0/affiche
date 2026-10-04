@@ -27,6 +27,7 @@ def sync_libraries_task(media_server_id: int,
         media_server_id, cancel_check=cancel_check
     )
     _download_collection_posters(media_server_id, cancel_check=cancel_check)
+    _check_titles(media_server_id, cancel_check=cancel_check)
     report_task_progress(1, 1)
 
 def sync_library_task(media_server_id: int,
@@ -48,7 +49,21 @@ def sync_library_task(media_server_id: int,
         media_server_id, library_id, cancel_check=cancel_check
     )
     _download_collection_posters(media_server_id, library_id, cancel_check=cancel_check)
+    _check_titles(media_server_id, library_id, cancel_check=cancel_check)
     report_task_progress(1, 1)
+
+def _check_titles(media_server_id: int, library_id: int = None, cancel_check=None) -> None:
+    service = container.title_check_service
+    for target in _target_libraries(media_server_id, library_id):
+        if cancel_check and cancel_check():
+            return
+        try:
+            report = service.check_library(media_server_id, target, cancel_check=cancel_check)
+            if report.mismatched:
+                logger.info("Title check of library %s: %d of %d disagree with the catalogue",
+                            target, report.mismatched, report.checked)
+        except Exception:
+            logger.exception("Could not check the titles of library %s", target)
 
 def _download_collection_posters(media_server_id: int,
                                  library_id: int = None,
@@ -95,6 +110,36 @@ def resolve_collection_ids_task(media_server_id: int, library_id: int, cancel_ch
     resolved = service.resolve_collection_ids(media_server_id, library_id,
                                               cancel_check=cancel_check)
     logger.info("Resolved %d collection ids in library %s", resolved, library_id)
+    report_task_progress(1, 1)
+
+def fix_season_matches_task(media_server_id: int, library_id: int, cancel_check=None):
+    service = container.season_match_service()
+    report = service.fix_library_season_matches(media_server_id, library_id,
+                                                cancel_check=cancel_check)
+    logger.info("Season match sweep of library %s: %d scanned, %d suspect, %d resolved, %d left",
+                library_id, report.shows_scanned, report.shows_suspect, report.resolved,
+                report.unresolved)
+    report_task_progress(1, 1)
+
+def check_titles_task(media_server_id: int, library_id: int, cancel_check=None):
+    report = container.title_check_service.check_library(
+        media_server_id, library_id, force=True, cancel_check=cancel_check)
+    logger.info("Title check of library %s: %d checked, %d disagree, %d skipped",
+                library_id, report.checked, report.mismatched, report.skipped)
+    report_task_progress(1, 1)
+
+def apply_titles_task(media_server_id: int, library_id: int, item_ids: list[int],
+                      regenerate: bool = False, cancel_check=None):
+    service = container.title_cleanup_service
+    report = service.apply(media_server_id, library_id, item_ids, cancel_check=cancel_check)
+    logger.info("Title cleanup of library %s: %d approved, %d renamed, %d failed",
+                library_id, report.approved, report.renamed, report.failed)
+
+    renamed = service.renamed_item_ids(library_id) if regenerate else []
+    if renamed and not (cancel_check and cancel_check()):
+        logger.info("Regenerating %d poster(s) after the title cleanup", len(renamed))
+        container.poster_sync_service().apply_posters_to_items(
+            media_server_id, renamed, cancel_check=cancel_check)
     report_task_progress(1, 1)
 
 def _target_libraries(media_server_id: int, library_id: int = None) -> list[int]:

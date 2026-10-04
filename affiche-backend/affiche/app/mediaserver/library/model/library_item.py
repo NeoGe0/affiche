@@ -28,6 +28,10 @@ class LibraryItem(BaseModel):
     poster_hash: Optional[str] = None
     poster_provider: Optional[str] = None
     style_hash: Optional[str] = None
+    title_mismatched: bool = False
+    title_checked_at: Optional[datetime] = None
+    catalogue_title: Optional[str] = None
+    catalogue_provider: Optional[str] = None
     processed: bool = False
     locked: bool = False
     error_message: Optional[str] = None

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
+import { errorMessage } from '../../api';
 import { Modal } from '../common';
 import { useToast } from '../../context/ToastContext';
 import {
@@ -17,6 +18,7 @@ import { sortPosterCandidates } from './posterSort';
 import { PosterPreviewPane } from './PosterPreviewPane';
 import { PosterEditPanel } from './PosterEditPanel';
 import type { PosterTarget } from './posterTarget';
+import type { TmdbMatch } from '../../hooks/usePosterBrowseQuery';
 import type { OverlayOptions, TextOptions } from '../../types';
 import styles from './PosterBrowserModal.module.css';
 
@@ -25,6 +27,12 @@ interface PosterBrowserModalProps {
   target: PosterTarget;
 
   seasonNumber?: number;
+
+  tmdbMatch?: TmdbMatch;
+
+  onTmdbMatchChange?: (match: TmdbMatch) => Promise<void>;
+
+  onTmdbMatchFind?: () => Promise<{ tmdbId: number; seasonNumber: number; reason: string } | null>;
   onClose: () => void;
   onSave: (
     posterUrl: string,
@@ -42,6 +50,9 @@ interface PosterBrowserModalProps {
 export function PosterBrowserModal({
   target,
   seasonNumber,
+  tmdbMatch,
+  onTmdbMatchChange,
+  onTmdbMatchFind,
   onClose,
   onSave,
   isSaving = false,
@@ -60,11 +71,15 @@ export function PosterBrowserModal({
   const [selectedPoster, setSelectedPoster] = useState<string | null>(initialPoster ?? null);
   const [showEditPanel, setShowEditPanel] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
+  const [isSavingMatch, setIsSavingMatch] = useState(false);
+  const [isFindingMatch, setIsFindingMatch] = useState(false);
+  const [foundReason, setFoundReason] = useState<string | undefined>(undefined);
 
   const query = usePosterBrowseQuery({
     itemTitle,
     year,
     seasonNumber,
+    tmdbMatch,
     onSourceChanged: () => setSelectedPoster(null),
   });
 
@@ -79,6 +94,8 @@ export function PosterBrowserModal({
     tvdbId,
     collectionId,
     seasonNumber: isSeason && !query.useShowArt ? query.searchSeasonNumber : undefined,
+    tmdbIdOverride: query.appliedTmdbMatch.tmdbId ?? undefined,
+    tmdbSeasonNumberOverride: query.appliedTmdbMatch.seasonNumber ?? undefined,
     provider: query.provider,
     language: query.language,
   });
@@ -88,6 +105,42 @@ export function PosterBrowserModal({
     if (!name) return;
     if (await candidates.search(name, query.yearFilter)) {
       setSelectedPoster(null);
+    }
+  };
+
+  const findTmdbMatch = async () => {
+    if (!onTmdbMatchFind) return;
+    setIsFindingMatch(true);
+    setFoundReason(undefined);
+    try {
+      const found = await onTmdbMatchFind();
+      if (!found) {
+        setFoundReason('No confident match found. Fill the boxes yourself, or leave it as is.');
+        return;
+      }
+
+      query.setTmdbIdDraft(String(found.tmdbId));
+      query.setTmdbSeasonDraft(String(found.seasonNumber));
+      setFoundReason(`${found.reason}. Press Save match to keep it.`);
+    } catch (err) {
+      toast.error(errorMessage(err, 'Could not work out a TMDB match.'));
+    } finally {
+      setIsFindingMatch(false);
+    }
+  };
+
+  const persistTmdbMatch = async (match: TmdbMatch) => {
+    if (!onTmdbMatchChange) return;
+    setIsSavingMatch(true);
+    try {
+      await onTmdbMatchChange(match);
+      toast.success(match.tmdbId === null
+        ? 'TMDB match cleared for this season.'
+        : `Season artwork now comes from TMDB series ${match.tmdbId}.`);
+    } catch (err) {
+      toast.error(errorMessage(err, 'Could not save the TMDB match.'));
+    } finally {
+      setIsSavingMatch(false);
     }
   };
 
@@ -181,6 +234,24 @@ export function PosterBrowserModal({
                     useShowArt: query.useShowArt,
                     onUseShowArtChange: query.changeUseShowArt,
                     appliesToSeason: seasonNumber,
+                    tmdbMatch: onTmdbMatchChange
+                      ? {
+                          idDraft: query.tmdbIdDraft,
+                          onIdDraftChange: query.setTmdbIdDraft,
+                          seasonDraft: query.tmdbSeasonDraft,
+                          onSeasonDraftChange: query.setTmdbSeasonDraft,
+                          onApply: () => void persistTmdbMatch(query.applyTmdbMatch()),
+                          onFind: onTmdbMatchFind ? () => void findTmdbMatch() : undefined,
+                          isFinding: isFindingMatch,
+                          foundReason,
+                          isSaving: isSavingMatch,
+                          isSet: query.appliedTmdbMatch.tmdbId !== null,
+                          onClear: () => {
+                            setFoundReason(undefined);
+                            void persistTmdbMatch(query.clearTmdbMatch());
+                          },
+                        }
+                      : undefined,
                   }
                 : undefined
             }
@@ -229,13 +300,6 @@ export function PosterBrowserModal({
         </div>
 
         <div className={styles.footer}>
-          <p className={styles.footerNote}>
-            {!canUpload
-              ? 'The poster is kept in Affiche.'
-              : defaultUpload
-                ? "This library uploads new posters: Save & upload replaces the media server's artwork, keeping its current one for Reset. Save keeps the poster in Affiche only."
-                : "Save keeps the poster in Affiche. Save & upload also replaces the media server's artwork, keeping its current one for Reset."}
-          </p>
           <button
             className={`${styles.footerButton} ${styles.cancel}`}
             onClick={onClose}

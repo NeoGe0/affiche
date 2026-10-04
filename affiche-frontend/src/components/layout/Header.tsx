@@ -1,4 +1,4 @@
-import { RefreshCw, Image, RotateCcw, ListRestart, Loader, Search, X, StopCircle, Trash2, Upload, LayoutGrid, List, CheckSquare } from 'lucide-react';
+import { RefreshCw, Image, RotateCcw, ListRestart, Loader, Pencil, Search, X, Sparkles, StopCircle, Trash2, Upload, LayoutGrid, List, CheckSquare } from 'lucide-react';
 import { OverflowMenu, TaskProgressBar, type OverflowMenuItem } from '../common';
 
 import { FilterMenu } from '../library/FilterMenu';
@@ -18,6 +18,10 @@ interface HeaderProps {
   onSyncPosters: () => void;
   onUploadPosters?: () => void;
   onResetPosters: () => void;
+
+  onMatchSeasons?: () => void;
+
+  onCleanTitles?: () => void;
   onRefreshItems?: () => void;
   onEmptyTrash?: () => void;
   onStopTask?: () => void;
@@ -54,6 +58,8 @@ export function Header({
   onSyncPosters,
   onUploadPosters,
   onResetPosters,
+  onMatchSeasons,
+  onCleanTitles,
   onRefreshItems,
   onEmptyTrash,
   onStopTask,
@@ -91,6 +97,14 @@ export function Header({
       : []),
     ...(onUploadPosters
       ? [{ icon: <Upload size={16} />, label: 'Upload posters', onClick: onUploadPosters,
+           disabled: isLoading }]
+      : []),
+    ...(onMatchSeasons
+      ? [{ icon: <Sparkles size={16} />, label: 'Match seasons', onClick: onMatchSeasons,
+           disabled: isLoading }]
+      : []),
+    ...(onCleanTitles
+      ? [{ icon: <Pencil size={16} />, label: 'Clean up titles', onClick: onCleanTitles,
            disabled: isLoading }]
       : []),
     { icon: <RotateCcw size={16} />, label: 'Reset posters', onClick: onResetPosters,

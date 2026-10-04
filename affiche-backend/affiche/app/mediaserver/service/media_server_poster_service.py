@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Optional, Callable, List, NamedTuple
+from typing import Optional, Callable, List, NamedTuple, Sequence
 
 from sqlalchemy.orm import Session
 
@@ -306,17 +306,24 @@ class LibraryPosterService:
                          library: Library,
                          cancel_check: Callable[[], bool] = None,
                          upload: Optional[bool] = None):
-        with library_session(self._session_factory) as (repo, _):
+        with library_session(self._session_factory) as (repo, session):
             items = repo.find_items(LibraryItemSearch(library_id=library.id, processed=False,
                                                       locked=False))
-        self._process_items(media_server_id, library, items, cancel_check=cancel_check, upload=upload)
+
+            show_ids = LibrarySeasonService(session).find_show_ids(library.id, processed=False)
+            season_shows = repo.find_items(LibraryItemSearch(
+                library_id=library.id, item_ids=show_ids, processed=True, locked=False)) if show_ids else []
+
+        self._process_items(media_server_id, library, items, cancel_check=cancel_check, upload=upload,
+                            season_shows=season_shows)
 
     def _process_items(self,
                        media_server_id: int,
                        library: Library,
                        items: List[LibraryItem],
                        cancel_check: Callable[[], bool] = None,
-                       upload: Optional[bool] = None):
+                       upload: Optional[bool] = None,
+                       season_shows: Sequence[LibraryItem] = ()):
         library_id = library.id
         library_type = library.type
         library_name = library.name
@@ -330,7 +337,7 @@ class LibraryPosterService:
         settings = self._get_server_poster_settings(media_server_id)
         connector = self._get_connector(media_server_id)
 
-        total = len(items)
+        total = len(items) + len(season_shows)
         progress_label = f"Generating posters — {library_name}"
         report_task_progress(0, total, progress_label)
 
@@ -354,6 +361,19 @@ class LibraryPosterService:
                 ): item
                 for item in items
             }
+            future_to_item.update({
+                executor.submit(
+                    self._process_pending_seasons,
+                    show,
+                    provider_order,
+                    settings,
+                    style,
+                    connector,
+                    upload_enabled,
+                    cancel_check
+                ): show
+                for show in season_shows
+            })
 
             for future in as_completed(future_to_item):
                 if cancel_check and cancel_check():
@@ -426,6 +446,23 @@ class LibraryPosterService:
                 logger.exception("Error processing item %s", item.id)
                 self._mark_item_failed(repo, item, _error_text(error))
                 return False
+
+    def _process_pending_seasons(self,
+                                 item: LibraryItem,
+                                 provider_order: List[str],
+                                 settings: ServerPosterSettings,
+                                 style: LibraryPosterStyle,
+                                 connector: MediaServerConnector,
+                                 upload: bool,
+                                 cancel_check: Callable[[], bool] = None) -> bool:
+        if cancel_check and cancel_check():
+            return False
+
+        with library_session(self._session_factory) as (_, session):
+            failed_seasons = self._process_series_seasons(
+                LibrarySeasonService(session), session, item, provider_order, settings, style,
+                connector, upload)
+        return not failed_seasons
 
     def _mark_item_failed(self, repo: LibraryRepository, item: LibraryItem, message: str):
         item.error_message = (message or "Unknown error")[:MAX_ERROR_LENGTH]
@@ -587,16 +624,19 @@ class LibraryPosterService:
         if not stored:
             return False
 
-        if upload:
-            self._uploader.upload_season_if_changed(season_service, season, item, stored.path, stored.digest,
-                                           connector)
+        uploaded = upload and self._uploader.upload_season_if_changed(
+            season_service, season, item, stored.path, stored.digest, connector)
 
-        ProviderStatsService(session).record(provider, item.library_id)
-        season_service.update_seasons([season], SeasonPosterState(
+        state = dict(
             poster_provider=provider,
             style_hash=self._decorator.style_fingerprint(overlay_options, text_options, apply_style),
             processed=True,
-        ))
+        )
+        if not uploaded:
+            state['poster_uploaded_at'] = None
+
+        ProviderStatsService(session).record(provider, item.library_id)
+        season_service.update_seasons([season], SeasonPosterState(**state))
         event_manager.publish_season_processed(item.library_id, item.id, season.season_number)
         return True
 

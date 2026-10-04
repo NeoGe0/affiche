@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 
 import { CollectionsPage } from './CollectionsPage';
 import { collectionsApi, libraryApi, postersApi } from '../api';
-import type { Collection, Library } from '../types';
+import type { Collection, Library, PosterCandidate } from '../types';
 
 vi.mock('../api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../api')>();
@@ -70,10 +70,16 @@ const renderPage = (props: Partial<Parameters<typeof CollectionsPage>[0]> = {}) 
     />
   );
 
+const MATCHED = collection({ tmdb_collection_id: 8091 });
+const CANDIDATE: PosterCandidate = { url: 'https://cdn/a.jpg', provider: 'tmdb', rank: 0, rank_score: 1 };
+
 beforeEach(() => {
   toast.error.mockReset();
 
   vi.mocked(collectionsApi.resolveIds).mockClear();
+  vi.mocked(postersApi.applyCollectionPoster).mockClear();
+  vi.mocked(postersApi.getCollectionPosters).mockClear();
+  vi.mocked(postersApi.getCollectionPosters).mockResolvedValue([]);
   vi.mocked(libraryApi.getLibrarySettings).mockResolvedValue(
     { upload_enabled: true } as Awaited<ReturnType<typeof libraryApi.getLibrarySettings>>);
   getCollections.mockClear();
@@ -194,33 +200,36 @@ describe('CollectionsPage', () => {
   it('offers Save & upload as the default for a library that uploads', async () => {
 
     getCollections.mockResolvedValue({
-      collections: [collection()], total: 1, page: 0, page_size: 50,
+      collections: [MATCHED], total: 1, page: 0, page_size: 50,
     });
-    vi.mocked(collectionsApi.getCollection).mockResolvedValue({ ...collection(), members: [] });
+    vi.mocked(collectionsApi.getCollection).mockResolvedValue({ ...MATCHED, members: [] });
+    vi.mocked(postersApi.getCollectionPosters).mockResolvedValue([CANDIDATE]);
     renderPage();
 
     fireEvent.click(await screen.findByText('Alien Saga'));
     fireEvent.click(await screen.findByRole('button', { name: /choose artwork/i }));
-    await screen.findByRole('dialog');
+    fireEvent.doubleClick(await screen.findByRole('button', { name: /^Poster \d+ from / }));
 
-    expect(await screen.findByText(/This library uploads new posters/)).toBeInTheDocument();
+    await waitFor(() => expect(postersApi.applyCollectionPoster)
+      .toHaveBeenCalledWith(expect.objectContaining({ upload: true })));
   });
 
   it('keeps Save as the default for a library that does not upload', async () => {
     getCollections.mockResolvedValue({
-      collections: [collection()], total: 1, page: 0, page_size: 50,
+      collections: [MATCHED], total: 1, page: 0, page_size: 50,
     });
-    vi.mocked(collectionsApi.getCollection).mockResolvedValue({ ...collection(), members: [] });
+    vi.mocked(collectionsApi.getCollection).mockResolvedValue({ ...MATCHED, members: [] });
     vi.mocked(libraryApi.getLibrarySettings).mockResolvedValue(
       { upload_enabled: false } as Awaited<ReturnType<typeof libraryApi.getLibrarySettings>>);
+    vi.mocked(postersApi.getCollectionPosters).mockResolvedValue([CANDIDATE]);
     renderPage();
 
     fireEvent.click(await screen.findByText('Alien Saga'));
     fireEvent.click(await screen.findByRole('button', { name: /choose artwork/i }));
-    await screen.findByRole('dialog');
+    fireEvent.doubleClick(await screen.findByRole('button', { name: /^Poster \d+ from / }));
 
-    expect(await screen.findByText(/Save keeps the poster in Affiche\./)).toBeInTheDocument();
-    expect(screen.queryByText(/This library uploads new posters/)).not.toBeInTheDocument();
+    await waitFor(() => expect(postersApi.applyCollectionPoster)
+      .toHaveBeenCalledWith(expect.objectContaining({ upload: false })));
   });
 
   it('does not browse providers for a collection no catalogue matched', async () => {

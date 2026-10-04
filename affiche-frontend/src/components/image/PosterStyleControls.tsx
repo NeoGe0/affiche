@@ -265,7 +265,7 @@ export function PosterStyleControls({
           </label>
           {capsOnlyFont && (
             <span className={styles.hint}>
-              {fontBaseName(textOptions.font_name)} has no lowercase, so this changes nothing
+              {fontBaseName(textOptions.font_name)} has no lowercase
             </span>
           )}
         </div>

@@ -19,8 +19,17 @@ from affiche.api.schemas.library import (
     ApplyPosterRequest,
     BulkLockResponse,
     ItemLockRequest,
+    ItemRenameRequest,
     ItemSelectionLockRequest,
     ItemSelectionRequest,
+    SeasonTmdbMatchRequest,
+    SeasonTmdbMatchSuggestion,
+    ItemTitleSuggestions,
+    MatchedTitle,
+    TitleCheckProgress,
+    TitleCleanupRequest,
+    TitleCleanupState,
+    TitleProposalResponse,
     TrashEmptyResponse,
 )
 from affiche.api.schemas.library_settings import LibrarySettingsResponse, LibrarySettingsUpdate
@@ -29,6 +38,12 @@ from affiche.app.asynch.async_task_service import AsyncTaskService
 from affiche.app.events import event_manager
 from affiche.app.mediaserver.library import LibraryService
 from affiche.app.mediaserver.library.model.library import Library as LibraryModel
+from affiche.app.mediaserver.library.service.item_rename_service import (
+    ItemRenameError,
+    ItemRenameService,
+)
+from affiche.app.mediaserver.library.service.title_check_service import TitleCheckService
+from affiche.app.mediaserver.library.service.title_cleanup_service import TitleCleanupService
 from affiche.app.mediaserver.library.settings.library_settings_service import LibrarySettingsService
 from affiche.app.mediaserver.library.sync.media_server_synchronisation_service import (
     MediaServerSynchronisationService,
@@ -39,7 +54,11 @@ from affiche.config.dependencies import (
     require_admin,
     container,
     get_async_task_service,
+    get_item_rename_service,
+    get_title_check_service,
+    get_title_cleanup_service,
     get_library_service,
+    get_poster_aggregator,
     get_library_settings_service,
     get_media_server_synchronisation_service,
     get_poster_sync_service,
@@ -264,6 +283,35 @@ def set_library_item_lock(media_server_id: int,
                           request: ItemLockRequest,
                           service: LibraryService = Depends(get_library_service)) -> LibraryItemResponse:
     item = service.set_item_locked(media_server_id, library_id, item_id, request.locked)
+    return _item_response(library_id, item)
+
+@router.get("/{library_id}/items/{item_id}/title/suggestions",
+            response_model=ItemTitleSuggestions)
+def suggest_item_titles(media_server_id: int,
+                        library_id: int,
+                        item_id: int,
+                        service: ItemRenameService = Depends(get_item_rename_service)
+                        ) -> ItemTitleSuggestions:
+    suggestions = service.suggest_titles(media_server_id, library_id, item_id)
+    return ItemTitleSuggestions(
+        current=suggestions.current,
+        matched=(MatchedTitle(title=suggestions.matched.title,
+                              provider=suggestions.matched.provider)
+                 if suggestions.matched else None),
+        reason=suggestions.reason,
+    )
+
+@router.patch("/{library_id}/items/{item_id}", response_model=LibraryItemResponse)
+def rename_library_item(media_server_id: int,
+                        library_id: int,
+                        item_id: int,
+                        request: ItemRenameRequest,
+                        service: ItemRenameService = Depends(get_item_rename_service)
+                        ) -> LibraryItemResponse:
+    try:
+        item = service.rename_item(media_server_id, library_id, item_id, request.title)
+    except ItemRenameError as error:
+        raise HTTPException(status_code=502, detail=error.message)
     return _item_response(library_id, item)
 
 @router.post("/{library_id}/trash/empty", response_model=TrashEmptyResponse)
@@ -514,6 +562,128 @@ def get_season_episodes(media_server_id: int,
     service.get_library(media_server_id, library_id)
     episodes = service.get_season_episodes(library_id, item_id, season_number)
     return [ItemEpisode.model_validate(e) for e in episodes]
+
+@router.post("/{library_id}/seasons/tmdb-match/resolve", response_model=SyncTaskResponse)
+def resolve_season_tmdb_matches(media_server_id: int,
+                                library_id: int,
+                                background_tasks: BackgroundTasks,
+                                service: LibraryService = Depends(get_library_service),
+                                task_service: AsyncTaskService = Depends(get_async_task_service)
+                                ) -> SyncTaskResponse:
+    service.get_library(media_server_id, library_id)
+
+    task_id, task_status = task_service.submit_task(
+        background_tasks=background_tasks,
+        task_func=lambda cancel_check=None: library_tasks.fix_season_matches_task(
+            media_server_id, library_id, cancel_check=cancel_check),
+        task_name=f"season_match_{library_id}",
+        blocking=True,
+        resource=f"ms:{media_server_id}:lib:{library_id}",
+    )
+    return SyncTaskResponse(
+        status=task_status,
+        task_id=task_id,
+        message=f"Season matching started for library {library_id}",
+    )
+
+@router.get("/{library_id}/titles/cleanup", response_model=TitleCleanupState)
+def get_title_cleanup_state(media_server_id: int,
+                            library_id: int,
+                            service: TitleCleanupService = Depends(get_title_cleanup_service),
+                            checker: TitleCheckService = Depends(get_title_check_service)
+                            ) -> TitleCleanupState:
+    return TitleCleanupState(
+        proposals=[TitleProposalResponse(**proposal._asdict())
+                   for proposal in service.proposals(media_server_id, library_id)],
+        check=TitleCheckProgress(**checker.progress(library_id)._asdict()),
+    )
+
+@router.post("/{library_id}/titles/check", response_model=SyncTaskResponse)
+def check_library_titles(media_server_id: int,
+                         library_id: int,
+                         background_tasks: BackgroundTasks,
+                         service: LibraryService = Depends(get_library_service),
+                         task_service: AsyncTaskService = Depends(get_async_task_service)
+                         ) -> SyncTaskResponse:
+    service.get_library(media_server_id, library_id)
+
+    task_id, task_status = task_service.submit_task(
+        background_tasks=background_tasks,
+        task_func=lambda cancel_check=None: library_tasks.check_titles_task(
+            media_server_id, library_id, cancel_check=cancel_check),
+        task_name=f"title_check_{library_id}",
+        blocking=True,
+        resource=f"ms:{media_server_id}:lib:{library_id}",
+    )
+    return SyncTaskResponse(
+        status=task_status,
+        task_id=task_id,
+        message=f"Checking titles in library {library_id}",
+    )
+
+@router.post("/{library_id}/titles/cleanup", response_model=SyncTaskResponse)
+def apply_title_cleanup(media_server_id: int,
+                        library_id: int,
+                        request: TitleCleanupRequest,
+                        background_tasks: BackgroundTasks,
+                        service: LibraryService = Depends(get_library_service),
+                        task_service: AsyncTaskService = Depends(get_async_task_service)
+                        ) -> SyncTaskResponse:
+    service.get_library(media_server_id, library_id)
+
+    item_ids = request.item_ids
+    regenerate = request.regenerate
+    task_id, task_status = task_service.submit_task(
+        background_tasks=background_tasks,
+        task_func=lambda cancel_check=None: library_tasks.apply_titles_task(
+            media_server_id, library_id, item_ids, regenerate=regenerate,
+            cancel_check=cancel_check),
+        task_name=f"title_cleanup_{library_id}",
+        blocking=True,
+        resource=f"ms:{media_server_id}:lib:{library_id}",
+    )
+    return SyncTaskResponse(
+        status=task_status,
+        task_id=task_id,
+        message=f"Renaming {len(item_ids)} item(s) in library {library_id}",
+    )
+
+@router.get("/{library_id}/items/{item_id}/seasons/{season_number}/tmdb-match/suggestion",
+            response_model=SeasonTmdbMatchSuggestion)
+def suggest_season_tmdb_match(media_server_id: int,
+                              library_id: int,
+                              item_id: int,
+                              season_number: int,
+                              service: LibraryService = Depends(get_library_service),
+                              aggregator=Depends(get_poster_aggregator)) -> SeasonTmdbMatchSuggestion:
+    item = service.get_library_item(media_server_id, library_id, item_id)
+    suggestion = aggregator.suggest_season_match(
+        show_title=item.title,
+        season_number=season_number,
+        tvdb_id=int(item.tvdb_id) if item.tvdb_id else None,
+    )
+    if suggestion is None:
+        raise HTTPException(404, "No confident TMDB match found for this season")
+    return SeasonTmdbMatchSuggestion(
+        tmdb_id=suggestion.tmdb_id,
+        tmdb_season_number=suggestion.season_number,
+        series_name=suggestion.series_name,
+        reason=suggestion.reason,
+    )
+
+@router.put("/{library_id}/items/{item_id}/seasons/{season_number}/tmdb-match",
+            response_model=ItemSeason)
+def set_season_tmdb_match(media_server_id: int,
+                          library_id: int,
+                          item_id: int,
+                          season_number: int,
+                          request: SeasonTmdbMatchRequest,
+                          service: LibraryService = Depends(get_library_service)) -> ItemSeason:
+    season = service.set_season_tmdb_match(media_server_id, library_id, item_id, season_number,
+                                           request.tmdb_id, request.tmdb_season_number)
+    if season is None:
+        raise HTTPException(404, f"Season {season_number} not found for item {item_id}")
+    return _season_response(library_id, item_id, season)
 
 @router.post("/{library_id}/items/{item_id}/seasons/{season_number}/posters", status_code=status.HTTP_204_NO_CONTENT)
 def apply_season_poster(media_server_id: int,

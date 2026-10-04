@@ -119,6 +119,19 @@ class LibraryService:
     def get_item_seasons(self, library_id: int, item_id: int) -> List:
         return self.library_season_service.get_item_seasons(library_id, item_id)
 
+    def set_season_tmdb_match(self,
+                              media_server_id: int,
+                              library_id: int,
+                              item_id: int,
+                              season_number: int,
+                              tmdb_id: Optional[int],
+                              tmdb_season_number: Optional[int]):
+        self.get_library_item(media_server_id, library_id, item_id)
+        season = self.library_season_service.get_season(library_id, item_id, season_number)
+        if season is None or season.id is None:
+            return None
+        return self.library_season_service.set_tmdb_match(season.id, tmdb_id, tmdb_season_number)
+
     def get_season_episodes(self, library_id: int, item_id: int, season_number: int) -> List:
         seasons = self.library_season_service.get_item_seasons(library_id, item_id)
         season = next((s for s in seasons if s.season_number == season_number), None)

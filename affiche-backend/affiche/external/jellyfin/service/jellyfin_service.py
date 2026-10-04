@@ -162,6 +162,23 @@ class JellyfinService(MediaServerConnector):
             logger.exception("Error fetching recently added items for library %s", library_id)
             raise
 
+    def get_recently_added_seasons(self, library_id: str, limit: int) -> Dict[str, str]:
+        try:
+            data = self._get("/Items", params={
+                'Recursive': 'true',
+                'IncludeItemTypes': 'Season',
+                'ParentId': library_id,
+                'SortBy': 'DateCreated',
+                'SortOrder': 'Descending',
+                'Limit': limit,
+            })
+            return {season['Id']: season['SeriesId'] for season in data.get('Items', [])
+                    if season.get('Id') and season.get('SeriesId')}
+
+        except Exception:
+            logger.exception("Error fetching recently added seasons for library %s", library_id)
+            raise
+
     def get_library_item(self, item_id: str, library_id: str) -> Optional[JellyfinLibraryItem]:
         data = self._get("/Items", params={
             'Ids': item_id,
@@ -218,6 +235,26 @@ class JellyfinService(MediaServerConnector):
         except Exception:
             logger.exception("Failed to create Jellyfin collection '%s'", title)
             return None
+
+    def rename_item(self, external_id: str, title: str) -> bool:
+        try:
+            data = self._get("/Items", params={'Ids': external_id,
+                                               'Fields': 'SortName,Overview,LockedFields'})
+            items = data.get('Items', [])
+            if not items:
+                logger.warning("Item %s not found on Jellyfin", external_id)
+                return False
+
+            locked = list(items[0].get('LockedFields') or [])
+            if 'Name' not in locked:
+                locked.append('Name')
+
+            payload = {**items[0], 'Name': title, 'LockedFields': locked}
+            self._post(f"/Items/{external_id}", data=json.dumps(payload))
+            return True
+        except Exception:
+            logger.exception("Failed to rename Jellyfin item %s", external_id)
+            return False
 
     def rename_collection(self, external_id: str, title: str) -> bool:
         try:

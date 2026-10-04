@@ -1,5 +1,5 @@
 export type ConfirmAction =
-  | 'generate' | 'upload' | 'reset'
+  | 'generate' | 'upload' | 'reset' | 'season-match'
   | 'item-reset'
   | 'selection-generate' | 'selection-upload' | 'selection-reset'
   | 'empty-trash';
@@ -89,6 +89,12 @@ export function confirmationCopy(
         message: `This puts back the original artwork for ${plural(selectionCount, 'selected item')}, including any Affiche never made a poster for. Their Affiche posters are discarded; you can generate them again.`,
         confirmLabel: `Reset ${selectionCount}`,
         variant: 'danger',
+      };
+    case 'season-match':
+      return {
+        title: 'Match seasons',
+        message: `TMDB files some anthologies as one show per season, so a season's artwork can sit under a different entry than the show's. This checks every show in ${libraryName} against TMDB and corrects the seasons it can identify with confidence; the rest are left for you to set by hand. Seasons you have already matched are not touched.`,
+        confirmLabel: 'Match',
       };
     case 'empty-trash':
       return {

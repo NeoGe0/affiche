@@ -9,7 +9,7 @@ from affiche.app.mediaserver.library.seasons.library_season_service import Libra
 from affiche.app.mediaserver.library.episodes.library_episode_service import LibraryEpisodeService
 from affiche.app.mediaserver.library.collections.library_collection_service import LibraryCollectionService
 from affiche.app.mediaserver.library.settings import LibrarySettingsService
-from affiche.app.mediaserver.library.sync.incremental import RECENT_ITEM_LIMIT
+from affiche.app.mediaserver.library.sync.incremental import RECENT_ITEM_LIMIT, shows_gaining_seasons
 from affiche.app.mediaserver.library.sync.reidentification import RemoteIdentity
 from affiche.app.mediaserver.model.media_server import MediaServer
 from affiche.app.mediaserver.service.media_server_connector_factory import MediaServerConnectorFactory
@@ -139,11 +139,31 @@ class PlexSynchronisationService:
         items = plex_service.get_recently_added_items(int(library.external_id),
                                                       RECENT_ITEM_LIMIT)
         if len(items) < RECENT_ITEM_LIMIT:
-            return items, True
-
-        logger.info("Library '%s': %d recently added items filled the window — syncing in full",
-                    library.name, len(items))
+            shows = self._shows_gaining_seasons(plex_service, library, items)
+            if shows is not None:
+                return items + shows, True
+            logger.info("Library '%s': new seasons filled the window — syncing in full",
+                        library.name)
+        else:
+            logger.info("Library '%s': %d recently added items filled the window — syncing in full",
+                        library.name, len(items))
         return plex_service.get_library_items(int(library.external_id)), False
+
+    def _shows_gaining_seasons(self, plex_service: PlexService, library: Library, items: list):
+        if library.type != 'show':
+            return []
+        try:
+            recent = plex_service.get_recently_added_seasons(int(library.external_id), RECENT_ITEM_LIMIT)
+            known = self.season_service.find_known_external_ids(library.id, list(recent))
+            show_ids = shows_gaining_seasons(recent, known, {str(item.id) for item in items})
+            if show_ids is None:
+                return None
+            shows = [plex_service.get_library_item(show_id) for show_id in show_ids]
+            return [show for show in shows if show]
+        except Exception:
+            logger.warning("Library '%s': could not look for new seasons", library.name,
+                           exc_info=True)
+            return []
 
     def _sync_library(self,
                       plex_service: PlexService,

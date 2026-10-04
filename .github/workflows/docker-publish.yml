@@ -2,7 +2,7 @@ name: Publish image
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     tags: ["v*"]
     paths-ignore: ["**.md", "docs/**", "LICENSE"]
   workflow_dispatch:
@@ -36,6 +36,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/develop' }}
             type=sha,prefix=sha-
             type=semver,pattern={{version}}
 

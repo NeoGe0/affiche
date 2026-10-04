@@ -12,6 +12,8 @@ export const STATUS_FILTER_OPTIONS: {
   { value: 'uploaded', label: 'On server', count: 'uploaded' },
   { value: 'errors', label: 'Failed', count: 'errors' },
   { value: 'locked', label: 'Locked', count: 'locked' },
+
+  { value: 'mismatched_titles', label: 'Title mismatch', count: 'mismatched_titles' },
 ];
 
 export interface FilterChip {

@@ -1,7 +1,7 @@
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Sequence
 
 from sqlalchemy.orm import Session
 
@@ -100,20 +100,27 @@ class PosterUploader:
                                  connector: MediaServerConnector) -> bool:
         if digest and season.poster_hash == digest:
             logger.info("[upload] season %d of '%s': unchanged, skipped", season.season_number, item.title)
+            if season.poster_uploaded_at is None:
+                season.poster_uploaded_at = datetime.now(timezone.utc)
+                season_service.update_seasons(
+                    [season], SeasonPosterState(poster_uploaded_at=season.poster_uploaded_at))
             return True
 
         if not self.upload_poster(season.external_id, poster_path, connector):
             return False
 
         season.poster_hash = digest
-        season_service.update_seasons([season], SeasonPosterState(poster_hash=digest))
+        season.poster_uploaded_at = datetime.now(timezone.utc)
+        season_service.update_seasons([season], SeasonPosterState(
+            poster_hash=digest, poster_uploaded_at=season.poster_uploaded_at))
         return True
 
     def upload_existing_season_posters(self,
                                        season_service: LibrarySeasonService,
                                        item: LibraryItem,
-                                       connector: MediaServerConnector):
-        seasons = season_service.get_item_seasons(item.library_id, item.id)
+                                       connector: MediaServerConnector) -> bool:
+        succeeded = True
+        seasons = season_service.get_item_seasons(item.library_id, item.id, processed=True)
         for season in seasons:
             if not self._file_store.exists(item.library_id, item.id, season_number=season.season_number):
                 continue
@@ -121,32 +128,55 @@ class PosterUploader:
                                                     season_number=season.season_number))
             digest = self._file_store.digest(item.library_id, item.id,
                                              season_number=season.season_number)
-            self.upload_season_if_changed(season_service, season, item, poster_path, digest, connector)
+            if not self.upload_season_if_changed(season_service, season, item, poster_path, digest,
+                                                 connector):
+                logger.warning("[upload] season %d of '%s': FAILED", season.season_number, item.title)
+                succeeded = False
+        return succeeded
+
+    def upload_show_season_posters(self, item: LibraryItem, connector: MediaServerConnector) -> bool:
+        with library_session(self._session_factory) as (_, session):
+            return self.upload_existing_season_posters(LibrarySeasonService(session), item, connector)
+
+    def upload_existing_posters(self, item: LibraryItem, connector: MediaServerConnector) -> bool:
+        uploaded = self.upload_existing_item_poster(item, connector)
+        if item.type == 'show':
+            uploaded = self.upload_show_season_posters(item, connector) and uploaded
+        return uploaded
 
     def upload_library_posters(self,
                                library: Library,
                                connector: MediaServerConnector,
                                cancel_check: Callable[[], bool] = None):
-        with library_session(self._session_factory) as (repo, _):
+        with library_session(self._session_factory) as (repo, session):
             items = repo.find_items(LibraryItemSearch(
                 library_id=library.id, processed=True, uploaded=False))
 
-        self.upload_items(items, library.name, connector, cancel_check)
+            queued = {item.id for item in items}
+            show_ids = [show_id for show_id in LibrarySeasonService(session).find_show_ids(
+                library.id, processed=True, uploaded=False) if show_id not in queued]
+            season_shows = repo.find_items(LibraryItemSearch(
+                library_id=library.id, item_ids=show_ids)) if show_ids else []
+
+        self.upload_items(items, library.name, connector, cancel_check, season_shows=season_shows)
 
     def upload_items(self,
                      items: List[LibraryItem],
                      library_name: str,
                      connector: MediaServerConnector,
-                     cancel_check: Callable[[], bool] = None):
+                     cancel_check: Callable[[], bool] = None,
+                     season_shows: Sequence[LibraryItem] = ()):
         logger.info("Uploading %d posters in '%s' using %d workers",
-                    len(items), library_name, MAX_WORKERS)
+                    len(items) + len(season_shows), library_name, MAX_WORKERS)
 
         uploaded = 0
         failed = 0
 
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-            futures = {executor.submit(self.upload_existing_item_poster, item, connector): item
+            futures = {executor.submit(self.upload_existing_posters, item, connector): item
                        for item in items}
+            futures.update({executor.submit(self.upload_show_season_posters, show, connector): show
+                            for show in season_shows})
             for future in as_completed(futures):
                 if cancel_check and cancel_check():
                     logger.info("Upload cancelled, shutting down executor")

@@ -50,6 +50,23 @@ interface PosterBrowserToolbarProps {
     onUseShowArtChange: (value: boolean) => void;
 
     appliesToSeason: number;
+
+    tmdbMatch?: {
+      idDraft: string;
+      onIdDraftChange: (value: string) => void;
+      seasonDraft: string;
+      onSeasonDraftChange: (value: string) => void;
+      onApply: () => void;
+
+      onFind?: () => void;
+      isFinding: boolean;
+      isSaving: boolean;
+
+      isSet: boolean;
+
+      foundReason?: string;
+      onClear: () => void;
+    };
   };
 }
 
@@ -242,6 +259,70 @@ export function PosterBrowserToolbar({
               {seasonSource.appliesToSeason}.
             </p>
           )}
+        </div>
+      )}
+
+      {seasonSource?.tmdbMatch && !seasonSource.useShowArt && (
+        <div className={styles.toolbarRow}>
+          <div className={`${styles.inputGroup} ${styles.seasonInput}`}>
+            <label htmlFor="tmdb-match-id">TMDB series</label>
+            <input
+              id="tmdb-match-id"
+              type="number"
+              min={1}
+              placeholder="Show's own"
+              value={seasonSource.tmdbMatch.idDraft}
+              onChange={(e) => seasonSource.tmdbMatch?.onIdDraftChange(e.target.value)}
+            />
+          </div>
+          <div className={`${styles.inputGroup} ${styles.seasonInput}`}>
+            <label htmlFor="tmdb-match-season">Its season</label>
+            <input
+              id="tmdb-match-season"
+              type="number"
+              min={0}
+              placeholder={String(seasonSource.appliesToSeason)}
+              value={seasonSource.tmdbMatch.seasonDraft}
+              onChange={(e) => seasonSource.tmdbMatch?.onSeasonDraftChange(e.target.value)}
+              disabled={!seasonSource.tmdbMatch.idDraft.trim()}
+            />
+          </div>
+          {seasonSource.tmdbMatch.onFind && (
+            <button
+              type="button"
+              className={styles.searchButton}
+              onClick={seasonSource.tmdbMatch.onFind}
+              disabled={seasonSource.tmdbMatch.isFinding || seasonSource.tmdbMatch.isSaving}
+            >
+              {seasonSource.tmdbMatch.isFinding
+                ? <Loader2 size={16} className="spin" />
+                : <Search size={16} />}
+              Find match
+            </button>
+          )}
+          <button
+            type="button"
+            className={styles.searchButton}
+            onClick={seasonSource.tmdbMatch.onApply}
+            disabled={seasonSource.tmdbMatch.isSaving || seasonSource.tmdbMatch.isFinding}
+          >
+            {seasonSource.tmdbMatch.isSaving ? <Loader2 size={16} className="spin" /> : 'Save match'}
+          </button>
+          {seasonSource.tmdbMatch.isSet && (
+            <button
+              type="button"
+              className={styles.searchButton}
+              onClick={seasonSource.tmdbMatch.onClear}
+              disabled={seasonSource.tmdbMatch.isSaving}
+            >
+              Clear
+            </button>
+          )}
+          <p className={styles.sourceHint}>
+            {seasonSource.tmdbMatch.foundReason
+              ?? "TMDB files some anthologies as one show per season. Find match works it out from "
+                 + "TVDB's season names; it fills the boxes but saves nothing until you say so."}
+          </p>
         </div>
       )}
     </div>

@@ -4,6 +4,7 @@ from typing import List, NamedTuple, Optional
 from affiche.app.filestore.filestore import FileStoreService
 from affiche.app.mediaserver.library.model.library_item import LibraryItem
 from affiche.app.mediaserver.library.seasons.model.library_season import LibrarySeason
+from affiche.app.mediaserver.library.seasons.season_match import tmdb_season_match
 from affiche.external.poster.poster_service import PosterAggregatorService
 
 logger = logging.getLogger(__name__)
@@ -66,6 +67,7 @@ class PosterResolver:
                 season_number=season.season_number,
                 provider_order=provider_order,
                 language=language or None,
+                tmdb_match=tmdb_season_match(season),
             )
             if found:
                 return PosterSource(found.url, self._should_style(language, settings), found.provider)

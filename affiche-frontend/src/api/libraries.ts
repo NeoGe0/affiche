@@ -1,5 +1,5 @@
 import { api, API_BASE } from './client';
-import type { AlphaIndexEntry, AutoPickupAction, LibraryItemCounts, ItemEpisode, ItemStatusFilter, Library, LibraryItem, LibraryItemWithSeasons, LibrarySettings, LibraryStyleStaleness, PaginatedLibraryItems, SyncTaskResponse } from '../types';
+import type { AlphaIndexEntry, AutoPickupAction, ItemTitleSuggestions, TitleCleanupState, LibraryItemCounts, ItemEpisode, ItemSeason, ItemStatusFilter, Library, LibraryItem, LibraryItemWithSeasons, LibrarySettings, LibraryStyleStaleness, PaginatedLibraryItems, SeasonTmdbMatchSuggestion, SyncTaskResponse } from '../types';
 
 export interface LibrarySettingsUpdate {
   enabled?: boolean;
@@ -147,6 +147,58 @@ export const libraryApi = {
 
   getSeasonEpisodes: (mediaServerId: number, libraryId: number, itemId: number, seasonNumber: number) =>
     api.get<ItemEpisode[]>(`/media-servers/${mediaServerId}/libraries/${libraryId}/items/${itemId}/seasons/${seasonNumber}/episodes`),
+
+  resolveSeasonTmdbMatches: (mediaServerId: number, libraryId: number) =>
+    api.post<SyncTaskResponse>(
+      `/media-servers/${mediaServerId}/libraries/${libraryId}/seasons/tmdb-match/resolve`),
+
+  suggestSeasonTmdbMatch: (
+    mediaServerId: number,
+    libraryId: number,
+    itemId: number,
+    seasonNumber: number,
+  ) =>
+    api.get<SeasonTmdbMatchSuggestion>(
+      `/media-servers/${mediaServerId}/libraries/${libraryId}/items/${itemId}/seasons/${seasonNumber}/tmdb-match/suggestion`
+    ),
+
+  setSeasonTmdbMatch: (
+    mediaServerId: number,
+    libraryId: number,
+    itemId: number,
+    seasonNumber: number,
+    tmdbId: number | null,
+    tmdbSeasonNumber: number | null,
+  ) =>
+    api.put<ItemSeason>(
+      `/media-servers/${mediaServerId}/libraries/${libraryId}/items/${itemId}/seasons/${seasonNumber}/tmdb-match`,
+      { tmdb_id: tmdbId, tmdb_season_number: tmdbSeasonNumber }
+    ),
+
+  getTitleCleanupState: (mediaServerId: number, libraryId: number) =>
+    api.get<TitleCleanupState>(
+      `/media-servers/${mediaServerId}/libraries/${libraryId}/titles/cleanup`),
+
+  checkLibraryTitles: (mediaServerId: number, libraryId: number) =>
+    api.post<SyncTaskResponse>(
+      `/media-servers/${mediaServerId}/libraries/${libraryId}/titles/check`),
+
+  applyTitleCleanup: (mediaServerId: number, libraryId: number, itemIds: number[],
+                      regenerate: boolean) =>
+    api.post<SyncTaskResponse>(
+      `/media-servers/${mediaServerId}/libraries/${libraryId}/titles/cleanup`,
+      { item_ids: itemIds, regenerate }),
+
+  suggestItemTitles: (mediaServerId: number, libraryId: number, itemId: number) =>
+    api.get<ItemTitleSuggestions>(
+      `/media-servers/${mediaServerId}/libraries/${libraryId}/items/${itemId}/title/suggestions`
+    ),
+
+  renameItem: (mediaServerId: number, libraryId: number, itemId: number, title: string) =>
+    api.patch<LibraryItem>(
+      `/media-servers/${mediaServerId}/libraries/${libraryId}/items/${itemId}`,
+      { title }
+    ),
 
   syncAllLibraries: (mediaServerId: number) =>
     api.post<SyncTaskResponse>(`/media-servers/${mediaServerId}/libraries/sync`),

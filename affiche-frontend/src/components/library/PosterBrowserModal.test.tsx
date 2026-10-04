@@ -346,13 +346,6 @@ describe('PosterBrowserModal — style drafts', () => {
     expect(onSave).toHaveBeenLastCalledWith('https://cdn/a.jpg', expect.objectContaining({ upload: false }));
   });
 
-  it('says in words which save is the default, not only by which button is filled', async () => {
-    renderModal({ defaultUpload: true });
-    await candidates();
-
-    expect(screen.getByText(/This library uploads new posters/)).toBeInTheDocument();
-  });
-
   it('offers no upload where applying cannot reach the media server', async () => {
     renderModal({ canUpload: false });
     await candidates();
@@ -399,6 +392,105 @@ describe('PosterBrowserModal — style drafts', () => {
     expect(onSave).toHaveBeenCalledWith('https://cdn/a.jpg', expect.objectContaining({
       overlayOptions: { border_px: 9 },
     }));
+  });
+
+  it('points a season at another TMDB series, and saves the correction', async () => {
+    const user = userEvent.setup();
+    const onTmdbMatchChange = vi.fn().mockResolvedValue(undefined);
+    renderModal({ seasonNumber: SEASON_NUMBER, onTmdbMatchChange });
+    await waitFor(() => expect(getSeasonPosters).toHaveBeenCalledTimes(1));
+
+    await user.type(screen.getByLabelText('TMDB series'), '225634');
+    await user.type(screen.getByLabelText('Its season'), '1');
+    await user.click(screen.getByRole('button', { name: 'Save match' }));
+
+    expect(onTmdbMatchChange).toHaveBeenCalledWith({ tmdbId: 225634, seasonNumber: 1 });
+
+    await waitFor(() => expect(getSeasonPosters).toHaveBeenCalledTimes(2));
+
+    expect(getSeasonPosters.mock.calls[1][0]).toMatchObject({
+      season_number: 2,
+      tmdb_id_override: 225634,
+      tmdb_season_number_override: 1,
+    });
+  });
+
+  it('opens on a correction the season already carries', async () => {
+    renderModal({
+      seasonNumber: SEASON_NUMBER,
+      tmdbMatch: { tmdbId: 225634, seasonNumber: 1 },
+      onTmdbMatchChange: vi.fn(),
+    });
+
+    await waitFor(() => expect(getSeasonPosters).toHaveBeenCalledTimes(1));
+    expect(getSeasonPosters.mock.calls[0][0]).toMatchObject({
+      tmdb_id_override: 225634,
+      tmdb_season_number_override: 1,
+    });
+    expect(screen.getByLabelText('TMDB series')).toHaveValue(225634);
+  });
+
+  it('clears a correction, handing the season back to the show match', async () => {
+    const user = userEvent.setup();
+    const onTmdbMatchChange = vi.fn().mockResolvedValue(undefined);
+    renderModal({
+      seasonNumber: SEASON_NUMBER,
+      tmdbMatch: { tmdbId: 225634, seasonNumber: 1 },
+      onTmdbMatchChange,
+    });
+    await waitFor(() => expect(getSeasonPosters).toHaveBeenCalledTimes(1));
+
+    await user.click(screen.getByRole('button', { name: 'Clear' }));
+
+    expect(onTmdbMatchChange).toHaveBeenCalledWith({ tmdbId: null, seasonNumber: null });
+    await waitFor(() => expect(getSeasonPosters).toHaveBeenCalledTimes(2));
+    expect(getSeasonPosters.mock.calls[1][0].tmdb_id_override).toBeUndefined();
+  });
+
+  it('offers no correction when there is nothing to save it against', async () => {
+    renderModal({ seasonNumber: SEASON_NUMBER });
+    await waitFor(() => expect(getSeasonPosters).toHaveBeenCalledTimes(1));
+
+    expect(screen.queryByLabelText('TMDB series')).toBeNull();
+  });
+
+  it('fills the boxes from a found match but saves nothing', async () => {
+    const user = userEvent.setup();
+    const onTmdbMatchChange = vi.fn().mockResolvedValue(undefined);
+    const onTmdbMatchFind = vi.fn().mockResolvedValue({
+      tmdbId: 225634,
+      seasonNumber: 1,
+      reason: 'Matched "The Lyle and Erik Menendez Story" to Monster (9 episodes, 2024)',
+    });
+    renderModal({ seasonNumber: SEASON_NUMBER, onTmdbMatchChange, onTmdbMatchFind });
+    await waitFor(() => expect(getSeasonPosters).toHaveBeenCalledTimes(1));
+
+    await user.click(screen.getByRole('button', { name: 'Find match' }));
+
+    await waitFor(() => expect(screen.getByLabelText('TMDB series')).toHaveValue(225634));
+    expect(screen.getByLabelText('Its season')).toHaveValue(1);
+    expect(screen.getByText(/Menendez Story/)).toBeInTheDocument();
+
+    expect(onTmdbMatchChange).not.toHaveBeenCalled();
+    expect(getSeasonPosters).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole('button', { name: 'Save match' }));
+    expect(onTmdbMatchChange).toHaveBeenCalledWith({ tmdbId: 225634, seasonNumber: 1 });
+  });
+
+  it('says so when nothing could be resolved', async () => {
+    const user = userEvent.setup();
+    renderModal({
+      seasonNumber: SEASON_NUMBER,
+      onTmdbMatchChange: vi.fn(),
+      onTmdbMatchFind: vi.fn().mockResolvedValue(null),
+    });
+    await waitFor(() => expect(getSeasonPosters).toHaveBeenCalledTimes(1));
+
+    await user.click(screen.getByRole('button', { name: 'Find match' }));
+
+    await waitFor(() => expect(screen.getByText(/No confident match found/)).toBeInTheDocument());
+    expect(screen.getByLabelText('TMDB series')).toHaveValue(null);
   });
 
   it('titles a season pick with its season label', async () => {
